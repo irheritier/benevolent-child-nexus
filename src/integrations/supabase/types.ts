@@ -1,0 +1,593 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export type Database = {
+  public: {
+    Tables: {
+      children: {
+        Row: {
+          birth_date: string | null
+          created_at: string | null
+          dhis2_tracked_entity_id: string | null
+          entry_date: string | null
+          estimated_age: number | null
+          full_name: string
+          gender: Database["public"]["Enums"]["gender"]
+          id: string
+          internal_code: string | null
+          orphanage_id: string | null
+          parent_status: Database["public"]["Enums"]["parent_status"]
+          photo_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          birth_date?: string | null
+          created_at?: string | null
+          dhis2_tracked_entity_id?: string | null
+          entry_date?: string | null
+          estimated_age?: number | null
+          full_name: string
+          gender: Database["public"]["Enums"]["gender"]
+          id?: string
+          internal_code?: string | null
+          orphanage_id?: string | null
+          parent_status: Database["public"]["Enums"]["parent_status"]
+          photo_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          birth_date?: string | null
+          created_at?: string | null
+          dhis2_tracked_entity_id?: string | null
+          entry_date?: string | null
+          estimated_age?: number | null
+          full_name?: string
+          gender?: Database["public"]["Enums"]["gender"]
+          id?: string
+          internal_code?: string | null
+          orphanage_id?: string | null
+          parent_status?: Database["public"]["Enums"]["parent_status"]
+          photo_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "children_orphanage_id_fkey"
+            columns: ["orphanage_id"]
+            isOneToOne: false
+            referencedRelation: "orphanages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cities: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_capital: boolean | null
+          name: string
+          population: number | null
+          province_id: string | null
+          type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_capital?: boolean | null
+          name: string
+          population?: number | null
+          province_id?: string | null
+          type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_capital?: boolean | null
+          name?: string
+          population?: number | null
+          province_id?: string | null
+          type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cities_province_id_fkey"
+            columns: ["province_id"]
+            isOneToOne: false
+            referencedRelation: "provinces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dhis2_sync_logs: {
+        Row: {
+          entity_id: string
+          entity_type: string
+          error_message: string | null
+          id: string
+          payload: Json | null
+          response: Json | null
+          status: Database["public"]["Enums"]["sync_status"] | null
+          synced_at: string | null
+        }
+        Insert: {
+          entity_id: string
+          entity_type: string
+          error_message?: string | null
+          id?: string
+          payload?: Json | null
+          response?: Json | null
+          status?: Database["public"]["Enums"]["sync_status"] | null
+          synced_at?: string | null
+        }
+        Update: {
+          entity_id?: string
+          entity_type?: string
+          error_message?: string | null
+          id?: string
+          payload?: Json | null
+          response?: Json | null
+          status?: Database["public"]["Enums"]["sync_status"] | null
+          synced_at?: string | null
+        }
+        Relationships: []
+      }
+      health_records: {
+        Row: {
+          child_id: string | null
+          chronic_conditions: string | null
+          created_at: string | null
+          date: string | null
+          dhis2_event_id: string | null
+          id: string
+          medications: string | null
+          remarks: string | null
+          synced: boolean | null
+          updated_at: string | null
+          vaccination_status: string | null
+        }
+        Insert: {
+          child_id?: string | null
+          chronic_conditions?: string | null
+          created_at?: string | null
+          date?: string | null
+          dhis2_event_id?: string | null
+          id?: string
+          medications?: string | null
+          remarks?: string | null
+          synced?: boolean | null
+          updated_at?: string | null
+          vaccination_status?: string | null
+        }
+        Update: {
+          child_id?: string | null
+          chronic_conditions?: string | null
+          created_at?: string | null
+          date?: string | null
+          dhis2_event_id?: string | null
+          id?: string
+          medications?: string | null
+          remarks?: string | null
+          synced?: boolean | null
+          updated_at?: string | null
+          vaccination_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "health_records_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      health_zones: {
+        Row: {
+          city_id: string | null
+          code: string
+          created_at: string | null
+          dhis2_id: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          city_id?: string | null
+          code: string
+          created_at?: string | null
+          dhis2_id?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          city_id?: string | null
+          code?: string
+          created_at?: string | null
+          dhis2_id?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "health_zones_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nutrition_records: {
+        Row: {
+          bmi: number | null
+          child_id: string | null
+          created_at: string | null
+          date: string | null
+          dhis2_event_id: string | null
+          height_cm: number | null
+          id: string
+          nutrition_status:
+            | Database["public"]["Enums"]["nutrition_status"]
+            | null
+          synced: boolean | null
+          updated_at: string | null
+          weight_kg: number | null
+        }
+        Insert: {
+          bmi?: number | null
+          child_id?: string | null
+          created_at?: string | null
+          date?: string | null
+          dhis2_event_id?: string | null
+          height_cm?: number | null
+          id?: string
+          nutrition_status?:
+            | Database["public"]["Enums"]["nutrition_status"]
+            | null
+          synced?: boolean | null
+          updated_at?: string | null
+          weight_kg?: number | null
+        }
+        Update: {
+          bmi?: number | null
+          child_id?: string | null
+          created_at?: string | null
+          date?: string | null
+          dhis2_event_id?: string | null
+          height_cm?: number | null
+          id?: string
+          nutrition_status?:
+            | Database["public"]["Enums"]["nutrition_status"]
+            | null
+          synced?: boolean | null
+          updated_at?: string | null
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nutrition_records_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orphanages: {
+        Row: {
+          address: string | null
+          city: string
+          city_id: string | null
+          contact_person: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          dhis2_orgunit_id: string | null
+          documents: Json | null
+          email: string | null
+          id: string
+          legal_status: Database["public"]["Enums"]["legal_status"] | null
+          location_gps: unknown | null
+          name: string
+          phone: string | null
+          photo_url: string | null
+          province: string
+          province_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          city: string
+          city_id?: string | null
+          contact_person: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          dhis2_orgunit_id?: string | null
+          documents?: Json | null
+          email?: string | null
+          id?: string
+          legal_status?: Database["public"]["Enums"]["legal_status"] | null
+          location_gps?: unknown | null
+          name: string
+          phone?: string | null
+          photo_url?: string | null
+          province: string
+          province_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string
+          city_id?: string | null
+          contact_person?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          dhis2_orgunit_id?: string | null
+          documents?: Json | null
+          email?: string | null
+          id?: string
+          legal_status?: Database["public"]["Enums"]["legal_status"] | null
+          location_gps?: unknown | null
+          name?: string
+          phone?: string | null
+          photo_url?: string | null
+          province?: string
+          province_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orphanages_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orphanages_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orphanages_province_id_fkey"
+            columns: ["province_id"]
+            isOneToOne: false
+            referencedRelation: "provinces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provinces: {
+        Row: {
+          area_km2: number | null
+          capital: string
+          code: string
+          created_at: string | null
+          id: string
+          name: string
+          population: number | null
+        }
+        Insert: {
+          area_km2?: number | null
+          capital: string
+          code: string
+          created_at?: string | null
+          id?: string
+          name: string
+          population?: number | null
+        }
+        Update: {
+          area_km2?: number | null
+          capital?: string
+          code?: string
+          created_at?: string | null
+          id?: string
+          name?: string
+          population?: number | null
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          is_verified: boolean | null
+          role: Database["public"]["Enums"]["user_role"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          is_verified?: boolean | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          is_verified?: boolean | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+    }
+    Views: {
+      city_stats: {
+        Row: {
+          children_count: number | null
+          city: string | null
+          city_type: string | null
+          orphanages_count: number | null
+          province: string | null
+        }
+        Relationships: []
+      }
+      province_stats: {
+        Row: {
+          children_count: number | null
+          malnourished: number | null
+          orphanages_count: number | null
+          province: string | null
+          province_code: string | null
+          well_nourished: number | null
+        }
+        Relationships: []
+      }
+      public_stats: {
+        Row: {
+          malnourished_children: number | null
+          total_children: number | null
+          total_orphanages: number | null
+          total_provinces: number | null
+          verified_orphanages: number | null
+          well_nourished_children: number | null
+        }
+        Relationships: []
+      }
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      gender: "M" | "F"
+      legal_status: "pending" | "verified" | "rejected"
+      nutrition_status: "normal" | "malnourished" | "severely_malnourished"
+      parent_status: "total_orphan" | "partial_orphan" | "abandoned"
+      sync_status: "pending" | "success" | "failed"
+      user_role: "admin" | "orphelinat"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
+
+type DefaultSchema = Database[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof Database },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof Database },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      gender: ["M", "F"],
+      legal_status: ["pending", "verified", "rejected"],
+      nutrition_status: ["normal", "malnourished", "severely_malnourished"],
+      parent_status: ["total_orphan", "partial_orphan", "abandoned"],
+      sync_status: ["pending", "success", "failed"],
+      user_role: ["admin", "orphelinat"],
+    },
+  },
+} as const
