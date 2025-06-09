@@ -351,7 +351,7 @@ const Index = () => {
             
             <div className="group text-center p-6 rounded-2xl hover:bg-muted/30 transition-all duration-300">
               <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
-                <Shield className="w-10 h-10 text-white" />
+                <Shield className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-3">{t.features.security}</h3>
               <p className="text-muted-foreground leading-relaxed">{t.features.securityDesc}</p>
@@ -367,7 +367,7 @@ const Index = () => {
             
             <div className="group text-center p-6 rounded-2xl hover:bg-muted/30 transition-all duration-300">
               <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
-                <MapPin className="w-10 h-10 text-white" />
+                <MapPin className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-3">{t.features.map}</h3>
               <p className="text-muted-foreground leading-relaxed">{t.features.mapDesc}</p>
