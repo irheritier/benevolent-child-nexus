@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,12 +11,41 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Upload, Shield, FileText, MapPin, Phone, Mail, Building2, Users, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
+
+interface FormData {
+  centerName: string;
+  capacity: string;
+  province: string;
+  city: string;
+  address: string;
+  contactPerson: string;
+  phone: string;
+  email: string;
+  description: string;
+}
 
 const Register = () => {
   const [language, setLanguage] = useState<'fr' | 'en'>('fr');
   const [currentStep, setCurrentStep] = useState(1);
   const [consentChecked, setConsentChecked] = useState(false);
-  const [documentsUploaded, setDocumentsUploaded] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const { toast } = useToast();
+
+  const form = useForm<FormData>({
+    defaultValues: {
+      centerName: "",
+      capacity: "",
+      province: "",
+      city: "",
+      address: "",
+      contactPerson: "",
+      phone: "",
+      email: "",
+      description: "",
+    }
+  });
 
   const texts = {
     fr: {
@@ -54,7 +84,8 @@ const Register = () => {
         certificatLabel: "Certificat d'enregistrement",
         uploadText: "Cliquez pour télécharger ou glissez vos fichiers ici",
         acceptedFormats: "Formats acceptés: PDF, JPG, PNG (max 10MB par fichier)",
-        legalNotice: "Veuillez soumettre les documents officiels attestant de votre reconnaissance légale en tant que centre d'accueil pour enfants, tels que l'agrément ministériel, les statuts, ou tout autre document d'enregistrement officiel. Ces pièces seront utilisées uniquement à des fins de vérification et de recensement, dans le respect de la confidentialité."
+        legalNotice: "Veuillez soumettre les documents officiels attestant de votre reconnaissance légale en tant que centre d'accueil pour enfants, tels que l'agrément ministériel, les statuts, ou tout autre document d'enregistrement officiel. Ces pièces seront utilisées uniquement à des fins de vérification et de recensement, dans le respect de la confidentialité.",
+        filesSelected: "fichier(s) sélectionné(s)"
       },
       consent: {
         title: "Consentement et Éthique",
@@ -71,7 +102,10 @@ const Register = () => {
       validation: {
         processing: "Traitement en cours...",
         success: "Demande soumise avec succès !",
-        pending: "Votre demande d'inscription a été soumise et est en cours de validation par nos équipes. Vous recevrez un email de confirmation dans les 48 heures."
+        pending: "Votre demande d'inscription a été soumise et est en cours de validation par nos équipes. Vous recevrez un email de confirmation dans les 48 heures.",
+        required: "Ce champ est obligatoire",
+        email: "Veuillez entrer une adresse email valide",
+        fillRequired: "Veuillez remplir tous les champs obligatoires"
       }
     },
     en: {
@@ -110,7 +144,8 @@ const Register = () => {
         certificatLabel: "Registration certificate",
         uploadText: "Click to upload or drag your files here",
         acceptedFormats: "Accepted formats: PDF, JPG, PNG (max 10MB per file)",
-        legalNotice: "Please submit official documents attesting to your legal recognition as a care center for children, such as ministerial approval, statutes, or any other official registration document. These documents will be used solely for verification and census purposes, in compliance with confidentiality."
+        legalNotice: "Please submit official documents attesting to your legal recognition as a care center for children, such as ministerial approval, statutes, or any other official registration document. These documents will be used solely for verification and census purposes, in compliance with confidentiality.",
+        filesSelected: "file(s) selected"
       },
       consent: {
         title: "Consent and Ethics",
@@ -127,7 +162,10 @@ const Register = () => {
       validation: {
         processing: "Processing...",
         success: "Application submitted successfully!",
-        pending: "Your registration application has been submitted and is being validated by our teams. You will receive a confirmation email within 48 hours."
+        pending: "Your registration application has been submitted and is being validated by our teams. You will receive a confirmation email within 48 hours.",
+        required: "This field is required",
+        email: "Please enter a valid email address",
+        fillRequired: "Please fill in all required fields"
       }
     }
   };
@@ -142,122 +180,301 @@ const Register = () => {
     "Équateur", "Tshuapa", "Lualaba", "Haut-Katanga", "Haut-Lomami", "Tanganyika"
   ];
 
+  const validateStep1 = () => {
+    const requiredFields = ['centerName', 'province', 'city', 'contactPerson', 'phone', 'email'];
+    const values = form.getValues();
+    
+    for (const field of requiredFields) {
+      if (!values[field as keyof FormData] || values[field as keyof FormData].trim() === '') {
+        toast({
+          title: "Erreur de validation",
+          description: t.validation.fillRequired,
+          variant: "destructive",
+        });
+        return false;
+      }
+    }
+
+    // Validation email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(values.email)) {
+      toast({
+        title: "Erreur de validation",
+        description: t.validation.email,
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const fileArray = Array.from(files);
+      const validFiles = fileArray.filter(file => {
+        const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        
+        if (!validTypes.includes(file.type)) {
+          toast({
+            title: "Format non accepté",
+            description: `Le fichier ${file.name} n'est pas dans un format accepté.`,
+            variant: "destructive",
+          });
+          return false;
+        }
+        
+        if (file.size > maxSize) {
+          toast({
+            title: "Fichier trop volumineux",
+            description: `Le fichier ${file.name} dépasse la taille maximale de 10MB.`,
+            variant: "destructive",
+          });
+          return false;
+        }
+        
+        return true;
+      });
+
+      if (validFiles.length > 0) {
+        setUploadedFiles(prev => [...prev, ...validFiles]);
+        toast({
+          title: "Fichiers téléchargés",
+          description: `${validFiles.length} fichier(s) téléchargé(s) avec succès.`,
+        });
+      }
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleNextStep = () => {
+    if (currentStep === 1) {
+      if (validateStep1()) {
+        setCurrentStep(2);
+      }
+    } else if (currentStep === 2) {
+      if (uploadedFiles.length === 0) {
+        toast({
+          title: "Documents requis",
+          description: "Veuillez télécharger au moins un document avant de continuer.",
+          variant: "destructive",
+        });
+        return;
+      }
+      setCurrentStep(3);
+    }
+  };
+
   const renderStep1 = () => (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="centerName" className="text-sm font-medium">
-            {t.form.centerName} <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            id="centerName"
-            placeholder={t.form.centerNamePlaceholder}
-            className="h-11"
+    <Form {...form}>
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
+            name="centerName"
+            rules={{ required: t.validation.required }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  {t.form.centerName} <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder={t.form.centerNamePlaceholder}
+                    className="h-11"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="capacity"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t.form.capacity}</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder={t.form.capacityPlaceholder}
+                    className="h-11"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="capacity" className="text-sm font-medium">
-            {t.form.capacity}
-          </Label>
-          <Input
-            id="capacity"
-            type="number"
-            placeholder={t.form.capacityPlaceholder}
-            className="h-11"
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
+            name="province"
+            rules={{ required: t.validation.required }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  {t.form.province} <span className="text-red-500">*</span>
+                </FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="h-11">
+                      <SelectValue placeholder="Sélectionnez une province" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {provinces.map((province) => (
+                      <SelectItem key={province} value={province}>
+                        {province}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="city"
+            rules={{ required: t.validation.required }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  {t.form.city} <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Ex: Lubumbashi"
+                    className="h-11"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="province" className="text-sm font-medium">
-            {t.form.province} <span className="text-red-500">*</span>
-          </Label>
-          <Select>
-            <SelectTrigger className="h-11">
-              <SelectValue placeholder="Sélectionnez une province" />
-            </SelectTrigger>
-            <SelectContent>
-              {provinces.map((province) => (
-                <SelectItem key={province} value={province}>
-                  {province}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <FormField
+          control={form.control}
+          name="address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t.form.address}</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder={t.form.addressPlaceholder}
+                  className="h-11"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="city" className="text-sm font-medium">
-            {t.form.city} <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            id="city"
-            placeholder="Ex: Lubumbashi"
-            className="h-11"
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
+            name="contactPerson"
+            rules={{ required: t.validation.required }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  {t.form.contactPerson} <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder={t.form.contactPersonPlaceholder}
+                    className="h-11"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="phone"
+            rules={{ required: t.validation.required }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  {t.form.phone} <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder={t.form.phonePlaceholder}
+                    className="h-11"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="address" className="text-sm font-medium">
-          {t.form.address}
-        </Label>
-        <Input
-          id="address"
-          placeholder={t.form.addressPlaceholder}
-          className="h-11"
+        <FormField
+          control={form.control}
+          name="email"
+          rules={{ 
+            required: t.validation.required,
+            pattern: {
+              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: t.validation.email
+            }
+          }}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                {t.form.email} <span className="text-red-500">*</span>
+              </FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  placeholder={t.form.emailPlaceholder}
+                  className="h-11"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t.form.description}</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder={t.form.descriptionPlaceholder}
+                  className="min-h-[120px] resize-none"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="contactPerson" className="text-sm font-medium">
-            {t.form.contactPerson} <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            id="contactPerson"
-            placeholder={t.form.contactPersonPlaceholder}
-            className="h-11"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="phone" className="text-sm font-medium">
-            {t.form.phone} <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            id="phone"
-            placeholder={t.form.phonePlaceholder}
-            className="h-11"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="email" className="text-sm font-medium">
-          {t.form.email} <span className="text-red-500">*</span>
-        </Label>
-        <Input
-          id="email"
-          type="email"
-          placeholder={t.form.emailPlaceholder}
-          className="h-11"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description" className="text-sm font-medium">
-          {t.form.description}
-        </Label>
-        <Textarea
-          id="description"
-          placeholder={t.form.descriptionPlaceholder}
-          className="min-h-[120px] resize-none"
-        />
-      </div>
-    </div>
+    </Form>
   );
 
   const renderStep2 = () => (
@@ -287,17 +504,47 @@ const Register = () => {
           <p className="text-xs text-muted-foreground mb-4">
             {t.documents.acceptedFormats}
           </p>
-          <Button variant="outline" onClick={() => setDocumentsUploaded(true)}>
+          <input
+            type="file"
+            multiple
+            accept=".pdf,.jpg,.jpeg,.png"
+            onChange={handleFileUpload}
+            className="hidden"
+            id="file-upload"
+          />
+          <Button 
+            variant="outline" 
+            onClick={() => document.getElementById('file-upload')?.click()}
+          >
             <Upload className="w-4 h-4 mr-2" />
             {t.buttons.upload}
           </Button>
         </div>
 
-        {documentsUploaded && (
+        {uploadedFiles.length > 0 && (
           <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-            <div className="flex items-center space-x-2 text-green-700 dark:text-green-300">
+            <div className="flex items-center space-x-2 text-green-700 dark:text-green-300 mb-3">
               <Shield className="w-5 h-5" />
-              <span className="text-sm font-medium">Documents téléchargés avec succès</span>
+              <span className="text-sm font-medium">
+                {uploadedFiles.length} {t.documents.filesSelected}
+              </span>
+            </div>
+            <div className="space-y-2">
+              {uploadedFiles.map((file, index) => (
+                <div key={index} className="flex items-center justify-between bg-white dark:bg-gray-800 p-2 rounded border">
+                  <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
+                    {file.name}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeFile(index)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    ×
+                  </Button>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -504,8 +751,7 @@ const Register = () => {
                 <div>
                   {currentStep < 3 ? (
                     <Button
-                      onClick={() => setCurrentStep(currentStep + 1)}
-                      disabled={currentStep === 2 && !documentsUploaded}
+                      onClick={handleNextStep}
                       className="px-8"
                     >
                       {t.buttons.next}
