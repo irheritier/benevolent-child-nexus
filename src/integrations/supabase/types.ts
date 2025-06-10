@@ -280,6 +280,7 @@ export type Database = {
       orphanages: {
         Row: {
           address: string | null
+          child_capacity: number | null
           city: string
           city_id: string | null
           contact_person: string
@@ -301,6 +302,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          child_capacity?: number | null
           city: string
           city_id?: string | null
           contact_person: string
@@ -322,6 +324,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          child_capacity?: number | null
           city?: string
           city_id?: string | null
           contact_person?: string

@@ -13,12 +13,15 @@ import { Link } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { useProvinces } from "@/hooks/useProvinces";
+import { useCities } from "@/hooks/useCities";
+import { Footer } from "@/components/landing/Footer";
 
 interface FormData {
   centerName: string;
   capacity: string;
-  province: string;
-  city: string;
+  provinceId: string;
+  cityId: string;
   address: string;
   contactPerson: string;
   phone: string;
@@ -31,14 +34,18 @@ const Register = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [consentChecked, setConsentChecked] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [selectedProvinceId, setSelectedProvinceId] = useState<string>("");
   const { toast } = useToast();
+
+  const { data: provinces = [] } = useProvinces();
+  const { data: cities = [] } = useCities(selectedProvinceId);
 
   const form = useForm<FormData>({
     defaultValues: {
       centerName: "",
       capacity: "",
-      province: "",
-      city: "",
+      provinceId: "",
+      cityId: "",
       address: "",
       contactPerson: "",
       phone: "",
@@ -61,7 +68,7 @@ const Register = () => {
         centerName: "Nom du centre d'accueil",
         centerNamePlaceholder: "Ex: Centre d'Accueil Notre Dame",
         province: "Province",
-        city: "Ville",
+        locality: "Localité",
         address: "Adresse complète",
         addressPlaceholder: "Numéro, rue, quartier...",
         contactPerson: "Personne de contact",
@@ -105,7 +112,9 @@ const Register = () => {
         pending: "Votre demande d'inscription a été soumise et est en cours de validation par nos équipes. Vous recevrez un email de confirmation dans les 48 heures.",
         required: "Ce champ est obligatoire",
         email: "Veuillez entrer une adresse email valide",
-        fillRequired: "Veuillez remplir tous les champs obligatoires"
+        fillRequired: "Veuillez remplir tous les champs obligatoires",
+        selectProvince: "Veuillez sélectionner une province",
+        selectLocality: "Veuillez sélectionner une localité"
       }
     },
     en: {
@@ -121,7 +130,7 @@ const Register = () => {
         centerName: "Care center name",
         centerNamePlaceholder: "Ex: Notre Dame Care Center",
         province: "Province",
-        city: "City",
+        locality: "Locality",
         address: "Full address",
         addressPlaceholder: "Number, street, district...",
         contactPerson: "Contact person",
@@ -165,30 +174,33 @@ const Register = () => {
         pending: "Your registration application has been submitted and is being validated by our teams. You will receive a confirmation email within 48 hours.",
         required: "This field is required",
         email: "Please enter a valid email address",
-        fillRequired: "Please fill in all required fields"
+        fillRequired: "Please fill in all required fields",
+        selectProvince: "Please select a province",
+        selectLocality: "Please select a locality"
       }
     }
   };
 
   const t = texts[language];
 
-  const provinces = [
-    "Kinshasa", "Kongo Central", "Kwango", "Kwilu", "Mai-Ndombe",
-    "Kasaï", "Kasaï Central", "Kasaï Oriental", "Lomami", "Sankuru",
-    "Maniema", "Sud-Kivu", "Nord-Kivu", "Ituri", "Haut-Uélé",
-    "Bas-Uélé", "Tshopo", "Mongala", "Nord-Ubangi", "Sud-Ubangi",
-    "Équateur", "Tshuapa", "Lualaba", "Haut-Katanga", "Haut-Lomami", "Tanganyika"
-  ];
-
   const validateStep1 = () => {
-    const requiredFields = ['centerName', 'province', 'city', 'contactPerson', 'phone', 'email'];
     const values = form.getValues();
     
-    for (const field of requiredFields) {
+    // Vérifier les champs obligatoires
+    const requiredFields = [
+      { field: 'centerName', message: t.validation.required },
+      { field: 'provinceId', message: t.validation.selectProvince },
+      { field: 'cityId', message: t.validation.selectLocality },
+      { field: 'contactPerson', message: t.validation.required },
+      { field: 'phone', message: t.validation.required },
+      { field: 'email', message: t.validation.required }
+    ];
+
+    for (const { field, message } of requiredFields) {
       if (!values[field as keyof FormData] || values[field as keyof FormData].trim() === '') {
         toast({
           title: "Erreur de validation",
-          description: t.validation.fillRequired,
+          description: message,
           variant: "destructive",
         });
         return false;
@@ -211,45 +223,39 @@ const Register = () => {
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (files) {
-      const fileArray = Array.from(files);
-      const validFiles = fileArray.filter(file => {
-        const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
-        const maxSize = 10 * 1024 * 1024; // 10MB
-        
-        if (!validTypes.includes(file.type)) {
-          toast({
-            title: "Format non accepté",
-            description: `Le fichier ${file.name} n'est pas dans un format accepté.`,
-            variant: "destructive",
-          });
-          return false;
-        }
-        
-        if (file.size > maxSize) {
-          toast({
-            title: "Fichier trop volumineux",
-            description: `Le fichier ${file.name} dépasse la taille maximale de 10MB.`,
-            variant: "destructive",
-          });
-          return false;
-        }
-        
-        return true;
-      });
-
-      if (validFiles.length > 0) {
-        setUploadedFiles(prev => [...prev, ...validFiles]);
+    if (files && files.length > 0) {
+      const file = files[0]; // Prendre seulement le premier fichier
+      const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      
+      if (!validTypes.includes(file.type)) {
         toast({
-          title: "Fichiers téléchargés",
-          description: `${validFiles.length} fichier(s) téléchargé(s) avec succès.`,
+          title: "Format non accepté",
+          description: `Le fichier ${file.name} n'est pas dans un format accepté.`,
+          variant: "destructive",
         });
+        return;
       }
+      
+      if (file.size > maxSize) {
+        toast({
+          title: "Fichier trop volumineux",
+          description: `Le fichier ${file.name} dépasse la taille maximale de 10MB.`,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setUploadedFiles([file]); // Remplacer le fichier existant
+      toast({
+        title: "Fichier téléchargé",
+        description: `Fichier ${file.name} téléchargé avec succès.`,
+      });
     }
   };
 
-  const removeFile = (index: number) => {
-    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  const removeFile = () => {
+    setUploadedFiles([]);
   };
 
   const handleNextStep = () => {
@@ -260,14 +266,20 @@ const Register = () => {
     } else if (currentStep === 2) {
       if (uploadedFiles.length === 0) {
         toast({
-          title: "Documents requis",
-          description: "Veuillez télécharger au moins un document avant de continuer.",
+          title: "Document requis",
+          description: "Veuillez télécharger un document avant de continuer.",
           variant: "destructive",
         });
         return;
       }
       setCurrentStep(3);
     }
+  };
+
+  const handleProvinceChange = (provinceId: string) => {
+    setSelectedProvinceId(provinceId);
+    form.setValue('provinceId', provinceId);
+    form.setValue('cityId', ''); // Reset city selection
   };
 
   const renderStep1 = () => (
@@ -318,14 +330,14 @@ const Register = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
-            name="province"
-            rules={{ required: t.validation.required }}
+            name="provinceId"
+            rules={{ required: t.validation.selectProvince }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
                   {t.form.province} <span className="text-red-500">*</span>
                 </FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={handleProvinceChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="h-11">
                       <SelectValue placeholder="Sélectionnez une province" />
@@ -333,8 +345,8 @@ const Register = () => {
                   </FormControl>
                   <SelectContent>
                     {provinces.map((province) => (
-                      <SelectItem key={province} value={province}>
-                        {province}
+                      <SelectItem key={province.id} value={province.id}>
+                        {province.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -346,20 +358,27 @@ const Register = () => {
 
           <FormField
             control={form.control}
-            name="city"
-            rules={{ required: t.validation.required }}
+            name="cityId"
+            rules={{ required: t.validation.selectLocality }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  {t.form.city} <span className="text-red-500">*</span>
+                  {t.form.locality} <span className="text-red-500">*</span>
                 </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Ex: Lubumbashi"
-                    className="h-11"
-                    {...field}
-                  />
-                </FormControl>
+                <Select onValueChange={field.onChange} value={field.value} disabled={!selectedProvinceId}>
+                  <FormControl>
+                    <SelectTrigger className="h-11">
+                      <SelectValue placeholder="Sélectionnez une localité" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {cities.map((city) => (
+                      <SelectItem key={city.id} value={city.id}>
+                        {city.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -484,13 +503,11 @@ const Register = () => {
           <FileText className="w-5 h-5 text-amber-600 mt-0.5" />
           <div>
             <h4 className="font-medium text-amber-800 dark:text-amber-200 mb-2">
-              {t.documents.required}
+              Document requis :
             </h4>
-            <ul className="text-sm text-amber-700 dark:text-amber-300 space-y-1">
-              <li>• {t.documents.agrementLabel}</li>
-              <li>• {t.documents.statutsLabel}</li>
-              <li>• {t.documents.certificatLabel}</li>
-            </ul>
+            <p className="text-sm text-amber-700 dark:text-amber-300">
+              Un seul fichier contenant tous vos documents légaux mergés (agrément ministériel, statuts, certificat d'enregistrement, etc.)
+            </p>
           </div>
         </div>
       </div>
@@ -506,7 +523,6 @@ const Register = () => {
           </p>
           <input
             type="file"
-            multiple
             accept=".pdf,.jpg,.jpeg,.png"
             onChange={handleFileUpload}
             className="hidden"
@@ -526,25 +542,23 @@ const Register = () => {
             <div className="flex items-center space-x-2 text-green-700 dark:text-green-300 mb-3">
               <Shield className="w-5 h-5" />
               <span className="text-sm font-medium">
-                {uploadedFiles.length} {t.documents.filesSelected}
+                Document sélectionné
               </span>
             </div>
-            <div className="space-y-2">
-              {uploadedFiles.map((file, index) => (
-                <div key={index} className="flex items-center justify-between bg-white dark:bg-gray-800 p-2 rounded border">
-                  <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
-                    {file.name}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeFile(index)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    ×
-                  </Button>
-                </div>
-              ))}
+            <div className="bg-white dark:bg-gray-800 p-2 rounded border">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
+                  {uploadedFiles[0].name}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={removeFile}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  ×
+                </Button>
+              </div>
             </div>
           </div>
         )}
@@ -607,8 +621,18 @@ const Register = () => {
     </div>
   );
 
+  const footerTexts = {
+    aboutText: "Congo ChildNet est une plateforme dédiée au suivi et à la protection des enfants vulnérables en République Démocratique du Congo. Notre mission est d'améliorer le bien-être des enfants grâce à une meilleure coordination entre les centres d'accueil.",
+    links: "Liens utiles",
+    privacy: "Politique de confidentialité",
+    terms: "Conditions d'utilisation",
+    contact: "Contact",
+    partners: "Partenaires",
+    partnersText: "Nous travaillons en étroite collaboration avec le Ministère des Affaires Sociales, les ONG locales et internationales pour assurer le meilleur suivi possible des enfants."
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 dark:to-primary/10">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 dark:to-primary/10 flex flex-col">
       {/* Header */}
       <header className="border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -657,121 +681,126 @@ const Register = () => {
       </header>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-foreground mb-4">{t.title}</h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t.subtitle}</p>
-          </div>
+      <div className="flex-1">
+        <div className="container mx-auto px-4 py-12">
+          <div className="max-w-4xl mx-auto">
+            {/* Header */}
+            <div className="text-center mb-12">
+              <h1 className="text-4xl font-bold text-foreground mb-4">{t.title}</h1>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t.subtitle}</p>
+            </div>
 
-          {/* Progress Steps */}
-          <div className="mb-8">
-            <div className="flex items-center justify-center space-x-8">
-              {[1, 2, 3].map((step) => (
-                <div key={step} className="flex items-center">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
-                    currentStep === step 
-                      ? 'bg-primary border-primary text-primary-foreground' 
-                      : currentStep > step 
-                        ? 'bg-green-500 border-green-500 text-white'
-                        : 'border-muted-foreground/30 text-muted-foreground'
-                  }`}>
-                    {currentStep > step ? (
-                      <Shield className="w-5 h-5" />
-                    ) : (
-                      <span className="text-sm font-semibold">{step}</span>
+            {/* Progress Steps */}
+            <div className="mb-8">
+              <div className="flex items-center justify-center space-x-8">
+                {[1, 2, 3].map((step) => (
+                  <div key={step} className="flex items-center">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
+                      currentStep === step 
+                        ? 'bg-primary border-primary text-primary-foreground' 
+                        : currentStep > step 
+                          ? 'bg-green-500 border-green-500 text-white'
+                          : 'border-muted-foreground/30 text-muted-foreground'
+                    }`}>
+                      {currentStep > step ? (
+                        <Shield className="w-5 h-5" />
+                      ) : (
+                        <span className="text-sm font-semibold">{step}</span>
+                      )}
+                    </div>
+                    <div className="ml-3 hidden md:block">
+                      <p className={`text-sm font-medium ${
+                        currentStep >= step ? 'text-foreground' : 'text-muted-foreground'
+                      }`}>
+                        {step === 1 && t.steps.info}
+                        {step === 2 && t.steps.documents}
+                        {step === 3 && t.steps.confirmation}
+                      </p>
+                    </div>
+                    {step < 3 && (
+                      <div className={`w-16 h-px mx-4 ${
+                        currentStep > step ? 'bg-green-500' : 'bg-muted-foreground/30'
+                      }`} />
                     )}
                   </div>
-                  <div className="ml-3 hidden md:block">
-                    <p className={`text-sm font-medium ${
-                      currentStep >= step ? 'text-foreground' : 'text-muted-foreground'
-                    }`}>
-                      {step === 1 && t.steps.info}
-                      {step === 2 && t.steps.documents}
-                      {step === 3 && t.steps.confirmation}
-                    </p>
-                  </div>
-                  {step < 3 && (
-                    <div className={`w-16 h-px mx-4 ${
-                      currentStep > step ? 'bg-green-500' : 'bg-muted-foreground/30'
-                    }`} />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Form Card */}
-          <Card className="shadow-xl border-0 bg-gradient-to-br from-background to-muted/20">
-            <CardHeader className="pb-6">
-              <CardTitle className="text-2xl text-center">
-                {currentStep === 1 && (
-                  <div className="flex items-center justify-center">
-                    <Building2 className="w-6 h-6 mr-2" />
-                    {t.steps.info}
-                  </div>
-                )}
-                {currentStep === 2 && (
-                  <div className="flex items-center justify-center">
-                    <FileText className="w-6 h-6 mr-2" />
-                    {t.documents.title}
-                  </div>
-                )}
-                {currentStep === 3 && (
-                  <div className="flex items-center justify-center">
-                    <Shield className="w-6 h-6 mr-2" />
-                    {t.consent.title}
-                  </div>
-                )}
-              </CardTitle>
-              {currentStep === 2 && (
-                <p className="text-center text-muted-foreground">{t.documents.subtitle}</p>
-              )}
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {currentStep === 1 && renderStep1()}
-              {currentStep === 2 && renderStep2()}
-              {currentStep === 3 && renderStep3()}
-
-              {/* Navigation Buttons */}
-              <div className="flex justify-between pt-6 border-t">
-                <div>
-                  {currentStep > 1 && (
-                    <Button
-                      variant="outline"
-                      onClick={() => setCurrentStep(currentStep - 1)}
-                      className="px-6"
-                    >
-                      <ArrowLeft className="w-4 h-4 mr-2" />
-                      {t.buttons.previous}
-                    </Button>
-                  )}
-                </div>
-                <div>
-                  {currentStep < 3 ? (
-                    <Button
-                      onClick={handleNextStep}
-                      className="px-8"
-                    >
-                      {t.buttons.next}
-                      <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
-                    </Button>
-                  ) : (
-                    <Button
-                      disabled={!consentChecked}
-                      className="px-8 bg-gradient-to-r from-primary to-primary/90"
-                    >
-                      <Users className="w-4 h-4 mr-2" />
-                      {t.buttons.submit}
-                    </Button>
-                  )}
-                </div>
+                ))}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+
+            {/* Form Card */}
+            <Card className="shadow-xl border-0 bg-gradient-to-br from-background to-muted/20">
+              <CardHeader className="pb-6">
+                <CardTitle className="text-2xl text-center">
+                  {currentStep === 1 && (
+                    <div className="flex items-center justify-center">
+                      <Building2 className="w-6 h-6 mr-2" />
+                      {t.steps.info}
+                    </div>
+                  )}
+                  {currentStep === 2 && (
+                    <div className="flex items-center justify-center">
+                      <FileText className="w-6 h-6 mr-2" />
+                      {t.documents.title}
+                    </div>
+                  )}
+                  {currentStep === 3 && (
+                    <div className="flex items-center justify-center">
+                      <Shield className="w-6 h-6 mr-2" />
+                      {t.consent.title}
+                    </div>
+                  )}
+                </CardTitle>
+                {currentStep === 2 && (
+                  <p className="text-center text-muted-foreground">{t.documents.subtitle}</p>
+                )}
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {currentStep === 1 && renderStep1()}
+                {currentStep === 2 && renderStep2()}
+                {currentStep === 3 && renderStep3()}
+
+                {/* Navigation Buttons */}
+                <div className="flex justify-between pt-6 border-t">
+                  <div>
+                    {currentStep > 1 && (
+                      <Button
+                        variant="outline"
+                        onClick={() => setCurrentStep(currentStep - 1)}
+                        className="px-6"
+                      >
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        {t.buttons.previous}
+                      </Button>
+                    )}
+                  </div>
+                  <div>
+                    {currentStep < 3 ? (
+                      <Button
+                        onClick={handleNextStep}
+                        className="px-8"
+                      >
+                        {t.buttons.next}
+                        <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
+                      </Button>
+                    ) : (
+                      <Button
+                        disabled={!consentChecked}
+                        className="px-8 bg-gradient-to-r from-primary to-primary/90"
+                      >
+                        <Users className="w-4 h-4 mr-2" />
+                        {t.buttons.submit}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <Footer footer={footerTexts} />
     </div>
   );
 };
