@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,13 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Upload, Shield, FileText, MapPin, Phone, Mail, Building2, Users, Heart } from "lucide-react";
+import { ArrowLeft, Upload, Shield, FileText, MapPin, Phone, Mail, Building2, Users, Heart, X, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useProvinces } from "@/hooks/useProvinces";
 import { useCities } from "@/hooks/useCities";
+import { useFileUpload } from "@/hooks/useFileUpload";
 import { Footer } from "@/components/landing/Footer";
 
 interface FormData {
@@ -33,12 +33,12 @@ const Register = () => {
   const [language, setLanguage] = useState<'fr' | 'en'>('fr');
   const [currentStep, setCurrentStep] = useState(1);
   const [consentChecked, setConsentChecked] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [selectedProvinceId, setSelectedProvinceId] = useState<string>("");
   const { toast } = useToast();
 
   const { data: provinces = [] } = useProvinces();
   const { data: cities = [] } = useCities(selectedProvinceId);
+  const { uploadedFile, isUploading, uploadFile, removeFile, getDocumentData } = useFileUpload();
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -83,16 +83,15 @@ const Register = () => {
         capacityPlaceholder: "Nombre maximum d'enfants"
       },
       documents: {
-        title: "Documents Légaux Requis",
-        subtitle: "Veuillez soumettre les documents officiels attestant de votre reconnaissance légale",
-        required: "Documents obligatoires :",
-        agrementLabel: "Agrément ministériel",
-        statutsLabel: "Statuts de l'organisation",
-        certificatLabel: "Certificat d'enregistrement",
-        uploadText: "Cliquez pour télécharger ou glissez vos fichiers ici",
-        acceptedFormats: "Formats acceptés: PDF, JPG, PNG (max 10MB par fichier)",
-        legalNotice: "Veuillez soumettre les documents officiels attestant de votre reconnaissance légale en tant que centre d'accueil pour enfants, tels que l'agrément ministériel, les statuts, ou tout autre document d'enregistrement officiel. Ces pièces seront utilisées uniquement à des fins de vérification et de recensement, dans le respect de la confidentialité.",
-        filesSelected: "fichier(s) sélectionné(s)"
+        title: "Document Légal Requis",
+        subtitle: "Veuillez soumettre un fichier unique contenant tous vos documents légaux",
+        required: "Document obligatoire :",
+        singleFileLabel: "Document légal complet (PDF ou Image)",
+        uploadText: "Cliquez pour télécharger ou glissez votre fichier ici",
+        acceptedFormats: "Formats acceptés: PDF, JPG, PNG (max 10MB)",
+        legalNotice: "Veuillez soumettre un seul fichier contenant tous vos documents officiels mergés (agrément ministériel, statuts, certificat d'enregistrement, etc.). Ce fichier sera utilisé uniquement à des fins de vérification et de recensement, dans le respect de la confidentialité.",
+        fileSelected: "Document sélectionné avec succès",
+        uploading: "Téléchargement en cours..."
       },
       consent: {
         title: "Consentement et Éthique",
@@ -104,7 +103,7 @@ const Register = () => {
         next: "Suivant",
         previous: "Précédent",
         submit: "Soumettre la demande",
-        upload: "Télécharger les documents"
+        upload: "Télécharger le document"
       },
       validation: {
         processing: "Traitement en cours...",
@@ -114,7 +113,8 @@ const Register = () => {
         email: "Veuillez entrer une adresse email valide",
         fillRequired: "Veuillez remplir tous les champs obligatoires",
         selectProvince: "Veuillez sélectionner une province",
-        selectLocality: "Veuillez sélectionner une localité"
+        selectLocality: "Veuillez sélectionner une localité",
+        documentRequired: "Veuillez télécharger un document avant de continuer"
       }
     },
     en: {
@@ -145,16 +145,15 @@ const Register = () => {
         capacityPlaceholder: "Maximum number of children"
       },
       documents: {
-        title: "Required Legal Documents",
-        subtitle: "Please submit official documents attesting to your legal recognition",
-        required: "Required documents:",
-        agrementLabel: "Ministerial approval",
-        statutsLabel: "Organization statutes",
-        certificatLabel: "Registration certificate",
-        uploadText: "Click to upload or drag your files here",
-        acceptedFormats: "Accepted formats: PDF, JPG, PNG (max 10MB per file)",
-        legalNotice: "Please submit official documents attesting to your legal recognition as a care center for children, such as ministerial approval, statutes, or any other official registration document. These documents will be used solely for verification and census purposes, in compliance with confidentiality.",
-        filesSelected: "file(s) selected"
+        title: "Required Legal Document",
+        subtitle: "Please submit a single file containing all your legal documents",
+        required: "Required document:",
+        singleFileLabel: "Complete legal document (PDF or Image)",
+        uploadText: "Click to upload or drag your file here",
+        acceptedFormats: "Accepted formats: PDF, JPG, PNG (max 10MB)",
+        legalNotice: "Please submit a single file containing all your official documents merged (ministerial approval, statutes, registration certificate, etc.). This file will be used solely for verification and census purposes, in compliance with confidentiality.",
+        fileSelected: "Document selected successfully",
+        uploading: "Uploading..."
       },
       consent: {
         title: "Consent and Ethics",
@@ -166,7 +165,7 @@ const Register = () => {
         next: "Next",
         previous: "Previous",
         submit: "Submit application",
-        upload: "Upload documents"
+        upload: "Upload document"
       },
       validation: {
         processing: "Processing...",
@@ -176,7 +175,8 @@ const Register = () => {
         email: "Please enter a valid email address",
         fillRequired: "Please fill in all required fields",
         selectProvince: "Please select a province",
-        selectLocality: "Please select a locality"
+        selectLocality: "Please select a locality",
+        documentRequired: "Please upload a document before continuing"
       }
     }
   };
@@ -186,7 +186,6 @@ const Register = () => {
   const validateStep1 = () => {
     const values = form.getValues();
     
-    // Vérifier les champs obligatoires
     const requiredFields = [
       { field: 'centerName', message: t.validation.required },
       { field: 'provinceId', message: t.validation.selectProvince },
@@ -207,7 +206,6 @@ const Register = () => {
       }
     }
 
-    // Validation email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(values.email)) {
       toast({
@@ -221,41 +219,11 @@ const Register = () => {
     return true;
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
-      const file = files[0]; // Prendre seulement le premier fichier
-      const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
-      const maxSize = 10 * 1024 * 1024; // 10MB
-      
-      if (!validTypes.includes(file.type)) {
-        toast({
-          title: "Format non accepté",
-          description: `Le fichier ${file.name} n'est pas dans un format accepté.`,
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      if (file.size > maxSize) {
-        toast({
-          title: "Fichier trop volumineux",
-          description: `Le fichier ${file.name} dépasse la taille maximale de 10MB.`,
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      setUploadedFiles([file]); // Remplacer le fichier existant
-      toast({
-        title: "Fichier téléchargé",
-        description: `Fichier ${file.name} téléchargé avec succès.`,
-      });
+      await uploadFile(files[0]);
     }
-  };
-
-  const removeFile = () => {
-    setUploadedFiles([]);
   };
 
   const handleNextStep = () => {
@@ -264,10 +232,10 @@ const Register = () => {
         setCurrentStep(2);
       }
     } else if (currentStep === 2) {
-      if (uploadedFiles.length === 0) {
+      if (!uploadedFile) {
         toast({
           title: "Document requis",
-          description: "Veuillez télécharger un document avant de continuer.",
+          description: t.validation.documentRequired,
           variant: "destructive",
         });
         return;
@@ -279,7 +247,7 @@ const Register = () => {
   const handleProvinceChange = (provinceId: string) => {
     setSelectedProvinceId(provinceId);
     form.setValue('provinceId', provinceId);
-    form.setValue('cityId', ''); // Reset city selection
+    form.setValue('cityId', '');
   };
 
   const renderStep1 = () => (
@@ -503,60 +471,70 @@ const Register = () => {
           <FileText className="w-5 h-5 text-amber-600 mt-0.5" />
           <div>
             <h4 className="font-medium text-amber-800 dark:text-amber-200 mb-2">
-              Document requis :
+              {t.documents.required}
             </h4>
             <p className="text-sm text-amber-700 dark:text-amber-300">
-              Un seul fichier contenant tous vos documents légaux mergés (agrément ministériel, statuts, certificat d'enregistrement, etc.)
+              {t.documents.singleFileLabel}
             </p>
           </div>
         </div>
       </div>
 
       <div className="space-y-4">
-        <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
-          <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-sm font-medium text-foreground mb-2">
-            {t.documents.uploadText}
-          </p>
-          <p className="text-xs text-muted-foreground mb-4">
-            {t.documents.acceptedFormats}
-          </p>
-          <input
-            type="file"
-            accept=".pdf,.jpg,.jpeg,.png"
-            onChange={handleFileUpload}
-            className="hidden"
-            id="file-upload"
-          />
-          <Button 
-            variant="outline" 
-            onClick={() => document.getElementById('file-upload')?.click()}
-          >
-            <Upload className="w-4 h-4 mr-2" />
-            {t.buttons.upload}
-          </Button>
-        </div>
-
-        {uploadedFiles.length > 0 && (
+        {!uploadedFile ? (
+          <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
+            <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-sm font-medium text-foreground mb-2">
+              {isUploading ? t.documents.uploading : t.documents.uploadText}
+            </p>
+            <p className="text-xs text-muted-foreground mb-4">
+              {t.documents.acceptedFormats}
+            </p>
+            <input
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png"
+              onChange={handleFileUpload}
+              className="hidden"
+              id="file-upload"
+              disabled={isUploading}
+            />
+            <Button 
+              variant="outline" 
+              onClick={() => document.getElementById('file-upload')?.click()}
+              disabled={isUploading}
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              {isUploading ? t.documents.uploading : t.buttons.upload}
+            </Button>
+          </div>
+        ) : (
           <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
             <div className="flex items-center space-x-2 text-green-700 dark:text-green-300 mb-3">
-              <Shield className="w-5 h-5" />
+              <CheckCircle className="w-5 h-5" />
               <span className="text-sm font-medium">
-                Document sélectionné
+                {t.documents.fileSelected}
               </span>
             </div>
-            <div className="bg-white dark:bg-gray-800 p-2 rounded border">
+            <div className="bg-white dark:bg-gray-800 p-3 rounded border">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
-                  {uploadedFiles[0].name}
-                </span>
+                <div className="flex items-center space-x-3">
+                  <FileText className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {uploadedFile.file.name}
+                    </span>
+                    <p className="text-xs text-muted-foreground">
+                      {(uploadedFile.file.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
+                  </div>
+                </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={removeFile}
                   className="text-red-500 hover:text-red-700"
                 >
-                  ×
+                  <X className="w-4 h-4" />
                 </Button>
               </div>
             </div>
