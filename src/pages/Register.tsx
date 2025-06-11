@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useProvinces } from "@/hooks/useProvinces";
 import { useCities } from "@/hooks/useCities";
 import { useFileUpload } from "@/hooks/useFileUpload";
+import { useOrphanageRegistration } from "@/hooks/useOrphanageRegistration";
 import { Footer } from "@/components/landing/Footer";
 
 interface FormData {
@@ -34,11 +35,13 @@ const Register = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [consentChecked, setConsentChecked] = useState(false);
   const [selectedProvinceId, setSelectedProvinceId] = useState<string>("");
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
 
   const { data: provinces = [] } = useProvinces();
   const { data: cities = [] } = useCities(selectedProvinceId);
   const { uploadedFile, isUploading, uploadFile, removeFile, getDocumentData } = useFileUpload();
+  const { submitRegistration, isSubmitting } = useOrphanageRegistration();
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -249,6 +252,119 @@ const Register = () => {
     form.setValue('provinceId', provinceId);
     form.setValue('cityId', '');
   };
+
+  const handleSubmit = async () => {
+    if (!consentChecked) {
+      toast({
+        title: "Consentement requis",
+        description: "Veuillez accepter les conditions avant de soumettre.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const formData = form.getValues();
+    const documentData = getDocumentData();
+
+    const registrationData = {
+      ...formData,
+      documentData
+    };
+
+    const result = await submitRegistration(registrationData);
+    
+    if (result.success) {
+      setIsSubmitted(true);
+    }
+  };
+
+  // Show success page if submitted
+  if (isSubmitted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 dark:to-primary/10 flex flex-col">
+        {/* Header */}
+        <header className="border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 shadow-sm">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <Link to="/" className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg">
+                <Heart className="w-6 h-6 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-primary">Congo ChildNet</h1>
+                <p className="text-xs text-muted-foreground">Inscription</p>
+              </div>
+            </Link>
+            
+            <div className="flex items-center space-x-4">
+              <div className="flex space-x-1 bg-muted/50 rounded-lg p-1">
+                <button
+                  onClick={() => setLanguage('fr')}
+                  className={`px-3 py-1.5 text-sm rounded-md transition-all font-medium ${
+                    language === 'fr' 
+                      ? 'bg-primary text-primary-foreground shadow-sm' 
+                      : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+                  }`}
+                >
+                  FR
+                </button>
+                <button
+                  onClick={() => setLanguage('en')}
+                  className={`px-3 py-1.5 text-sm rounded-md transition-all font-medium ${
+                    language === 'en' 
+                      ? 'bg-primary text-primary-foreground shadow-sm' 
+                      : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+                  }`}
+                >
+                  EN
+                </button>
+              </div>
+              <ThemeToggle />
+              <Link to="/">
+                <Button variant="outline" size="sm" className="hidden md:flex">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  {t.backHome}
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </header>
+
+        {/* Success Content */}
+        <div className="flex-1">
+          <div className="container mx-auto px-4 py-12">
+            <div className="max-w-2xl mx-auto text-center">
+              <div className="w-20 h-20 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="w-10 h-10 text-green-600 dark:text-green-400" />
+              </div>
+              
+              <h1 className="text-3xl font-bold text-foreground mb-4">{t.validation.success}</h1>
+              <p className="text-lg text-muted-foreground mb-8">
+                {t.validation.pending}
+              </p>
+              
+              <Link to="/">
+                <Button size="lg" className="px-8">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  {t.backHome}
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <Footer footer={{
+          aboutText: "Congo ChildNet est une plateforme dédiée au suivi et à la protection des enfants vulnérables en République Démocratique du Congo. Notre mission est d'améliorer le bien-être des enfants grâce à une meilleure coordination entre les centres d'accueil.",
+          links: "Liens utiles",
+          privacy: "Politique de confidentialité",
+          terms: "Conditions d'utilisation",
+          contact: "Contact",
+          partners: "Partenaires",
+          partnersText: "Nous travaillons en étroite collaboration avec le Ministère des Affaires Sociales, les ONG locales et internationales pour assurer le meilleur suivi possible des enfants."
+        }} />
+      </div>
+    );
+  }
 
   const renderStep1 = () => (
     <Form {...form}>
@@ -762,11 +878,12 @@ const Register = () => {
                       </Button>
                     ) : (
                       <Button
-                        disabled={!consentChecked}
+                        onClick={handleSubmit}
+                        disabled={!consentChecked || isSubmitting}
                         className="px-8 bg-gradient-to-r from-primary to-primary/90"
                       >
                         <Users className="w-4 h-4 mr-2" />
-                        {t.buttons.submit}
+                        {isSubmitting ? t.validation.processing : t.buttons.submit}
                       </Button>
                     )}
                   </div>
