@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Heart, LogOut, Eye, CheckCircle, XCircle, Clock, Mail, Phone, MapPin, FileText } from 'lucide-react';
+import { Heart, LogOut, Eye, CheckCircle, XCircle, Clock, Mail, Phone, MapPin, FileText, Download } from 'lucide-react';
 
 interface Orphanage {
   id: string;
@@ -211,6 +210,57 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDownloadDocument = async (documentData: any) => {
+    if (!documentData?.legal_document?.url) {
+      toast({
+        title: "Aucun document",
+        description: "Aucun document n'est disponible pour le téléchargement.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(documentData.legal_document.url);
+      if (!response.ok) throw new Error('Erreur de téléchargement');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = documentData.legal_document.file_name || 'document';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "Document téléchargé",
+        description: `Le document ${documentData.legal_document.file_name} a été téléchargé.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur de téléchargement",
+        description: "Impossible de télécharger le document.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePreviewDocument = (documentData: any) => {
+    if (!documentData?.legal_document?.url) {
+      toast({
+        title: "Aucun document",
+        description: "Aucun document n'est disponible pour la prévisualisation.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    window.open(documentData.legal_document.url, '_blank');
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
@@ -402,11 +452,33 @@ const AdminDashboard = () => {
                   Documents
                 </h4>
                 {selectedOrphanage.documents?.legal_document ? (
-                  <div className="p-3 bg-muted rounded-md">
-                    <p className="text-sm font-medium">Document légal fourni</p>
-                    <p className="text-xs text-muted-foreground">
-                      {selectedOrphanage.documents.legal_document.file_name}
-                    </p>
+                  <div className="space-y-3">
+                    <div className="p-3 bg-muted rounded-md">
+                      <p className="text-sm font-medium">Document légal fourni</p>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        {selectedOrphanage.documents.legal_document.file_name}
+                      </p>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePreviewDocument(selectedOrphanage.documents)}
+                          className="flex items-center gap-1"
+                        >
+                          <Eye className="w-3 h-3" />
+                          Prévisualiser
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDownloadDocument(selectedOrphanage.documents)}
+                          className="flex items-center gap-1"
+                        >
+                          <Download className="w-3 h-3" />
+                          Télécharger
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground">Aucun document fourni</p>
