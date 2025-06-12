@@ -398,6 +398,35 @@ export type Database = {
         }
         Relationships: []
       }
+      user_orphanage_links: {
+        Row: {
+          created_at: string
+          id: string
+          orphanage_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          orphanage_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          orphanage_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_orphanage_links_orphanage_id_fkey"
+            columns: ["orphanage_id"]
+            isOneToOne: false
+            referencedRelation: "orphanages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           created_at: string | null
@@ -461,7 +490,19 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      create_user_account: {
+        Args: {
+          user_email: string
+          user_password: string
+          user_role?: Database["public"]["Enums"]["user_role"]
+          orphanage_id_param?: string
+        }
+        Returns: Json
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       gender: "M" | "F"

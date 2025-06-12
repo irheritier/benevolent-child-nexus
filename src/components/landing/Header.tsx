@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Heart, LogIn } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   language: 'fr' | 'en';
@@ -11,6 +12,8 @@ interface HeaderProps {
 }
 
 export const Header = ({ language, setLanguage, adminLoginText }: HeaderProps) => {
+  const navigate = useNavigate();
+
   return (
     <header className="border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -50,7 +53,12 @@ export const Header = ({ language, setLanguage, adminLoginText }: HeaderProps) =
             </button>
           </div>
           <ThemeToggle />
-          <Button variant="outline" size="sm" className="hidden md:flex">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="hidden md:flex"
+            onClick={() => navigate('/admin/auth')}
+          >
             <LogIn className="w-4 h-4 mr-2" />
             {adminLoginText}
           </Button>
