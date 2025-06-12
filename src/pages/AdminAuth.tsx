@@ -37,14 +37,56 @@ const AdminAuth = () => {
         return;
       }
 
-      // Vérifier si l'utilisateur est admin
+      console.log('User authenticated:', data.user.id);
+
+      // Attendre un peu pour que les données soient synchronisées
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Vérifier si l'utilisateur est admin avec une requête plus robuste
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('role')
+        .select('role, email')
         .eq('id', data.user.id)
-        .single();
+        .maybeSingle();
 
-      if (userError || userData?.role !== 'admin') {
+      console.log('User data from database:', userData, 'Error:', userError);
+
+      if (userError) {
+        console.error('Error fetching user data:', userError);
+        toast({
+          title: "Erreur de vérification",
+          description: "Impossible de vérifier vos droits d'accès.",
+          variant: "destructive",
+        });
+        await supabase.auth.signOut();
+        return;
+      }
+
+      if (!userData) {
+        console.log('No user data found, checking if user needs to be created in public.users');
+        // Si l'utilisateur n'existe pas dans public.users, essayer de le créer
+        const { error: insertError } = await supabase
+          .from('users')
+          .insert({
+            id: data.user.id,
+            email: data.user.email,
+            role: 'admin',
+            is_verified: true
+          });
+
+        if (insertError) {
+          console.error('Error creating user in public.users:', insertError);
+          await supabase.auth.signOut();
+          toast({
+            title: "Accès refusé",
+            description: "Votre compte n'est pas configuré comme administrateur.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        console.log('User created in public.users with admin role');
+      } else if (userData.role !== 'admin') {
         await supabase.auth.signOut();
         toast({
           title: "Accès refusé",
@@ -61,6 +103,7 @@ const AdminAuth = () => {
 
       navigate('/admin/dashboard');
     } catch (error) {
+      console.error('Unexpected error during login:', error);
       toast({
         title: "Erreur inattendue",
         description: "Une erreur est survenue lors de la connexion.",
@@ -86,12 +129,16 @@ const AdminAuth = () => {
     setIsLoading(true);
 
     try {
+      console.log('Creating admin account for:', email);
+      
       // Utiliser la fonction SQL pour créer un compte admin
       const { data, error } = await supabase.rpc('create_user_account', {
         user_email: email,
         user_password: password,
         user_role: 'admin'
       });
+
+      console.log('Account creation result:', data, 'Error:', error);
 
       if (error) {
         toast({
@@ -112,6 +159,7 @@ const AdminAuth = () => {
       setPassword('');
       setConfirmPassword('');
     } catch (error) {
+      console.error('Unexpected error during signup:', error);
       toast({
         title: "Erreur inattendue",
         description: "Une erreur est survenue lors de la création du compte.",
