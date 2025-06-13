@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
   Heart, 
   LogOut, 
@@ -21,6 +22,8 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import AddChildForm from '@/components/orphanage/AddChildForm';
+import ChildrenTable from '@/components/orphanage/ChildrenTable';
 
 interface User {
   id: string;
@@ -45,11 +48,12 @@ interface Child {
   id: string;
   full_name: string;
   gender: string;
-  birth_date: string;
-  estimated_age: number;
-  entry_date: string;
+  birth_date: string | null;
+  estimated_age: number | null;
+  entry_date: string | null;
   parent_status: string;
-  internal_code: string;
+  internal_code: string | null;
+  created_at: string;
 }
 
 const OrphanageDashboard = () => {
@@ -57,6 +61,7 @@ const OrphanageDashboard = () => {
   const [orphanage, setOrphanage] = useState<Orphanage | null>(null);
   const [children, setChildren] = useState<Child[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAddChild, setShowAddChild] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -109,15 +114,7 @@ const OrphanageDashboard = () => {
 
         if (orphanageData) {
           setOrphanage(orphanageData);
-
-          // Récupérer les enfants de l'orphelinat
-          const { data: childrenData } = await supabase
-            .from('children')
-            .select('*')
-            .eq('orphanage_id', orphanageData.id)
-            .order('created_at', { ascending: false });
-
-          setChildren(childrenData || []);
+          await loadChildren(orphanageData.id);
         }
       }
     } catch (error) {
@@ -128,6 +125,21 @@ const OrphanageDashboard = () => {
     }
   };
 
+  const loadChildren = async (orphanageId: string) => {
+    try {
+      const { data: childrenData, error } = await supabase
+        .from('children')
+        .select('*')
+        .eq('orphanage_id', orphanageId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setChildren(childrenData || []);
+    } catch (error) {
+      console.error('Erreur lors du chargement des enfants:', error);
+    }
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/orphelinat/auth');
@@ -135,6 +147,55 @@ const OrphanageDashboard = () => {
       title: "Déconnexion réussie",
       description: "Vous avez été déconnecté avec succès.",
     });
+  };
+
+  const handleAddChildSuccess = () => {
+    setShowAddChild(false);
+    if (orphanage) {
+      loadChildren(orphanage.id);
+    }
+    toast({
+      title: "Enfant ajouté",
+      description: "L'enfant a été enregistré avec succès.",
+    });
+  };
+
+  const handleEditChild = (child: Child) => {
+    // TODO: Implémenter l'édition d'enfant
+    console.log('Éditer enfant:', child);
+  };
+
+  const handleDeleteChild = async (childId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet enfant ?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('children')
+        .delete()
+        .eq('id', childId);
+
+      if (error) throw error;
+
+      setChildren(children.filter(child => child.id !== childId));
+      toast({
+        title: "Enfant supprimé",
+        description: "L'enfant a été retiré de votre centre.",
+      });
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer l'enfant.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleViewChildDetails = (child: Child) => {
+    // TODO: Implémenter la vue détaillée d'un enfant
+    console.log('Voir détails enfant:', child);
   };
 
   const getStatusBadge = (status: string) => {
@@ -148,23 +209,6 @@ const OrphanageDashboard = () => {
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
-  };
-
-  const getGenderBadge = (gender: string) => {
-    return (
-      <Badge variant="outline" className={gender === 'M' ? 'text-blue-600' : 'text-pink-600'}>
-        {gender === 'M' ? 'Garçon' : 'Fille'}
-      </Badge>
-    );
-  };
-
-  const getParentStatusText = (status: string) => {
-    const statusMap = {
-      'total_orphan': 'Orphelin total',
-      'partial_orphan': 'Orphelin partiel',
-      'abandoned': 'Abandonné'
-    };
-    return statusMap[status as keyof typeof statusMap] || status;
   };
 
   if (isLoading) {
@@ -346,9 +390,12 @@ const OrphanageDashboard = () => {
                 <CardContent>
                   <div className="space-y-4">
                     <div className="text-sm text-muted-foreground">
-                      Aucune activité récente à afficher.
+                      {children.length === 0 
+                        ? "Aucun enfant enregistré pour le moment."
+                        : `${children.length} enfant(s) enregistré(s) dans votre centre.`
+                      }
                     </div>
-                    <Button size="sm" className="w-full">
+                    <Button size="sm" className="w-full" onClick={() => setShowAddChild(true)}>
                       <UserPlus className="w-4 h-4 mr-2" />
                       Ajouter un enfant
                     </Button>
@@ -359,63 +406,25 @@ const OrphanageDashboard = () => {
           </TabsContent>
 
           <TabsContent value="children" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="w-5 h-5" />
-                    Liste des enfants ({children.length})
-                  </CardTitle>
-                  <Button>
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    Ajouter un enfant
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {children.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-medium mb-2">Aucun enfant enregistré</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Commencez par ajouter des enfants à votre centre d'accueil.
-                    </p>
-                    <Button>
-                      <UserPlus className="w-4 h-4 mr-2" />
-                      Ajouter le premier enfant
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {children.map((child) => (
-                      <div key={child.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
-                            <Users className="w-5 h-5 text-muted-foreground" />
-                          </div>
-                          <div>
-                            <h4 className="font-medium">{child.full_name}</h4>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <span>Code: {child.internal_code || 'Non défini'}</span>
-                              <span>•</span>
-                              <span>Âge: {child.estimated_age} ans</span>
-                              <span>•</span>
-                              <span>{getParentStatusText(child.parent_status)}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {getGenderBadge(child.gender)}
-                          <Button variant="outline" size="sm">
-                            Voir détails
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium">Gestion des enfants</h3>
+                <p className="text-sm text-muted-foreground">
+                  Enregistrez et gérez les enfants hébergés dans votre centre.
+                </p>
+              </div>
+              <Button onClick={() => setShowAddChild(true)}>
+                <UserPlus className="w-4 h-4 mr-2" />
+                Ajouter un enfant
+              </Button>
+            </div>
+
+            <ChildrenTable
+              children={children}
+              onEdit={handleEditChild}
+              onDelete={handleDeleteChild}
+              onViewDetails={handleViewChildDetails}
+            />
           </TabsContent>
 
           <TabsContent value="health" className="space-y-6">
@@ -465,6 +474,20 @@ const OrphanageDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Dialog pour ajouter un enfant */}
+      <Dialog open={showAddChild} onOpenChange={setShowAddChild}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Ajouter un nouvel enfant</DialogTitle>
+          </DialogHeader>
+          <AddChildForm
+            orphanageId={orphanage.id}
+            onSuccess={handleAddChildSuccess}
+            onCancel={() => setShowAddChild(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
