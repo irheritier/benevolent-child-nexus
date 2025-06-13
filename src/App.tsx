@@ -9,6 +9,8 @@ import Index from "./pages/Index";
 import Register from "./pages/Register";
 import AdminAuth from "./pages/AdminAuth";
 import AdminDashboard from "./pages/AdminDashboard";
+import OrphanageAuth from "./pages/OrphanageAuth";
+import OrphanageDashboard from "./pages/OrphanageDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +27,8 @@ const App = () => (
             <Route path="/register" element={<Register />} />
             <Route path="/admin/auth" element={<AdminAuth />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/orphelinat/auth" element={<OrphanageAuth />} />
+            <Route path="/orphelinat/dashboard" element={<OrphanageDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
