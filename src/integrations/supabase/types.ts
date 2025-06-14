@@ -277,6 +277,62 @@ export type Database = {
           },
         ]
       }
+      orphanage_documents: {
+        Row: {
+          created_at: string
+          description: string | null
+          document_type: string
+          expiry_date: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          file_url: string
+          id: string
+          orphanage_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          document_type: string
+          expiry_date?: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          file_url: string
+          id?: string
+          orphanage_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          document_type?: string
+          expiry_date?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
+          file_url?: string
+          id?: string
+          orphanage_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orphanage_documents_orphanage_id_fkey"
+            columns: ["orphanage_id"]
+            isOneToOne: false
+            referencedRelation: "orphanages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orphanages: {
         Row: {
           address: string | null

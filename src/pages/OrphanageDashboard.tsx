@@ -470,26 +470,11 @@ const OrphanageDashboard = () => {
           </TabsContent>
 
           <TabsContent value="documents" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  Documents légaux
-                </CardTitle>
-                <CardDescription>
-                  Gérez les documents officiels de votre centre d'accueil
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Gestion des documents</h3>
-                  <p className="text-muted-foreground">
-                    Interface de gestion des documents en cours de développement.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <DocumentsManagement
+              orphanageId={orphanage.id}
+              orphanageName={orphanage.name}
+              children={children}
+            />
           </TabsContent>
         </Tabs>
       </div>

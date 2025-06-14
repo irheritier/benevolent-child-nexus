@@ -8,19 +8,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
+import type { Tables } from '@/integrations/supabase/types';
 
-interface OrphanageDocument {
-  id: string;
-  document_type: string;
-  title: string;
-  description: string | null;
-  file_url: string;
-  file_name: string;
-  file_size: number;
-  file_type: string;
-  expiry_date: string | null;
-  created_at: string;
-}
+type OrphanageDocument = Tables<'orphanage_documents'>;
 
 interface DocumentsHistoryProps {
   orphanageId: string;
@@ -238,7 +228,7 @@ const DocumentsHistory = ({ orphanageId, orphanageName, onAddDocument }: Documen
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDeleteDocument(document.id, document.file_url.split('/').pop() || '')}
+                      onClick={() => handleDeleteDocument(document.id, document.file_path)}
                       className="text-red-600 hover:text-red-800"
                     >
                       <Trash2 className="w-4 h-4" />
