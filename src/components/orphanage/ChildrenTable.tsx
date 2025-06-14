@@ -5,7 +5,10 @@ import { Users } from 'lucide-react';
 import ChildrenTableFilters from './ChildrenTableFilters';
 import ChildrenTableEmptyStates from './ChildrenTableEmptyStates';
 import ChildrenTableRow from './ChildrenTableRow';
+import ChildrenTablePagination from './ChildrenTablePagination';
 import { useChildrenTableFilters } from './hooks/useChildrenTableFilters';
+import { useChildrenPagination } from './hooks/useChildrenPagination';
+import { useEffect } from 'react';
 
 interface Child {
   id: string;
@@ -36,6 +39,28 @@ const ChildrenTable = ({ children, onEdit, onDelete, onViewDetails }: ChildrenTa
     setStatusFilter,
     filteredChildren
   } = useChildrenTableFilters(children);
+
+  const {
+    currentPage,
+    pageSize,
+    totalPages,
+    paginatedChildren,
+    goToPage,
+    goToNextPage,
+    goToPreviousPage,
+    changePageSize,
+    resetToFirstPage,
+    hasNextPage,
+    hasPreviousPage,
+    startIndex,
+    endIndex,
+    totalItems
+  } = useChildrenPagination(filteredChildren, 5);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    resetToFirstPage();
+  }, [searchTerm, genderFilter, statusFilter, resetToFirstPage]);
 
   if (children.length === 0) {
     return <ChildrenTableEmptyStates hasChildren={false} hasFilteredResults={false} />;
@@ -74,7 +99,7 @@ const ChildrenTable = ({ children, onEdit, onDelete, onViewDetails }: ChildrenTa
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredChildren.map((child) => (
+              {paginatedChildren.map((child) => (
                 <ChildrenTableRow
                   key={child.id}
                   child={child}
@@ -87,10 +112,27 @@ const ChildrenTable = ({ children, onEdit, onDelete, onViewDetails }: ChildrenTa
           </Table>
         </div>
 
-        <ChildrenTableEmptyStates 
-          hasChildren={children.length > 0} 
-          hasFilteredResults={filteredChildren.length > 0} 
-        />
+        {filteredChildren.length === 0 ? (
+          <ChildrenTableEmptyStates 
+            hasChildren={children.length > 0} 
+            hasFilteredResults={filteredChildren.length > 0} 
+          />
+        ) : (
+          <ChildrenTablePagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            totalItems={totalItems}
+            startIndex={startIndex}
+            endIndex={endIndex}
+            hasNextPage={hasNextPage}
+            hasPreviousPage={hasPreviousPage}
+            onPageChange={goToPage}
+            onPageSizeChange={changePageSize}
+            onNextPage={goToNextPage}
+            onPreviousPage={goToPreviousPage}
+          />
+        )}
       </CardContent>
     </Card>
   );
