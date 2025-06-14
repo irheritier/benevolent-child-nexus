@@ -26,6 +26,7 @@ import EditChildForm from '@/components/orphanage/EditChildForm';
 import ChildrenTable from '@/components/orphanage/ChildrenTable';
 import ChildDetailsDialog from '@/components/orphanage/ChildDetailsDialog';
 import HealthManagement from '@/components/orphanage/HealthManagement';
+import NutritionManagement from '@/components/orphanage/NutritionManagement';
 
 interface User {
   id: string;
@@ -340,10 +341,11 @@ const OrphanageDashboard = () => {
 
         {/* Contenu principal avec onglets */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
             <TabsTrigger value="children">Enfants</TabsTrigger>
             <TabsTrigger value="health">Santé</TabsTrigger>
+            <TabsTrigger value="nutrition">Nutrition</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
           </TabsList>
 
@@ -451,6 +453,19 @@ const OrphanageDashboard = () => {
             </div>
 
             <HealthManagement children={children} />
+          </TabsContent>
+
+          <TabsContent value="nutrition" className="space-y-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-lg font-medium">Suivi nutritionnel</h3>
+                <p className="text-sm text-muted-foreground">
+                  Gérez les données de poids, taille et statut nutritionnel des enfants.
+                </p>
+              </div>
+            </div>
+
+            <NutritionManagement children={children} />
           </TabsContent>
 
           <TabsContent value="documents" className="space-y-6">
