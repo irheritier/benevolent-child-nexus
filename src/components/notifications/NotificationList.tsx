@@ -13,7 +13,8 @@ import {
   FileText, 
   Users, 
   CheckCircle2,
-  X
+  X,
+  Bell
 } from 'lucide-react';
 
 interface NotificationListProps {

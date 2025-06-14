@@ -55,7 +55,13 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
         return;
       }
 
-      setNotifications(data || []);
+      // Type assertion to ensure proper typing
+      const typedNotifications = (data || []).map(notification => ({
+        ...notification,
+        priority: notification.priority as 'low' | 'medium' | 'high' | 'critical'
+      }));
+
+      setNotifications(typedNotifications);
     } catch (error) {
       console.error('Erreur lors du chargement des notifications:', error);
     }
@@ -149,7 +155,11 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
           table: 'notifications'
         },
         (payload) => {
-          const newNotification = payload.new as Notification;
+          const newNotification = {
+            ...payload.new,
+            priority: payload.new.priority as 'low' | 'medium' | 'high' | 'critical'
+          } as Notification;
+          
           setNotifications(prev => [newNotification, ...prev]);
           
           // Afficher un toast pour les nouvelles notifications
