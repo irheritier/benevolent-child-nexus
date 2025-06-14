@@ -503,6 +503,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      user_orphanage_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       gender: "M" | "F"
