@@ -159,27 +159,27 @@ const DocumentsHistory = ({ orphanageId, orphanageName, onAddDocument }: Documen
           </div>
         ) : (
           <div className="space-y-4">
-            {documents.map((document) => (
-              <div key={document.id} className="border rounded-lg p-4">
+            {documents.map((doc) => (
+              <div key={doc.id} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <FileText className="w-5 h-5 text-muted-foreground" />
                     <div>
-                      <h4 className="font-medium">{document.title}</h4>
+                      <h4 className="font-medium">{doc.title}</h4>
                       <p className="text-sm text-muted-foreground">
-                        Ajouté le {format(new Date(document.created_at), 'PPP', { locale: fr })}
+                        Ajouté le {format(new Date(doc.created_at), 'PPP', { locale: fr })}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {getDocumentTypeBadge(document.document_type)}
-                    {document.expiry_date && isExpired(document.expiry_date) && (
+                    {getDocumentTypeBadge(doc.document_type)}
+                    {doc.expiry_date && isExpired(doc.expiry_date) && (
                       <Badge className="bg-red-100 text-red-800 border-red-200">
                         <AlertTriangle className="w-3 h-3 mr-1" />
                         Expiré
                       </Badge>
                     )}
-                    {document.expiry_date && isExpiringSoon(document.expiry_date) && !isExpired(document.expiry_date) && (
+                    {doc.expiry_date && isExpiringSoon(doc.expiry_date) && !isExpired(doc.expiry_date) && (
                       <Badge className="bg-orange-100 text-orange-800 border-orange-200">
                         <AlertTriangle className="w-3 h-3 mr-1" />
                         Expire bientôt
@@ -188,18 +188,18 @@ const DocumentsHistory = ({ orphanageId, orphanageName, onAddDocument }: Documen
                   </div>
                 </div>
 
-                {document.description && (
-                  <p className="text-sm text-muted-foreground mb-3">{document.description}</p>
+                {doc.description && (
+                  <p className="text-sm text-muted-foreground mb-3">{doc.description}</p>
                 )}
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span>{document.file_name}</span>
-                    <span>{formatFileSize(document.file_size)}</span>
-                    {document.expiry_date && (
+                    <span>{doc.file_name}</span>
+                    <span>{formatFileSize(doc.file_size)}</span>
+                    {doc.expiry_date && (
                       <div className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
-                        <span>Expire le {format(new Date(document.expiry_date), 'PPP', { locale: fr })}</span>
+                        <span>Expire le {format(new Date(doc.expiry_date), 'PPP', { locale: fr })}</span>
                       </div>
                     )}
                   </div>
@@ -207,7 +207,7 @@ const DocumentsHistory = ({ orphanageId, orphanageName, onAddDocument }: Documen
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => window.open(document.file_url, '_blank')}
+                      onClick={() => window.open(doc.file_url, '_blank')}
                     >
                       <Eye className="w-4 h-4 mr-1" />
                       Voir
@@ -216,9 +216,9 @@ const DocumentsHistory = ({ orphanageId, orphanageName, onAddDocument }: Documen
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        const link = document.createElement('a');
-                        link.href = document.file_url;
-                        link.download = document.file_name;
+                        const link = window.document.createElement('a');
+                        link.href = doc.file_url;
+                        link.download = doc.file_name;
                         link.click();
                       }}
                     >
@@ -228,7 +228,7 @@ const DocumentsHistory = ({ orphanageId, orphanageName, onAddDocument }: Documen
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDeleteDocument(document.id, document.file_path)}
+                      onClick={() => handleDeleteDocument(doc.id, doc.file_path)}
                       className="text-red-600 hover:text-red-800"
                     >
                       <Trash2 className="w-4 h-4" />
