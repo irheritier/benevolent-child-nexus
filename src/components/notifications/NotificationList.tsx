@@ -1,24 +1,24 @@
 
 import React from 'react';
-import { formatDistanceToNow } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNotifications } from '@/contexts/NotificationContext';
+import { formatDistanceToNow } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import { 
+  Bell, 
   AlertTriangle, 
   Heart, 
   FileText, 
-  Users, 
+  Users,
+  Shield,
   CheckCircle2,
-  X,
-  Bell
+  X
 } from 'lucide-react';
 
 interface NotificationListProps {
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 const getNotificationIcon = (type: string) => {
@@ -31,31 +31,36 @@ const getNotificationIcon = (type: string) => {
       return <FileText className="h-4 w-4 text-orange-500" />;
     case 'capacity_alert':
       return <Users className="h-4 w-4 text-yellow-500" />;
+    case 'health_disease_outbreak':
+      return <AlertTriangle className="h-4 w-4 text-red-600" />;
+    case 'health_vaccination_gap':
+      return <Shield className="h-4 w-4 text-orange-600" />;
     default:
-      return <AlertTriangle className="h-4 w-4 text-gray-500" />;
+      return <Bell className="h-4 w-4 text-gray-500" />;
   }
 };
 
 const getPriorityColor = (priority: string) => {
   switch (priority) {
     case 'critical':
-      return 'bg-red-500';
+      return 'text-red-600';
     case 'high':
-      return 'bg-orange-500';
+      return 'text-orange-600';
     case 'medium':
-      return 'bg-yellow-500';
+      return 'text-yellow-600';
     case 'low':
-      return 'bg-blue-500';
+      return 'text-green-600';
     default:
-      return 'bg-gray-500';
+      return 'text-gray-600';
   }
 };
 
 export const NotificationList = ({ onClose }: NotificationListProps) => {
   const { notifications, markAsRead, markAllAsRead } = useNotifications();
+  const unreadNotifications = notifications.filter(n => !n.is_read);
+  const recentNotifications = notifications.slice(0, 10);
 
-  const handleMarkAsRead = async (id: string, event: React.MouseEvent) => {
-    event.stopPropagation();
+  const handleMarkAsRead = async (id: string) => {
     await markAsRead(id);
   };
 
@@ -66,90 +71,105 @@ export const NotificationList = ({ onClose }: NotificationListProps) => {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between p-4 border-b">
-        <h3 className="font-semibold">Notifications</h3>
         <div className="flex items-center gap-2">
-          {notifications.some(n => !n.is_read) && (
+          <Bell className="h-5 w-5" />
+          <span className="font-medium">Notifications</span>
+          {unreadNotifications.length > 0 && (
+            <Badge variant="destructive" className="h-5 w-5 flex items-center justify-center p-0 text-xs">
+              {unreadNotifications.length}
+            </Badge>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {unreadNotifications.length > 0 && (
             <Button
               variant="ghost"
               size="sm"
               onClick={handleMarkAllAsRead}
-              className="text-xs"
+              className="h-7 px-2 text-xs"
             >
+              <CheckCircle2 className="h-3 w-3 mr-1" />
               Tout marquer comme lu
             </Button>
           )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          {onClose && (
+            <Button variant="ghost" size="sm" onClick={onClose} className="h-7 w-7 p-0">
+              <X className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
 
       <ScrollArea className="h-96">
-        {notifications.length === 0 ? (
+        {recentNotifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-8 text-center">
             <Bell className="h-12 w-12 text-gray-300 mb-4" />
             <p className="text-sm text-gray-500">Aucune notification</p>
           </div>
         ) : (
-          <div className="space-y-0">
-            {notifications.map((notification, index) => (
-              <div key={notification.id}>
-                <div
-                  className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
-                    !notification.is_read ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
-                  }`}
-                  onClick={() => !notification.is_read && markAsRead(notification.id)}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 mt-1">
-                      {getNotificationIcon(notification.type)}
+          <div className="divide-y">
+            {recentNotifications.map((notification) => (
+              <div
+                key={notification.id}
+                className={`p-4 hover:bg-gray-50 transition-colors ${
+                  !notification.is_read ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 mt-1">
+                    {getNotificationIcon(notification.type)}
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className="text-sm font-medium text-gray-900 truncate">
+                        {notification.title}
+                      </h4>
+                      <span className={`text-xs font-medium ${getPriorityColor(notification.priority)}`}>
+                        {notification.priority === 'critical' ? 'Critique' :
+                         notification.priority === 'high' ? 'Élevée' :
+                         notification.priority === 'medium' ? 'Moyenne' : 'Faible'}
+                      </span>
                     </div>
                     
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {notification.title}
-                        </p>
-                        <div className={`w-2 h-2 rounded-full ${getPriorityColor(notification.priority)}`} />
-                      </div>
-                      
-                      <p className="text-sm text-gray-600 mb-2">
-                        {notification.message}
+                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                      {notification.message}
+                    </p>
+                    
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-gray-400">
+                        {formatDistanceToNow(new Date(notification.created_at), {
+                          addSuffix: true,
+                          locale: fr
+                        })}
                       </p>
                       
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs text-gray-400">
-                          {formatDistanceToNow(new Date(notification.created_at), {
-                            addSuffix: true,
-                            locale: fr
-                          })}
-                        </p>
-                        
-                        {!notification.is_read && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => handleMarkAsRead(notification.id, e)}
-                            className="h-6 px-2 text-xs"
-                          >
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
-                            Marquer comme lu
-                          </Button>
-                        )}
-                      </div>
+                      {!notification.is_read && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleMarkAsRead(notification.id)}
+                          className="h-6 px-2 text-xs"
+                        >
+                          <CheckCircle2 className="h-3 w-3" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
-                {index < notifications.length - 1 && <Separator />}
               </div>
             ))}
           </div>
         )}
       </ScrollArea>
+
+      {notifications.length > 10 && (
+        <div className="p-4 border-t">
+          <Button variant="outline" className="w-full" size="sm">
+            Voir toutes les notifications
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

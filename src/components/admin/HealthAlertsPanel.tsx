@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Heart, Shield, Activity, Eye } from 'lucide-react';
+import { AlertTriangle, Heart, Shield, Activity } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useHealthAlertsNotifications } from './hooks/useHealthAlertsNotifications';
 
 interface HealthAlert {
   id: string;
@@ -29,6 +30,7 @@ const HealthAlertsPanel = () => {
   const [alerts, setAlerts] = useState<HealthAlert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { runHealthAlertsCheck } = useHealthAlertsNotifications();
 
   useEffect(() => {
     loadHealthAlerts();
@@ -164,7 +166,6 @@ const HealthAlertsPanel = () => {
         }
       });
 
-      // Trier les alertes par sévérité
       const severityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
       alerts.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
 
@@ -179,6 +180,15 @@ const HealthAlertsPanel = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleRefreshAlerts = async () => {
+    await loadHealthAlerts();
+    await runHealthAlertsCheck();
+    toast({
+      title: "Alertes actualisées",
+      description: "Les alertes de santé et notifications ont été mises à jour.",
+    });
   };
 
   const getSeverityBadge = (severity: string) => {
@@ -278,7 +288,7 @@ const HealthAlertsPanel = () => {
       </Card>
 
       <div className="flex justify-end">
-        <Button onClick={loadHealthAlerts} variant="outline">
+        <Button onClick={handleRefreshAlerts} variant="outline">
           <Activity className="w-4 h-4 mr-2" />
           Actualiser les alertes
         </Button>
