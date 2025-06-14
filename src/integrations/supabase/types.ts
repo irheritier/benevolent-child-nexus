@@ -620,6 +620,103 @@ export type Database = {
           },
         ]
       }
+      partner_access_logs: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          resource: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          resource?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          resource?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_access_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_requests: {
+        Row: {
+          contact_person: string
+          created_at: string
+          description: string | null
+          email: string
+          id: string
+          organization_name: string
+          organization_type: string
+          phone: string | null
+          purpose: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          contact_person: string
+          created_at?: string
+          description?: string | null
+          email: string
+          id?: string
+          organization_name: string
+          organization_type: string
+          phone?: string | null
+          purpose: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          contact_person?: string
+          created_at?: string
+          description?: string | null
+          email?: string
+          id?: string
+          organization_name?: string
+          organization_type?: string
+          phone?: string | null
+          purpose?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       provinces: {
         Row: {
           area_km2: number | null
@@ -767,6 +864,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      log_partner_access: {
+        Args: {
+          action_type: string
+          resource_accessed?: string
+          user_ip?: unknown
+          user_agent_string?: string
+        }
+        Returns: string
+      }
       user_orphanage_id: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -778,7 +884,7 @@ export type Database = {
       nutrition_status: "normal" | "malnourished" | "severely_malnourished"
       parent_status: "total_orphan" | "partial_orphan" | "abandoned"
       sync_status: "pending" | "success" | "failed"
-      user_role: "admin" | "orphelinat"
+      user_role: "admin" | "orphelinat" | "partner"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -899,7 +1005,7 @@ export const Constants = {
       nutrition_status: ["normal", "malnourished", "severely_malnourished"],
       parent_status: ["total_orphan", "partial_orphan", "abandoned"],
       sync_status: ["pending", "success", "failed"],
-      user_role: ["admin", "orphelinat"],
+      user_role: ["admin", "orphelinat", "partner"],
     },
   },
 } as const

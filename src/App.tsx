@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +12,10 @@ import AdminNotifications from "./pages/AdminNotifications";
 import OrphanageAuth from "./pages/OrphanageAuth";
 import OrphanageDashboard from "./pages/OrphanageDashboard";
 import NotFound from "./pages/NotFound";
+import PartnerRequest from "./pages/PartnerRequest";
+import PartnerAuth from "./pages/PartnerAuth";
+import PartnerDashboard from "./pages/PartnerDashboard";
+import AdminPartnerRequests from "./pages/AdminPartnerRequests";
 
 const queryClient = new QueryClient();
 
@@ -29,8 +32,12 @@ const App = () => (
             <Route path="/admin/auth" element={<AdminAuth />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/notifications" element={<AdminNotifications />} />
+            <Route path="/admin/partners" element={<AdminPartnerRequests />} />
             <Route path="/orphelinat/auth" element={<OrphanageAuth />} />
             <Route path="/orphelinat/dashboard" element={<OrphanageDashboard />} />
+            <Route path="/partner/request" element={<PartnerRequest />} />
+            <Route path="/partner/auth" element={<PartnerAuth />} />
+            <Route path="/partner/dashboard" element={<PartnerDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
