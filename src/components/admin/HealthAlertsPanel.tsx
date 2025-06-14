@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +17,12 @@ interface HealthAlert {
   orphanage_name: string;
   child_count: number;
   created_at: string;
+}
+
+interface OutbreakData {
+  orphanage_name: string;
+  disease_name: string;
+  count: number;
 }
 
 const HealthAlertsPanel = () => {
@@ -58,7 +63,7 @@ const HealthAlertsPanel = () => {
       if (diseaseError) throw diseaseError;
 
       // Analyser les épidémies potentielles
-      const outbreakMap = new Map<string, Map<string, number>>();
+      const outbreakMap = new Map<string, OutbreakData>();
       
       diseaseOutbreaks?.forEach((record) => {
         const orphanageId = record.health_records.children.orphanage_id;
@@ -67,22 +72,22 @@ const HealthAlertsPanel = () => {
         const key = `${orphanageId}-${diseaseName}`;
 
         if (!outbreakMap.has(key)) {
-          outbreakMap.set(key, new Map([
-            ['orphanage_name', orphanageName],
-            ['disease_name', diseaseName],
-            ['count', 0]
-          ]));
+          outbreakMap.set(key, {
+            orphanage_name: orphanageName,
+            disease_name: diseaseName,
+            count: 0
+          });
         }
 
-        const currentCount = outbreakMap.get(key)!.get('count') as number;
-        outbreakMap.get(key)!.set('count', currentCount + 1);
+        const currentData = outbreakMap.get(key)!;
+        currentData.count++;
       });
 
       // Créer des alertes pour les épidémies (seuil: 3+ cas)
       outbreakMap.forEach((data) => {
-        const count = data.get('count') as number;
-        const orphanageName = data.get('orphanage_name') as string;
-        const diseaseName = data.get('disease_name') as string;
+        const count = data.count;
+        const orphanageName = data.orphanage_name;
+        const diseaseName = data.disease_name;
 
         if (count >= 3) {
           alerts.push({
