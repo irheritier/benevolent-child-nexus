@@ -25,6 +25,7 @@ import AddChildForm from '@/components/orphanage/AddChildForm';
 import EditChildForm from '@/components/orphanage/EditChildForm';
 import ChildrenTable from '@/components/orphanage/ChildrenTable';
 import ChildDetailsDialog from '@/components/orphanage/ChildDetailsDialog';
+import HealthManagement from '@/components/orphanage/HealthManagement';
 
 interface User {
   id: string;
@@ -440,26 +441,16 @@ const OrphanageDashboard = () => {
           </TabsContent>
 
           <TabsContent value="health" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="w-5 h-5" />
-                  Suivi médical et nutritionnel
-                </CardTitle>
-                <CardDescription>
-                  Gérez les données de santé et de nutrition des enfants
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Activity className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Fonctionnalité en développement</h3>
-                  <p className="text-muted-foreground">
-                    Les outils de suivi médical et nutritionnel seront bientôt disponibles.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-lg font-medium">Suivi médical et nutritionnel</h3>
+                <p className="text-sm text-muted-foreground">
+                  Gérez les données de santé et de nutrition des enfants de votre centre.
+                </p>
+              </div>
+            </div>
+
+            <HealthManagement children={children} />
           </TabsContent>
 
           <TabsContent value="documents" className="space-y-6">
