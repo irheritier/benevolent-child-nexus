@@ -53,12 +53,21 @@ const AddChildForm = ({ orphanageId, onSuccess, onCancel }: AddChildFormProps) =
     setIsSubmitting(true);
     
     try {
+      // Convert dates to strings and ensure required fields are present
+      const submitData = {
+        orphanage_id: orphanageId,
+        full_name: data.full_name,
+        gender: data.gender,
+        birth_date: data.birth_date ? format(data.birth_date, 'yyyy-MM-dd') : null,
+        estimated_age: data.estimated_age || null,
+        entry_date: data.entry_date ? format(data.entry_date, 'yyyy-MM-dd') : null,
+        parent_status: data.parent_status,
+        internal_code: data.internal_code || null,
+      };
+
       const { error } = await supabase
         .from('children')
-        .insert([{
-          ...data,
-          orphanage_id: orphanageId,
-        }]);
+        .insert([submitData]);
 
       if (error) throw error;
 
