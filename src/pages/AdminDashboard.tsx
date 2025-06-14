@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,13 +9,15 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Heart, LogOut, Eye, CheckCircle, XCircle, Clock, Mail, Phone, MapPin, FileText, Download, BarChart, Bell, Users } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Heart, LogOut, Eye, CheckCircle, XCircle, Clock, Mail, Phone, MapPin, FileText, Download, BarChart, Bell, Users, Building2 } from 'lucide-react';
 import AdminStatsDashboard from '@/components/admin/AdminStatsDashboard';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { useNotificationAlerts } from '@/hooks/useNotificationAlerts';
-import AdminPartnerRequests from '@/pages/AdminPartnerRequests';
 
 interface Orphanage {
   id: string;
@@ -32,12 +35,33 @@ interface Orphanage {
   created_at: string;
 }
 
+interface PartnerRequest {
+  id: string;
+  organization_name: string;
+  organization_type: string;
+  contact_person: string;
+  email: string;
+  phone: string;
+  description: string;
+  purpose: string;
+  status: string;
+  created_at: string;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+  rejection_reason: string | null;
+}
+
 const AdminDashboardContent = () => {
   const [orphanages, setOrphanages] = useState<Orphanage[]>([]);
+  const [partnerRequests, setPartnerRequests] = useState<PartnerRequest[]>([]);
   const [selectedOrphanage, setSelectedOrphanage] = useState<Orphanage | null>(null);
+  const [selectedPartnerRequest, setSelectedPartnerRequest] = useState<PartnerRequest | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isValidating, setIsValidating] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
+  const [showPartnerDialog, setShowPartnerDialog] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [partnerPassword, setPartnerPassword] = useState('');
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -47,6 +71,7 @@ const AdminDashboardContent = () => {
   useEffect(() => {
     checkAuth();
     fetchOrphanages();
+    fetchPartnerRequests();
   }, []);
 
   const checkAuth = async () => {
@@ -100,6 +125,32 @@ const AdminDashboardContent = () => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchPartnerRequests = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('partner_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les demandes partenaires.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setPartnerRequests(data || []);
+    } catch (error) {
+      toast({
+        title: "Erreur inattendue",
+        description: "Une erreur est survenue lors du chargement des demandes partenaires.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -202,6 +253,105 @@ const AdminDashboardContent = () => {
     }
   };
 
+  const handleApprovePartnerRequest = async () => {
+    if (!selectedPartnerRequest || !partnerPassword.trim()) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez saisir un mot de passe pour le compte partenaire.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsValidating(true);
+    try {
+      // Créer le compte utilisateur
+      const { data: newUser, error: createError } = await supabase.rpc('create_user_account', {
+        user_email: selectedPartnerRequest.email,
+        user_password: partnerPassword,
+        user_role: 'partner'
+      });
+
+      if (createError) throw createError;
+
+      // Mettre à jour le statut de la demande
+      const { error: updateError } = await supabase
+        .from('partner_requests')
+        .update({
+          status: 'approved',
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: (await supabase.auth.getSession()).data.session?.user.id
+        })
+        .eq('id', selectedPartnerRequest.id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Demande approuvée",
+        description: `Le compte partenaire a été créé pour ${selectedPartnerRequest.email}. Mot de passe: ${partnerPassword}`,
+      });
+
+      fetchPartnerRequests();
+      setShowPartnerDialog(false);
+      setSelectedPartnerRequest(null);
+      setPartnerPassword('');
+    } catch (error) {
+      console.error('Error approving request:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'approuver la demande.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  const handleRejectPartnerRequest = async () => {
+    if (!selectedPartnerRequest || !rejectionReason.trim()) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez saisir une raison de rejet.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsValidating(true);
+    try {
+      const { error } = await supabase
+        .from('partner_requests')
+        .update({
+          status: 'rejected',
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: (await supabase.auth.getSession()).data.session?.user.id,
+          rejection_reason: rejectionReason
+        })
+        .eq('id', selectedPartnerRequest.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Demande rejetée",
+        description: "La demande a été rejetée avec succès.",
+      });
+
+      fetchPartnerRequests();
+      setShowPartnerDialog(false);
+      setSelectedPartnerRequest(null);
+      setRejectionReason('');
+    } catch (error) {
+      console.error('Error rejecting request:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de rejeter la demande.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/admin/auth');
@@ -212,12 +362,25 @@ const AdminDashboardContent = () => {
       case 'pending':
         return <Badge variant="secondary" className="flex items-center gap-1"><Clock className="w-3 h-3" />En attente</Badge>;
       case 'verified':
+      case 'approved':
         return <Badge variant="default" className="flex items-center gap-1 bg-green-100 text-green-800"><CheckCircle className="w-3 h-3" />Validé</Badge>;
       case 'rejected':
         return <Badge variant="destructive" className="flex items-center gap-1"><XCircle className="w-3 h-3" />Rejeté</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
+  };
+
+  const getOrganizationTypeLabel = (type: string) => {
+    const types: { [key: string]: string } = {
+      'ong': 'ONG',
+      'universite': 'Université',
+      'institut_recherche': 'Institut de recherche',
+      'organisme_gouvernemental': 'Organisme gouvernemental',
+      'organisation_internationale': 'Organisation internationale',
+      'autre': 'Autre'
+    };
+    return types[type] || type;
   };
 
   const handleDownloadDocument = async (documentData: any) => {
@@ -423,10 +586,89 @@ const AdminDashboardContent = () => {
           </TabsContent>
 
           {/* Onglet des partenaires */}
-          <TabsContent value="partners">
-            <div className="bg-background rounded-lg">
-              <AdminPartnerRequests />
+          <TabsContent value="partners" className="space-y-6">
+            {/* Statistics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">En attente</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {partnerRequests.filter(p => p.status === 'pending').length}
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Approuvés</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-600">
+                    {partnerRequests.filter(p => p.status === 'approved').length}
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Rejetés</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-red-600">
+                    {partnerRequests.filter(p => p.status === 'rejected').length}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
+
+            {/* Partners Table */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Liste des demandes partenaires</CardTitle>
+                <CardDescription>
+                  Cliquez sur une demande pour voir les détails et procéder à la validation.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Organisation</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Contact</TableHead>
+                      <TableHead>Statut</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {partnerRequests.map((request) => (
+                      <TableRow key={request.id}>
+                        <TableCell className="font-medium">{request.organization_name}</TableCell>
+                        <TableCell>{getOrganizationTypeLabel(request.organization_type)}</TableCell>
+                        <TableCell>{request.contact_person}</TableCell>
+                        <TableCell>{getStatusBadge(request.status)}</TableCell>
+                        <TableCell>{new Date(request.created_at).toLocaleDateString('fr-FR')}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedPartnerRequest(request);
+                              setShowPartnerDialog(true);
+                            }}
+                            className="flex items-center gap-1"
+                          >
+                            <Eye className="w-3 h-3" />
+                            Voir
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Onglet des analyses et statistiques */}
@@ -441,7 +683,7 @@ const AdminDashboardContent = () => {
         </Tabs>
       </main>
 
-      {/* Details Dialog */}
+      {/* Details Dialog for Orphanages */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
@@ -570,6 +812,127 @@ const AdminDashboardContent = () => {
               </>
             )}
             <Button variant="outline" onClick={() => setShowDialog(false)}>
+              Fermer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Details Dialog for Partner Requests */}
+      <Dialog open={showPartnerDialog} onOpenChange={setShowPartnerDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Building2 className="w-5 h-5" />
+              {selectedPartnerRequest?.organization_name}
+            </DialogTitle>
+            <DialogDescription>
+              Détails de la demande d'accès partenaire
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedPartnerRequest && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium">Type d'organisation</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {getOrganizationTypeLabel(selectedPartnerRequest.organization_type)}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Objectif</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedPartnerRequest.purpose}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-medium flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  Contact
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  {selectedPartnerRequest.contact_person}
+                </p>
+                <p className="text-sm text-muted-foreground">{selectedPartnerRequest.email}</p>
+                {selectedPartnerRequest.phone && (
+                  <p className="text-sm text-muted-foreground flex items-center gap-2">
+                    <Phone className="w-3 h-3" />
+                    {selectedPartnerRequest.phone}
+                  </p>
+                )}
+              </div>
+
+              {selectedPartnerRequest.description && (
+                <div className="space-y-2">
+                  <h4 className="font-medium">Description du projet</h4>
+                  <p className="text-sm text-muted-foreground">{selectedPartnerRequest.description}</p>
+                </div>
+              )}
+
+              {selectedPartnerRequest.status === 'rejected' && selectedPartnerRequest.rejection_reason && (
+                <div className="space-y-2">
+                  <h4 className="font-medium">Raison du rejet</h4>
+                  <p className="text-sm text-red-600">{selectedPartnerRequest.rejection_reason}</p>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <h4 className="font-medium">Statut actuel</h4>
+                {getStatusBadge(selectedPartnerRequest.status)}
+              </div>
+
+              {selectedPartnerRequest.status === 'pending' && (
+                <div className="space-y-4 border-t pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="partner-password">Mot de passe pour le compte partenaire</Label>
+                    <Input
+                      id="partner-password"
+                      type="password"
+                      value={partnerPassword}
+                      onChange={(e) => setPartnerPassword(e.target.value)}
+                      placeholder="Saisissez un mot de passe sécurisé"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="rejection-reason">Raison de rejet (optionnel)</Label>
+                    <Textarea
+                      id="rejection-reason"
+                      value={rejectionReason}
+                      onChange={(e) => setRejectionReason(e.target.value)}
+                      placeholder="Expliquez pourquoi cette demande est rejetée..."
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter className="gap-2">
+            {selectedPartnerRequest?.status === 'pending' && (
+              <>
+                <Button
+                  variant="destructive"
+                  onClick={handleRejectPartnerRequest}
+                  disabled={isValidating}
+                  className="flex items-center gap-2"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Rejeter
+                </Button>
+                <Button
+                  onClick={handleApprovePartnerRequest}
+                  disabled={isValidating}
+                  className="flex items-center gap-2"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  {isValidating ? "Approbation..." : "Approuver"}
+                </Button>
+              </>
+            )}
+            <Button variant="outline" onClick={() => setShowPartnerDialog(false)}>
               Fermer
             </Button>
           </DialogFooter>
