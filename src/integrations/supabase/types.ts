@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      alert_thresholds: {
+        Row: {
+          capacity_critical_percentage: number
+          capacity_warning_percentage: number
+          created_at: string
+          document_expiry_critical_days: number
+          document_expiry_warning_days: number
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          capacity_critical_percentage?: number
+          capacity_warning_percentage?: number
+          created_at?: string
+          document_expiry_critical_days?: number
+          document_expiry_warning_days?: number
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          capacity_critical_percentage?: number
+          capacity_warning_percentage?: number
+          created_at?: string
+          document_expiry_critical_days?: number
+          document_expiry_warning_days?: number
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       children: {
         Row: {
           birth_date: string | null
@@ -220,6 +250,84 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notification_settings: {
+        Row: {
+          capacity_alerts_enabled: boolean
+          created_at: string
+          document_expiry_enabled: boolean
+          email_notifications_enabled: boolean
+          id: string
+          malnutrition_alerts_enabled: boolean
+          orphanage_pending_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          capacity_alerts_enabled?: boolean
+          created_at?: string
+          document_expiry_enabled?: boolean
+          email_notifications_enabled?: boolean
+          id?: string
+          malnutrition_alerts_enabled?: boolean
+          orphanage_pending_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          capacity_alerts_enabled?: boolean
+          created_at?: string
+          document_expiry_enabled?: boolean
+          email_notifications_enabled?: boolean
+          id?: string
+          malnutrition_alerts_enabled?: boolean
+          orphanage_pending_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          is_read: boolean
+          message: string
+          priority: string
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          is_read?: boolean
+          message: string
+          priority?: string
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          is_read?: boolean
+          message?: string
+          priority?: string
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       nutrition_records: {
         Row: {
@@ -546,6 +654,18 @@ export type Database = {
       }
     }
     Functions: {
+      create_notification: {
+        Args: {
+          target_user_id: string
+          notification_type: string
+          notification_title: string
+          notification_message: string
+          notification_entity_id?: string
+          notification_entity_type?: string
+          notification_priority?: string
+        }
+        Returns: string
+      }
       create_user_account: {
         Args: {
           user_email: string

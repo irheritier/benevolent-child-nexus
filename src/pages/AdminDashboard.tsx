@@ -8,8 +8,12 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Heart, LogOut, Eye, CheckCircle, XCircle, Clock, Mail, Phone, MapPin, FileText, Download, BarChart } from 'lucide-react';
+import { Heart, LogOut, Eye, CheckCircle, XCircle, Clock, Mail, Phone, MapPin, FileText, Download, BarChart, Bell } from 'lucide-react';
 import AdminStatsDashboard from '@/components/admin/AdminStatsDashboard';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
+import { NotificationProvider } from '@/contexts/NotificationContext';
+import { useNotificationAlerts } from '@/hooks/useNotificationAlerts';
 
 interface Orphanage {
   id: string;
@@ -27,7 +31,7 @@ interface Orphanage {
   created_at: string;
 }
 
-const AdminDashboard = () => {
+const AdminDashboardContent = () => {
   const [orphanages, setOrphanages] = useState<Orphanage[]>([]);
   const [selectedOrphanage, setSelectedOrphanage] = useState<Orphanage | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,6 +39,9 @@ const AdminDashboard = () => {
   const [showDialog, setShowDialog] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Utiliser le hook pour les alertes automatiques
+  useNotificationAlerts();
 
   useEffect(() => {
     checkAuth();
@@ -288,10 +295,13 @@ const AdminDashboard = () => {
               <p className="text-xs text-muted-foreground">Administration</p>
             </div>
           </div>
-          <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
-            <LogOut className="w-4 h-4" />
-            Déconnexion
-          </Button>
+          <div className="flex items-center gap-4">
+            <NotificationBell />
+            <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
+              <LogOut className="w-4 h-4" />
+              Déconnexion
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -306,7 +316,7 @@ const AdminDashboard = () => {
 
         {/* Onglets principaux */}
         <Tabs defaultValue="requests" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="requests" className="flex items-center gap-2">
               <Heart className="w-4 h-4" />
               Demandes d'inscription
@@ -314,6 +324,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart className="w-4 h-4" />
               Analyses et statistiques
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="flex items-center gap-2">
+              <Bell className="w-4 h-4" />
+              Notifications
             </TabsTrigger>
           </TabsList>
 
@@ -406,6 +420,11 @@ const AdminDashboard = () => {
           {/* Onglet des analyses et statistiques */}
           <TabsContent value="analytics">
             <AdminStatsDashboard />
+          </TabsContent>
+
+          {/* Onglet des notifications */}
+          <TabsContent value="notifications">
+            <NotificationCenter />
           </TabsContent>
         </Tabs>
       </main>
@@ -545,6 +564,14 @@ const AdminDashboard = () => {
         </DialogContent>
       </Dialog>
     </div>
+  );
+};
+
+const AdminDashboard = () => {
+  return (
+    <NotificationProvider>
+      <AdminDashboardContent />
+    </NotificationProvider>
   );
 };
 
