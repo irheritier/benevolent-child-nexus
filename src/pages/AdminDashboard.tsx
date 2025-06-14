@@ -14,7 +14,7 @@ import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { useNotificationAlerts } from '@/hooks/useNotificationAlerts';
-import { Link } from 'react-router-dom';
+import AdminPartnerRequests from '@/pages/AdminPartnerRequests';
 
 interface Orphanage {
   id: string;
@@ -337,10 +337,14 @@ const AdminDashboardContent = () => {
 
         {/* Onglets principaux */}
         <Tabs defaultValue="requests" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="requests" className="flex items-center gap-2">
               <Heart className="w-4 h-4" />
               Demandes d'inscription
+            </TabsTrigger>
+            <TabsTrigger value="partners" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Partenaires
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart className="w-4 h-4" />
@@ -436,6 +440,13 @@ const AdminDashboardContent = () => {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Onglet des partenaires */}
+          <TabsContent value="partners">
+            <div className="bg-background rounded-lg">
+              <AdminPartnerRequests />
+            </div>
           </TabsContent>
 
           {/* Onglet des analyses et statistiques */}
