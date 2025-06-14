@@ -23,6 +23,7 @@ interface HealthManagementProps {
 const HealthManagement = ({ children }: HealthManagementProps) => {
   const [selectedChildId, setSelectedChildId] = useState<string>('');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const selectedChild = children.find(child => child.id === selectedChildId);
 
@@ -32,7 +33,8 @@ const HealthManagement = ({ children }: HealthManagementProps) => {
 
   const handleFormSuccess = () => {
     setShowAddForm(false);
-    // This will trigger a re-render of HealthHistory which will reload the data
+    // Forcer le rechargement du composant HealthHistory
+    setRefreshKey(prev => prev + 1);
   };
 
   return (
@@ -89,6 +91,7 @@ const HealthManagement = ({ children }: HealthManagementProps) => {
 
       {selectedChild && (
         <HealthHistory
+          key={`${selectedChild.id}-${refreshKey}`}
           childId={selectedChild.id}
           childName={selectedChild.full_name}
           onAddRecord={handleAddRecord}
