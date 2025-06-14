@@ -29,12 +29,29 @@ const PartnerRequest = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const createPartnerRequestNotification = async (requestData: any) => {
+    try {
+      // Créer une notification pour l'administrateur
+      await supabase.rpc('create_notification', {
+        target_user_id: null, // Pour tous les admins
+        notification_type: 'partner_request_pending',
+        notification_title: 'Nouvelle demande partenaire',
+        notification_message: `${requestData.organization_name} a soumis une demande d'accès partenaire et attend validation.`,
+        notification_entity_id: requestData.id,
+        notification_entity_type: 'partner_request',
+        notification_priority: 'high'
+      });
+    } catch (error) {
+      console.error('Erreur lors de la création de la notification:', error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('partner_requests')
         .insert({
           organization_name: formData.organizationName,
@@ -44,9 +61,16 @@ const PartnerRequest = () => {
           phone: formData.phone,
           description: formData.description,
           purpose: formData.purpose
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+
+      // Créer la notification
+      if (data) {
+        await createPartnerRequestNotification(data);
+      }
 
       toast({
         title: "Demande envoyée avec succès",

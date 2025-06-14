@@ -16,7 +16,8 @@ import {
   Shield,
   CheckCircle2,
   X,
-  ExternalLink
+  ExternalLink,
+  Building
 } from 'lucide-react';
 
 interface NotificationListProps {
@@ -27,6 +28,8 @@ const getNotificationIcon = (type: string) => {
   switch (type) {
     case 'orphanage_pending':
       return <Heart className="h-4 w-4 text-blue-500" />;
+    case 'partner_request_pending':
+      return <Building className="h-4 w-4 text-purple-500" />;
     case 'malnutrition_alert':
       return <AlertTriangle className="h-4 w-4 text-red-500" />;
     case 'document_expiry':

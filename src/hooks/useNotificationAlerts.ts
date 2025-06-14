@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNotifications } from '@/contexts/NotificationContext';
@@ -41,6 +40,44 @@ export const useNotificationAlerts = () => {
       }
     } catch (error) {
       console.error('Erreur lors de la vérification des alertes orphelinats:', error);
+    }
+  };
+
+  const checkPartnerRequestAlerts = async () => {
+    try {
+      const { data: pendingRequests, error } = await supabase
+        .from('partner_requests')
+        .select('*')
+        .eq('status', 'pending');
+
+      if (error) {
+        console.error('Erreur lors de la vérification des demandes partenaires:', error);
+        return;
+      }
+
+      // Créer une notification pour chaque nouvelle demande partenaire
+      for (const request of pendingRequests || []) {
+        // Vérifier si on a déjà envoyé une notification pour cette demande
+        const { data: existingNotif } = await supabase
+          .from('notifications')
+          .select('id')
+          .eq('type', 'partner_request_pending')
+          .eq('entity_id', request.id)
+          .single();
+
+        if (!existingNotif) {
+          await createNotification({
+            type: 'partner_request_pending',
+            title: 'Nouvelle demande partenaire',
+            message: `${request.organization_name} a soumis une demande d'accès partenaire et attend validation.`,
+            entity_id: request.id,
+            entity_type: 'partner_request',
+            priority: 'high'
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors de la vérification des demandes partenaires:', error);
     }
   };
 
@@ -223,6 +260,7 @@ export const useNotificationAlerts = () => {
   const runAllChecks = async () => {
     await Promise.all([
       checkOrphanagePendingAlerts(),
+      checkPartnerRequestAlerts(),
       checkMalnutritionAlerts(),
       checkDocumentExpiryAlerts(),
       checkCapacityAlerts()
