@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,10 +26,11 @@ interface DocumentsManagementProps {
 
 const DocumentsManagement = ({ orphanageId, orphanageName, children }: DocumentsManagementProps) => {
   const [showAddDocument, setShowAddDocument] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0); // Nouveau state pour déclencher le rechargement
 
   const handleAddDocumentSuccess = () => {
     setShowAddDocument(false);
-    // Le composant DocumentsHistory se rechargera automatiquement
+    setRefreshTrigger(prev => prev + 1); // Incrémenter pour déclencher le rechargement
   };
 
   return (
@@ -137,6 +137,7 @@ const DocumentsManagement = ({ orphanageId, orphanageName, children }: Documents
         orphanageId={orphanageId}
         orphanageName={orphanageName}
         onAddDocument={() => setShowAddDocument(true)}
+        refreshTrigger={refreshTrigger} // Passer le trigger pour le rechargement
       />
 
       {/* Dialog pour ajouter un document */}

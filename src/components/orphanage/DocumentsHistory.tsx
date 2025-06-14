@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,16 +15,17 @@ interface DocumentsHistoryProps {
   orphanageId: string;
   orphanageName: string;
   onAddDocument: () => void;
+  refreshTrigger?: number; // Nouveau prop pour déclencher le rechargement
 }
 
-const DocumentsHistory = ({ orphanageId, orphanageName, onAddDocument }: DocumentsHistoryProps) => {
+const DocumentsHistory = ({ orphanageId, orphanageName, onAddDocument, refreshTrigger }: DocumentsHistoryProps) => {
   const [documents, setDocuments] = useState<OrphanageDocument[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     loadDocuments();
-  }, [orphanageId]);
+  }, [orphanageId, refreshTrigger]); // Ajouter refreshTrigger comme dépendance
 
   const loadDocuments = async () => {
     try {
