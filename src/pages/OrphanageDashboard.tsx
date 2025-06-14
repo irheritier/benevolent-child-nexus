@@ -24,6 +24,7 @@ import { useToast } from '@/hooks/use-toast';
 import AddChildForm from '@/components/orphanage/AddChildForm';
 import EditChildForm from '@/components/orphanage/EditChildForm';
 import ChildrenTable from '@/components/orphanage/ChildrenTable';
+import ChildDetailsDialog from '@/components/orphanage/ChildDetailsDialog';
 
 interface User {
   id: string;
@@ -63,6 +64,7 @@ const OrphanageDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showAddChild, setShowAddChild] = useState(false);
   const [editingChild, setEditingChild] = useState<Child | null>(null);
+  const [viewingChild, setViewingChild] = useState<Child | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -205,8 +207,7 @@ const OrphanageDashboard = () => {
   };
 
   const handleViewChildDetails = (child: Child) => {
-    // TODO: Implémenter la vue détaillée d'un enfant
-    console.log('Voir détails enfant:', child);
+    setViewingChild(child);
   };
 
   const getStatusBadge = (status: string) => {
@@ -515,6 +516,13 @@ const OrphanageDashboard = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Dialog pour voir les détails d'un enfant */}
+      <ChildDetailsDialog
+        child={viewingChild}
+        open={!!viewingChild}
+        onOpenChange={(open) => !open && setViewingChild(null)}
+      />
     </div>
   );
 };
