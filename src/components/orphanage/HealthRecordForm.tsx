@@ -4,30 +4,45 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, CalendarIcon, Stethoscope } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import DiseaseSelector from './DiseaseSelector';
+import { useHealthRecordSubmit } from './hooks/useHealthRecordSubmit';
 
 const healthRecordSchema = z.object({
   date: z.date({
     required_error: "La date est requise",
   }),
   vaccination_status: z.string().default(''),
+  vaccination_status_structured: z.object({
+    status: z.enum(['vaccinated', 'partially_vaccinated', 'not_vaccinated', 'unknown']).default('unknown'),
+    vaccines: z.array(z.string()).default([]),
+    last_updated: z.string().default(''),
+  }).default({
+    status: 'unknown',
+    vaccines: [],
+    last_updated: '',
+  }),
   chronic_conditions: z.string().default(''),
   medications: z.string().default(''),
   remarks: z.string().default(''),
 });
 
 type HealthRecordFormData = z.infer<typeof healthRecordSchema>;
+
+interface SelectedDisease {
+  disease_id: string;
+  severity: 'mild' | 'moderate' | 'severe';
+  notes: string;
+}
 
 interface HealthRecordFormProps {
   childId: string;
@@ -37,8 +52,8 @@ interface HealthRecordFormProps {
 }
 
 const HealthRecordForm = ({ childId, childName, onSuccess, onCancel }: HealthRecordFormProps) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
+  const [selectedDiseases, setSelectedDiseases] = useState<SelectedDisease[]>([]);
+  const { submitHealthRecord, isSubmitting } = useHealthRecordSubmit();
 
   const {
     register,
@@ -51,6 +66,11 @@ const HealthRecordForm = ({ childId, childName, onSuccess, onCancel }: HealthRec
     defaultValues: {
       date: new Date(),
       vaccination_status: '',
+      vaccination_status_structured: {
+        status: 'unknown',
+        vaccines: [],
+        last_updated: '',
+      },
       chronic_conditions: '',
       medications: '',
       remarks: '',
@@ -58,39 +78,26 @@ const HealthRecordForm = ({ childId, childName, onSuccess, onCancel }: HealthRec
   });
 
   const selectedDate = watch('date');
+  const vaccinationStatusStructured = watch('vaccination_status_structured');
 
   const onSubmit = async (data: HealthRecordFormData) => {
-    setIsSubmitting(true);
-    try {
-      const { error } = await supabase
-        .from('health_records')
-        .insert({
-          child_id: childId,
-          date: format(data.date, 'yyyy-MM-dd'),
-          vaccination_status: data.vaccination_status,
-          chronic_conditions: data.chronic_conditions,
-          medications: data.medications,
-          remarks: data.remarks,
-        });
+    await submitHealthRecord(
+      childId,
+      childName,
+      {
+        ...data,
+        selectedDiseases,
+      },
+      onSuccess
+    );
+  };
 
-      if (error) throw error;
-
-      toast({
-        title: "Dossier médical enregistré",
-        description: `Le dossier médical de ${childName} a été mis à jour avec succès.`,
-      });
-
-      onSuccess();
-    } catch (error) {
-      console.error('Erreur lors de l\'enregistrement:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible d'enregistrer le dossier médical.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleVaccinationStatusChange = (status: string) => {
+    setValue('vaccination_status_structured', {
+      ...vaccinationStatusStructured,
+      status: status as 'vaccinated' | 'partially_vaccinated' | 'not_vaccinated' | 'unknown',
+      last_updated: new Date().toISOString(),
+    });
   };
 
   return (
@@ -102,7 +109,7 @@ const HealthRecordForm = ({ childId, childName, onSuccess, onCancel }: HealthRec
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="date">Date de consultation</Label>
             <Popover>
@@ -137,7 +144,25 @@ const HealthRecordForm = ({ childId, childName, onSuccess, onCancel }: HealthRec
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="vaccination_status">Statut vaccinal</Label>
+            <Label htmlFor="vaccination_status_select">Statut vaccinal</Label>
+            <Select
+              value={vaccinationStatusStructured.status}
+              onValueChange={handleVaccinationStatusChange}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner le statut vaccinal" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="vaccinated">Vacciné</SelectItem>
+                <SelectItem value="partially_vaccinated">Partiellement vacciné</SelectItem>
+                <SelectItem value="not_vaccinated">Non vacciné</SelectItem>
+                <SelectItem value="unknown">Inconnu</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="vaccination_status">Détails du statut vaccinal</Label>
             <Textarea
               id="vaccination_status"
               placeholder="Ex: BCG à jour, DTC-HepB-Hib reçu à 2 mois, Rougeole prévue à 9 mois, En attente du carnet vaccinal..."
@@ -145,6 +170,11 @@ const HealthRecordForm = ({ childId, childName, onSuccess, onCancel }: HealthRec
               className="min-h-[80px]"
             />
           </div>
+
+          <DiseaseSelector
+            selectedDiseases={selectedDiseases}
+            onDiseasesChange={setSelectedDiseases}
+          />
 
           <div className="space-y-2">
             <Label htmlFor="chronic_conditions">Conditions chroniques</Label>

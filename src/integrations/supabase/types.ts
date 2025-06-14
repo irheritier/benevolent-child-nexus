@@ -14,30 +14,91 @@ export type Database = {
           capacity_critical_percentage: number
           capacity_warning_percentage: number
           created_at: string
+          disease_outbreak_threshold: number
           document_expiry_critical_days: number
           document_expiry_warning_days: number
           id: string
+          unvaccinated_children_threshold: number
           updated_at: string
         }
         Insert: {
           capacity_critical_percentage?: number
           capacity_warning_percentage?: number
           created_at?: string
+          disease_outbreak_threshold?: number
           document_expiry_critical_days?: number
           document_expiry_warning_days?: number
           id?: string
+          unvaccinated_children_threshold?: number
           updated_at?: string
         }
         Update: {
           capacity_critical_percentage?: number
           capacity_warning_percentage?: number
           created_at?: string
+          disease_outbreak_threshold?: number
           document_expiry_critical_days?: number
           document_expiry_warning_days?: number
           id?: string
+          unvaccinated_children_threshold?: number
           updated_at?: string
         }
         Relationships: []
+      }
+      child_diseases: {
+        Row: {
+          child_id: string
+          created_at: string
+          diagnosed_date: string
+          disease_id: string
+          health_record_id: string
+          id: string
+          notes: string | null
+          severity: string | null
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          diagnosed_date?: string
+          disease_id: string
+          health_record_id: string
+          id?: string
+          notes?: string | null
+          severity?: string | null
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          diagnosed_date?: string
+          disease_id?: string
+          health_record_id?: string
+          id?: string
+          notes?: string | null
+          severity?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "child_diseases_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_diseases_disease_id_fkey"
+            columns: ["disease_id"]
+            isOneToOne: false
+            referencedRelation: "diseases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_diseases_health_record_id_fkey"
+            columns: ["health_record_id"]
+            isOneToOne: false
+            referencedRelation: "health_records"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       children: {
         Row: {
@@ -166,6 +227,30 @@ export type Database = {
         }
         Relationships: []
       }
+      diseases: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+        }
+        Relationships: []
+      }
       health_records: {
         Row: {
           child_id: string | null
@@ -179,6 +264,7 @@ export type Database = {
           synced: boolean | null
           updated_at: string | null
           vaccination_status: string | null
+          vaccination_status_structured: Json | null
         }
         Insert: {
           child_id?: string | null
@@ -192,6 +278,7 @@ export type Database = {
           synced?: boolean | null
           updated_at?: string | null
           vaccination_status?: string | null
+          vaccination_status_structured?: Json | null
         }
         Update: {
           child_id?: string | null
@@ -205,6 +292,7 @@ export type Database = {
           synced?: boolean | null
           updated_at?: string | null
           vaccination_status?: string | null
+          vaccination_status_structured?: Json | null
         }
         Relationships: [
           {
