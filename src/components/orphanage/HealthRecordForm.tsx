@@ -140,7 +140,7 @@ const HealthRecordForm = ({ childId, childName, onSuccess, onCancel }: HealthRec
             <Label htmlFor="vaccination_status">Statut vaccinal</Label>
             <Textarea
               id="vaccination_status"
-              placeholder="Vaccins administrés, rappels nécessaires..."
+              placeholder="Ex: BCG à jour, DTC-HepB-Hib reçu à 2 mois, Rougeole prévue à 9 mois, En attente du carnet vaccinal..."
               {...register('vaccination_status')}
               className="min-h-[80px]"
             />
@@ -150,7 +150,7 @@ const HealthRecordForm = ({ childId, childName, onSuccess, onCancel }: HealthRec
             <Label htmlFor="chronic_conditions">Conditions chroniques</Label>
             <Textarea
               id="chronic_conditions"
-              placeholder="Maladies chroniques, allergies..."
+              placeholder="Ex: Antécédents d'otites fréquentes, Allergie aux arachides, Asthme léger, Eczéma atopique, Aucune condition particulière..."
               {...register('chronic_conditions')}
               className="min-h-[80px]"
             />
@@ -160,7 +160,7 @@ const HealthRecordForm = ({ childId, childName, onSuccess, onCancel }: HealthRec
             <Label htmlFor="medications">Médicaments</Label>
             <Textarea
               id="medications"
-              placeholder="Médicaments prescrits, posologie..."
+              placeholder="Ex: Amoxicilline 250mg 3x/jour pendant 7 jours, Paracétamol si fièvre >38.5°C, Sérum physiologique 2x/jour, Aucun médicament..."
               {...register('medications')}
               className="min-h-[80px]"
             />
@@ -170,7 +170,7 @@ const HealthRecordForm = ({ childId, childName, onSuccess, onCancel }: HealthRec
             <Label htmlFor="remarks">Remarques médicales</Label>
             <Textarea
               id="remarks"
-              placeholder="Observations, recommandations du médecin..."
+              placeholder="Ex: Éviter l'eau dans les oreilles, Surveiller la température, Contrôle dans 1 semaine, Bon état général, Référer si aggravation..."
               {...register('remarks')}
               className="min-h-[100px]"
             />
