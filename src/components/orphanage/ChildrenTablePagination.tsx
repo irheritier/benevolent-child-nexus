@@ -50,7 +50,10 @@ const ChildrenTablePagination = ({
         pages.push(
           <PaginationItem key={i}>
             <PaginationLink
-              onClick={() => onPageChange(i)}
+              onClick={(e) => {
+                e.preventDefault();
+                onPageChange(i);
+              }}
               isActive={currentPage === i}
               className="cursor-pointer"
             >
@@ -64,7 +67,10 @@ const ChildrenTablePagination = ({
       pages.push(
         <PaginationItem key={1}>
           <PaginationLink
-            onClick={() => onPageChange(1)}
+            onClick={(e) => {
+              e.preventDefault();
+              onPageChange(1);
+            }}
             isActive={currentPage === 1}
             className="cursor-pointer"
           >
@@ -90,7 +96,10 @@ const ChildrenTablePagination = ({
         pages.push(
           <PaginationItem key={i}>
             <PaginationLink
-              onClick={() => onPageChange(i)}
+              onClick={(e) => {
+                e.preventDefault();
+                onPageChange(i);
+              }}
               isActive={currentPage === i}
               className="cursor-pointer"
             >
@@ -114,7 +123,10 @@ const ChildrenTablePagination = ({
         pages.push(
           <PaginationItem key={totalPages}>
             <PaginationLink
-              onClick={() => onPageChange(totalPages)}
+              onClick={(e) => {
+                e.preventDefault();
+                onPageChange(totalPages);
+              }}
               isActive={currentPage === totalPages}
               className="cursor-pointer"
             >
@@ -158,7 +170,12 @@ const ChildrenTablePagination = ({
         <PaginationContent>
           <PaginationItem>
             <PaginationPrevious
-              onClick={onPreviousPage}
+              onClick={(e) => {
+                e.preventDefault();
+                if (hasPreviousPage) {
+                  onPreviousPage();
+                }
+              }}
               className={hasPreviousPage ? "cursor-pointer" : "cursor-not-allowed opacity-50"}
             />
           </PaginationItem>
@@ -167,7 +184,12 @@ const ChildrenTablePagination = ({
           
           <PaginationItem>
             <PaginationNext
-              onClick={onNextPage}
+              onClick={(e) => {
+                e.preventDefault();
+                if (hasNextPage) {
+                  onNextPage();
+                }
+              }}
               className={hasNextPage ? "cursor-pointer" : "cursor-not-allowed opacity-50"}
             />
           </PaginationItem>
