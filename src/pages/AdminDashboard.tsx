@@ -7,7 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Heart, LogOut, Eye, CheckCircle, XCircle, Clock, Mail, Phone, MapPin, FileText, Download } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Heart, LogOut, Eye, CheckCircle, XCircle, Clock, Mail, Phone, MapPin, FileText, Download, BarChart } from 'lucide-react';
+import AdminStatsDashboard from '@/components/admin/AdminStatsDashboard';
 
 interface Orphanage {
   id: string;
@@ -296,94 +298,116 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Gestion des demandes d'inscription</h2>
+          <h2 className="text-3xl font-bold mb-2">Tableau de bord administrateur</h2>
           <p className="text-muted-foreground">
-            Validez ou rejetez les demandes d'inscription des centres d'accueil pour enfants.
+            Gérez les demandes d'inscription et consultez les statistiques du système.
           </p>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">En attente</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">
-                {orphanages.filter(o => o.legal_status === 'pending').length}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Validés</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {orphanages.filter(o => o.legal_status === 'verified').length}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Rejetés</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {orphanages.filter(o => o.legal_status === 'rejected').length}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Onglets principaux */}
+        <Tabs defaultValue="requests" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="requests" className="flex items-center gap-2">
+              <Heart className="w-4 h-4" />
+              Demandes d'inscription
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart className="w-4 h-4" />
+              Analyses et statistiques
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Orphanages Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Liste des demandes</CardTitle>
-            <CardDescription>
-              Cliquez sur une demande pour voir les détails et procéder à la validation.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nom du centre</TableHead>
-                  <TableHead>Province</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {orphanages.map((orphanage) => (
-                  <TableRow key={orphanage.id}>
-                    <TableCell className="font-medium">{orphanage.name}</TableCell>
-                    <TableCell>{orphanage.province}, {orphanage.city}</TableCell>
-                    <TableCell>{orphanage.contact_person}</TableCell>
-                    <TableCell>{getStatusBadge(orphanage.legal_status)}</TableCell>
-                    <TableCell>{new Date(orphanage.created_at).toLocaleDateString('fr-FR')}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedOrphanage(orphanage);
-                          setShowDialog(true);
-                        }}
-                        className="flex items-center gap-1"
-                      >
-                        <Eye className="w-3 h-3" />
-                        Voir
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+          {/* Onglet des demandes d'inscription */}
+          <TabsContent value="requests" className="space-y-6">
+            {/* Statistics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">En attente</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {orphanages.filter(o => o.legal_status === 'pending').length}
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Validés</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-600">
+                    {orphanages.filter(o => o.legal_status === 'verified').length}
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Rejetés</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-red-600">
+                    {orphanages.filter(o => o.legal_status === 'rejected').length}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Orphanages Table */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Liste des demandes</CardTitle>
+                <CardDescription>
+                  Cliquez sur une demande pour voir les détails et procéder à la validation.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nom du centre</TableHead>
+                      <TableHead>Province</TableHead>
+                      <TableHead>Contact</TableHead>
+                      <TableHead>Statut</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {orphanages.map((orphanage) => (
+                      <TableRow key={orphanage.id}>
+                        <TableCell className="font-medium">{orphanage.name}</TableCell>
+                        <TableCell>{orphanage.province}, {orphanage.city}</TableCell>
+                        <TableCell>{orphanage.contact_person}</TableCell>
+                        <TableCell>{getStatusBadge(orphanage.legal_status)}</TableCell>
+                        <TableCell>{new Date(orphanage.created_at).toLocaleDateString('fr-FR')}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedOrphanage(orphanage);
+                              setShowDialog(true);
+                            }}
+                            className="flex items-center gap-1"
+                          >
+                            <Eye className="w-3 h-3" />
+                            Voir
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Onglet des analyses et statistiques */}
+          <TabsContent value="analytics">
+            <AdminStatsDashboard />
+          </TabsContent>
+        </Tabs>
       </main>
 
       {/* Details Dialog */}
