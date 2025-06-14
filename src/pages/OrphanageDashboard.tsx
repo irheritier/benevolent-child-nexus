@@ -27,6 +27,7 @@ import ChildrenTable from '@/components/orphanage/ChildrenTable';
 import ChildDetailsDialog from '@/components/orphanage/ChildDetailsDialog';
 import HealthManagement from '@/components/orphanage/HealthManagement';
 import NutritionManagement from '@/components/orphanage/NutritionManagement';
+import DocumentsManagement from '@/components/orphanage/DocumentsManagement';
 
 interface User {
   id: string;
