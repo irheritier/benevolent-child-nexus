@@ -8,12 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Heart, LogOut, Eye, CheckCircle, XCircle, Clock, Mail, Phone, MapPin, FileText, Download, BarChart, Bell } from 'lucide-react';
+import { Heart, LogOut, Eye, CheckCircle, XCircle, Clock, Mail, Phone, MapPin, FileText, Download, BarChart, Bell, Users } from 'lucide-react';
 import AdminStatsDashboard from '@/components/admin/AdminStatsDashboard';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { useNotificationAlerts } from '@/hooks/useNotificationAlerts';
+import { Link } from 'react-router-dom';
 
 interface Orphanage {
   id: string;
@@ -312,6 +313,26 @@ const AdminDashboardContent = () => {
           <p className="text-muted-foreground">
             Gérez les demandes d'inscription et consultez les statistiques du système.
           </p>
+        </div>
+
+        {/* Liens rapides */}
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold mb-4">Accès rapide</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Link to="/admin/partners">
+              <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <Users className="w-8 h-8 text-blue-600" />
+                    <div>
+                      <h4 className="font-medium">Gestion des partenaires</h4>
+                      <p className="text-sm text-muted-foreground">Approuver les demandes d'accès</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
         </div>
 
         {/* Onglets principaux */}
