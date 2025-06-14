@@ -53,12 +53,10 @@ const NutritionHistory = ({ childId, childName, onAddRecord }: NutritionHistoryP
     switch (status) {
       case 'severely_malnourished':
         return <Badge className="bg-red-100 text-red-800 border-red-200">Malnutrition sévère</Badge>;
-      case 'moderately_malnourished':
+      case 'malnourished':
         return <Badge className="bg-orange-100 text-orange-800 border-orange-200">Malnutrition modérée</Badge>;
       case 'normal':
         return <Badge className="bg-green-100 text-green-800 border-green-200">Normal</Badge>;
-      case 'overweight':
-        return <Badge className="bg-blue-100 text-blue-800 border-blue-200">Surpoids</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }

@@ -27,7 +27,7 @@ const nutritionRecordSchema = z.object({
   height_cm: z.number({
     required_error: "La taille est requise",
   }).min(10, "La taille doit être supérieure à 10cm").max(250, "La taille ne peut pas dépasser 250cm"),
-  nutrition_status: z.enum(['severely_malnourished', 'moderately_malnourished', 'normal', 'overweight'], {
+  nutrition_status: z.enum(['severely_malnourished', 'malnourished', 'normal'], {
     required_error: "Le statut nutritionnel est requis",
   }),
 });
@@ -110,9 +110,8 @@ const NutritionRecordForm = ({ childId, childName, onSuccess, onCancel }: Nutrit
 
   const nutritionStatusOptions = [
     { value: 'severely_malnourished', label: 'Malnutrition sévère' },
-    { value: 'moderately_malnourished', label: 'Malnutrition modérée' },
+    { value: 'malnourished', label: 'Malnutrition modérée' },
     { value: 'normal', label: 'Normal' },
-    { value: 'overweight', label: 'Surpoids' },
   ];
 
   return (
