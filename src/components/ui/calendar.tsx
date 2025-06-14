@@ -15,9 +15,20 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
+  const [currentMonth, setCurrentMonth] = React.useState(props.month || new Date());
+
+  const handleMonthChange = (newMonth: Date) => {
+    setCurrentMonth(newMonth);
+    if (props.onMonthChange) {
+      props.onMonthChange(newMonth);
+    }
+  };
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
+      month={currentMonth}
+      onMonthChange={handleMonthChange}
       className={cn("p-3 pointer-events-auto", className)}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
@@ -65,24 +76,20 @@ function Calendar({
             "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
           ];
 
-          const handleMonthChange = (month: string) => {
+          const handleMonthSelect = (month: string) => {
             const monthIndex = months.indexOf(month);
             const newDate = new Date(displayMonth.getFullYear(), monthIndex, 1);
-            if (props.onMonthChange) {
-              props.onMonthChange(newDate);
-            }
+            handleMonthChange(newDate);
           };
 
-          const handleYearChange = (year: string) => {
+          const handleYearSelect = (year: string) => {
             const newDate = new Date(parseInt(year), displayMonth.getMonth(), 1);
-            if (props.onMonthChange) {
-              props.onMonthChange(newDate);
-            }
+            handleMonthChange(newDate);
           };
 
           return (
             <div className="flex justify-center gap-2 relative">
-              <Select value={months[displayMonth.getMonth()]} onValueChange={handleMonthChange}>
+              <Select value={months[displayMonth.getMonth()]} onValueChange={handleMonthSelect}>
                 <SelectTrigger className="w-32 h-8 text-sm">
                   <SelectValue />
                 </SelectTrigger>
@@ -95,7 +102,7 @@ function Calendar({
                 </SelectContent>
               </Select>
               
-              <Select value={displayMonth.getFullYear().toString()} onValueChange={handleYearChange}>
+              <Select value={displayMonth.getFullYear().toString()} onValueChange={handleYearSelect}>
                 <SelectTrigger className="w-20 h-8 text-sm">
                   <SelectValue />
                 </SelectTrigger>
