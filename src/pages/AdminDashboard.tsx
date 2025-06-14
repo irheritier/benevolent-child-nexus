@@ -315,26 +315,6 @@ const AdminDashboardContent = () => {
           </p>
         </div>
 
-        {/* Liens rapides */}
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-4">Accès rapide</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link to="/admin/partners">
-              <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <Users className="w-8 h-8 text-blue-600" />
-                    <div>
-                      <h4 className="font-medium">Gestion des partenaires</h4>
-                      <p className="text-sm text-muted-foreground">Approuver les demandes d'accès</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          </div>
-        </div>
-
         {/* Onglets principaux */}
         <Tabs defaultValue="requests" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
