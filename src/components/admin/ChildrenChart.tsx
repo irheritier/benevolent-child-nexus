@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
@@ -43,7 +42,7 @@ const ChildrenChart = () => {
 
       if (error) throw error;
 
-      // Traiter les données par genre
+      // Traiter les données par genre - CORRECTION: utiliser 'M' et 'F' au lieu de 'male' et 'female'
       const genderCounts: { [key: string]: number } = {};
       children?.forEach(child => {
         genderCounts[child.gender] = (genderCounts[child.gender] || 0) + 1;
@@ -51,7 +50,7 @@ const ChildrenChart = () => {
 
       setGenderData(
         Object.entries(genderCounts).map(([gender, count]) => ({
-          gender: gender === 'male' ? 'Garçons' : 'Filles',
+          gender: gender === 'M' ? 'Garçons' : gender === 'F' ? 'Filles' : gender,
           count
         }))
       );
