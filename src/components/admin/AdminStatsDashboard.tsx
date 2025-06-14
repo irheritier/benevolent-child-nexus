@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,6 +8,7 @@ import OrphanagesChart from './OrphanagesChart';
 import ChildrenChart from './ChildrenChart';
 import NutritionChart from './NutritionChart';
 import ProvinceStatsChart from './ProvinceStatsChart';
+import ReportsManager from './ReportsManager';
 import { TrendingUp, Users, Heart, MapPin } from 'lucide-react';
 
 interface DashboardStats {

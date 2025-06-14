@@ -2,8 +2,6 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { supabase } from '@/integrations/supabase/client';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
 
 interface ReportConfig {
   type: 'general' | 'orphanages' | 'children' | 'nutrition' | 'provinces';
@@ -12,419 +10,393 @@ interface ReportConfig {
   dateTo?: Date;
 }
 
-interface StatsData {
-  totalOrphanages: number;
-  totalChildren: number;
-  pendingOrphanages: number;
-  verifiedOrphanages: number;
-  wellNourishedChildren: number;
-  malnourishedChildren: number;
-  totalProvinces: number;
+interface OrphanageData {
+  id: string;
+  name: string;
+  province: string;
+  city: string;
+  legal_status: string;
+  child_capacity: number;
+  created_at: string;
+}
+
+interface ChildData {
+  id: string;
+  full_name: string;
+  gender: 'M' | 'F';
+  birth_date: string;
+  entry_date: string;
+  parent_status: string;
+  orphanage_name: string;
+}
+
+interface NutritionData {
+  child_name: string;
+  nutrition_status: string;
+  weight_kg: number;
+  height_cm: number;
+  bmi: number;
+  date: string;
 }
 
 export const generatePDFReport = async (config: ReportConfig) => {
   try {
-    // Créer un nouveau document PDF
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
+    const doc = new jsPDF();
     
-    // En-tête
-    addHeader(pdf, config.title, pageWidth);
+    // En-tête du rapport
+    addReportHeader(doc, config.title);
     
-    // Informations sur la période
-    addPeriodInfo(pdf, config.dateFrom, config.dateTo, pageWidth);
+    let yPosition = 40;
     
-    // Récupérer les données
-    const stats = await fetchStatsData();
-    
-    // Ajouter le contenu selon le type de rapport
-    let yPosition = 60;
-    
+    // Ajouter les données selon le type de rapport
     switch (config.type) {
       case 'general':
-        yPosition = await addGeneralReport(pdf, stats, yPosition, pageWidth);
+        yPosition = await addGeneralReportContent(doc, yPosition, config.dateFrom, config.dateTo);
         break;
       case 'orphanages':
-        yPosition = await addOrphanagesReport(pdf, yPosition, pageWidth);
+        yPosition = await addOrphanagesReportContent(doc, yPosition, config.dateFrom, config.dateTo);
         break;
       case 'children':
-        yPosition = await addChildrenReport(pdf, yPosition, pageWidth);
+        yPosition = await addChildrenReportContent(doc, yPosition, config.dateFrom, config.dateTo);
         break;
       case 'nutrition':
-        yPosition = await addNutritionReport(pdf, yPosition, pageWidth);
+        yPosition = await addNutritionReportContent(doc, yPosition, config.dateFrom, config.dateTo);
         break;
       case 'provinces':
-        yPosition = await addProvincesReport(pdf, yPosition, pageWidth);
+        yPosition = await addProvincesReportContent(doc, yPosition, config.dateFrom, config.dateTo);
         break;
     }
     
     // Pied de page
-    addFooter(pdf, pageWidth, pageHeight);
+    addReportFooter(doc);
     
     // Télécharger le PDF
-    const filename = `rapport_${config.type}_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
-    pdf.save(filename);
+    const fileName = `rapport_${config.type}_${new Date().toISOString().split('T')[0]}.pdf`;
+    doc.save(fileName);
     
   } catch (error) {
-    console.error('Erreur lors de la génération du PDF:', error);
+    console.error('Erreur lors de la génération du rapport:', error);
     throw error;
   }
 };
 
-const addHeader = (pdf: jsPDF, title: string, pageWidth: number) => {
-  // Logo/Titre principal
-  pdf.setFontSize(20);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Congo ChildNet', pageWidth / 2, 20, { align: 'center' });
+const addReportHeader = (doc: jsPDF, title: string) => {
+  // Logo et titre
+  doc.setFontSize(20);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Congo ChildNet', 20, 20);
   
-  // Sous-titre
-  pdf.setFontSize(16);
-  pdf.setFont('helvetica', 'normal');
-  pdf.text(title, pageWidth / 2, 30, { align: 'center' });
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'normal');
+  doc.text(title, 20, 30);
+  
+  // Date de génération
+  doc.setFontSize(10);
+  doc.text(`Généré le: ${new Date().toLocaleDateString('fr-FR')}`, 150, 20);
   
   // Ligne de séparation
-  pdf.setLineWidth(0.5);
-  pdf.line(20, 35, pageWidth - 20, 35);
+  doc.line(20, 35, 190, 35);
 };
 
-const addPeriodInfo = (pdf: jsPDF, dateFrom?: Date, dateTo?: Date, pageWidth: number) => {
-  pdf.setFontSize(10);
-  pdf.setFont('helvetica', 'normal');
+const addReportFooter = (doc: jsPDF) => {
+  const pageCount = doc.getNumberOfPages();
   
-  let periodText = `Généré le ${format(new Date(), 'dd MMMM yyyy', { locale: fr })}`;
-  
-  if (dateFrom && dateTo) {
-    periodText += ` • Période: ${format(dateFrom, 'dd/MM/yyyy')} - ${format(dateTo, 'dd/MM/yyyy')}`;
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.text(`Page ${i} sur ${pageCount}`, 170, 290);
+    doc.text('Congo ChildNet - Rapport confidentiel', 20, 290);
   }
-  
-  pdf.text(periodText, pageWidth / 2, 45, { align: 'center' });
 };
 
-const fetchStatsData = async (): Promise<StatsData> => {
-  const { data: publicStats } = await supabase
-    .from('public_stats')
-    .select('*')
-    .single();
-
-  const { data: orphanages } = await supabase
-    .from('orphanages')
-    .select('legal_status');
-
-  const pendingCount = orphanages?.filter(o => o.legal_status === 'pending').length || 0;
-  const verifiedCount = orphanages?.filter(o => o.legal_status === 'verified').length || 0;
-
-  return {
-    totalOrphanages: publicStats?.total_orphanages || 0,
-    totalChildren: publicStats?.total_children || 0,
-    pendingOrphanages: pendingCount,
-    verifiedOrphanages: verifiedCount,
-    wellNourishedChildren: publicStats?.well_nourished_children || 0,
-    malnourishedChildren: publicStats?.malnourished_children || 0,
-    totalProvinces: publicStats?.total_provinces || 0
-  };
-};
-
-const addGeneralReport = async (pdf: jsPDF, stats: StatsData, yPosition: number, pageWidth: number): Promise<number> => {
-  // Titre de section
-  pdf.setFontSize(14);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Statistiques générales', 20, yPosition);
-  yPosition += 15;
+const addGeneralReportContent = async (doc: jsPDF, startY: number, dateFrom?: Date, dateTo?: Date) => {
+  let yPosition = startY;
   
-  // Métriques principales
-  pdf.setFontSize(12);
-  pdf.setFont('helvetica', 'normal');
-  
-  const metrics = [
-    { label: 'Total des orphelinats', value: stats.totalOrphanages.toString() },
-    { label: 'Orphelinats validés', value: stats.verifiedOrphanages.toString() },
-    { label: 'Orphelinats en attente', value: stats.pendingOrphanages.toString() },
-    { label: 'Total des enfants', value: stats.totalChildren.toString() },
-    { label: 'Enfants bien nourris', value: stats.wellNourishedChildren.toString() },
-    { label: 'Enfants malnutris', value: stats.malnourishedChildren.toString() },
-    { label: 'Provinces couvertes', value: stats.totalProvinces.toString() }
-  ];
-  
-  metrics.forEach((metric) => {
-    pdf.text(`${metric.label}:`, 25, yPosition);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text(metric.value, 120, yPosition);
-    pdf.setFont('helvetica', 'normal');
-    yPosition += 8;
-  });
-  
-  // Calculs additionnels
-  yPosition += 10;
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Indicateurs clés', 20, yPosition);
-  yPosition += 10;
-  
-  const malnutritionRate = stats.totalChildren > 0 
-    ? ((stats.malnourishedChildren / stats.totalChildren) * 100).toFixed(1)
-    : '0';
-  
-  const verificationRate = stats.totalOrphanages > 0
-    ? ((stats.verifiedOrphanages / stats.totalOrphanages) * 100).toFixed(1)
-    : '0';
-  
-  pdf.setFont('helvetica', 'normal');
-  pdf.text(`Taux de malnutrition: ${malnutritionRate}%`, 25, yPosition);
-  yPosition += 8;
-  pdf.text(`Taux de validation des orphelinats: ${verificationRate}%`, 25, yPosition);
-  yPosition += 8;
+  try {
+    // Récupérer les statistiques générales
+    const { data: stats } = await supabase
+      .from('public_stats')
+      .select('*')
+      .single();
+    
+    if (stats) {
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Statistiques générales', 20, yPosition);
+      yPosition += 15;
+      
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Total orphelinats: ${stats.total_orphanages || 0}`, 25, yPosition);
+      yPosition += 8;
+      doc.text(`Total enfants: ${stats.total_children || 0}`, 25, yPosition);
+      yPosition += 8;
+      doc.text(`Orphelinats vérifiés: ${stats.verified_orphanages || 0}`, 25, yPosition);
+      yPosition += 8;
+      doc.text(`Enfants bien nourris: ${stats.well_nourished_children || 0}`, 25, yPosition);
+      yPosition += 8;
+      doc.text(`Enfants malnutris: ${stats.malnourished_children || 0}`, 25, yPosition);
+      yPosition += 8;
+      doc.text(`Provinces couvertes: ${stats.total_provinces || 0}`, 25, yPosition);
+      yPosition += 15;
+    }
+    
+  } catch (error) {
+    console.error('Erreur lors de la récupération des statistiques:', error);
+    doc.text('Erreur lors du chargement des données', 20, yPosition);
+    yPosition += 15;
+  }
   
   return yPosition;
 };
 
-const addOrphanagesReport = async (pdf: jsPDF, yPosition: number, pageWidth: number): Promise<number> => {
-  pdf.setFontSize(14);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Rapport des orphelinats', 20, yPosition);
-  yPosition += 15;
+const addOrphanagesReportContent = async (doc: jsPDF, startY: number, dateFrom?: Date, dateTo?: Date) => {
+  let yPosition = startY;
   
   try {
-    const { data: orphanages } = await supabase
+    let query = supabase
       .from('orphanages')
       .select('*')
       .order('created_at', { ascending: false });
     
+    if (dateFrom) {
+      query = query.gte('created_at', dateFrom.toISOString());
+    }
+    if (dateTo) {
+      query = query.lte('created_at', dateTo.toISOString());
+    }
+    
+    const { data: orphanages } = await query;
+    
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Liste des orphelinats', 20, yPosition);
+    yPosition += 15;
+    
     if (orphanages && orphanages.length > 0) {
-      // Tableau des orphelinats
-      const headers = ['Nom', 'Province', 'Ville', 'Statut', 'Capacité'];
-      const headerY = yPosition;
-      
-      // En-têtes
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(10);
-      headers.forEach((header, index) => {
-        pdf.text(header, 20 + (index * 35), headerY);
-      });
-      
-      yPosition += 8;
-      
-      // Ligne de séparation
-      pdf.setLineWidth(0.3);
-      pdf.line(20, yPosition, pageWidth - 20, yPosition);
-      yPosition += 5;
-      
-      // Données
-      pdf.setFont('helvetica', 'normal');
-      orphanages.slice(0, 20).forEach((orphanage) => {
-        const row = [
-          orphanage.name.substring(0, 15),
-          orphanage.province.substring(0, 12),
-          orphanage.city.substring(0, 12),
-          orphanage.legal_status === 'verified' ? 'Validé' : 
-          orphanage.legal_status === 'pending' ? 'Attente' : 'Rejeté',
-          (orphanage.child_capacity || 0).toString()
-        ];
-        
-        row.forEach((cell, index) => {
-          pdf.text(cell, 20 + (index * 35), yPosition);
-        });
-        
-        yPosition += 6;
-        
-        // Nouvelle page si nécessaire
+      orphanages.forEach((orphanage: OrphanageData) => {
         if (yPosition > 250) {
-          pdf.addPage();
+          doc.addPage();
           yPosition = 20;
         }
+        
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text(orphanage.name, 25, yPosition);
+        yPosition += 6;
+        
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Province: ${orphanage.province}, Ville: ${orphanage.city}`, 25, yPosition);
+        yPosition += 5;
+        doc.text(`Statut: ${orphanage.legal_status}`, 25, yPosition);
+        yPosition += 5;
+        doc.text(`Capacité: ${orphanage.child_capacity || 'Non spécifiée'} enfants`, 25, yPosition);
+        yPosition += 5;
+        doc.text(`Date d'inscription: ${new Date(orphanage.created_at).toLocaleDateString('fr-FR')}`, 25, yPosition);
+        yPosition += 10;
       });
+    } else {
+      doc.text('Aucun orphelinat trouvé pour cette période', 25, yPosition);
     }
+    
   } catch (error) {
     console.error('Erreur lors de la récupération des orphelinats:', error);
-    pdf.text('Erreur lors du chargement des données', 25, yPosition);
+    doc.text('Erreur lors du chargement des données', 20, yPosition);
   }
   
   return yPosition;
 };
 
-const addChildrenReport = async (pdf: jsPDF, yPosition: number, pageWidth: number): Promise<number> => {
-  pdf.setFontSize(14);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Rapport des enfants', 20, yPosition);
-  yPosition += 15;
+const addChildrenReportContent = async (doc: jsPDF, startY: number, dateFrom?: Date, dateTo?: Date) => {
+  let yPosition = startY;
   
   try {
-    const { data: children } = await supabase
+    let query = supabase
       .from('children')
-      .select('*');
+      .select(`
+        *,
+        orphanages!inner(name)
+      `)
+      .order('entry_date', { ascending: false });
     
-    if (children) {
+    if (dateFrom) {
+      query = query.gte('entry_date', dateFrom.toISOString().split('T')[0]);
+    }
+    if (dateTo) {
+      query = query.lte('entry_date', dateTo.toISOString().split('T')[0]);
+    }
+    
+    const { data: children } = await query;
+    
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Liste des enfants', 20, yPosition);
+    yPosition += 15;
+    
+    if (children && children.length > 0) {
       // Statistiques par genre
-      const maleCount = children.filter(c => c.gender === 'male').length;
-      const femaleCount = children.filter(c => c.gender === 'female').length;
+      const maleCount = children.filter(child => child.gender === 'M').length;
+      const femaleCount = children.filter(child => child.gender === 'F').length;
       
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text(`Garçons: ${maleCount}`, 25, yPosition);
-      yPosition += 8;
-      pdf.text(`Filles: ${femaleCount}`, 25, yPosition);
+      doc.setFontSize(12);
+      doc.text(`Total: ${children.length} enfants (${maleCount} garçons, ${femaleCount} filles)`, 25, yPosition);
       yPosition += 15;
       
-      // Statistiques par âge
-      const ageCounts = {
-        '0-2 ans': 0,
-        '3-5 ans': 0,
-        '6-10 ans': 0,
-        '11-15 ans': 0,
-        '16+ ans': 0
-      };
-      
-      children.forEach(child => {
-        let age = 0;
-        if (child.birth_date) {
-          const birthDate = new Date(child.birth_date);
-          const today = new Date();
-          age = today.getFullYear() - birthDate.getFullYear();
-        } else if (child.estimated_age) {
-          age = child.estimated_age;
+      children.forEach((child: any) => {
+        if (yPosition > 250) {
+          doc.addPage();
+          yPosition = 20;
         }
         
-        if (age <= 2) ageCounts['0-2 ans']++;
-        else if (age <= 5) ageCounts['3-5 ans']++;
-        else if (age <= 10) ageCounts['6-10 ans']++;
-        else if (age <= 15) ageCounts['11-15 ans']++;
-        else ageCounts['16+ ans']++;
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text(child.full_name, 25, yPosition);
+        yPosition += 6;
+        
+        doc.setFont('helvetica', 'normal');
+        const genderText = child.gender === 'M' ? 'Garçon' : 'Fille';
+        doc.text(`Genre: ${genderText}`, 25, yPosition);
+        yPosition += 5;
+        
+        if (child.birth_date) {
+          const age = new Date().getFullYear() - new Date(child.birth_date).getFullYear();
+          doc.text(`Âge: ${age} ans`, 25, yPosition);
+          yPosition += 5;
+        }
+        
+        doc.text(`Statut parental: ${child.parent_status}`, 25, yPosition);
+        yPosition += 5;
+        doc.text(`Orphelinat: ${child.orphanages?.name || 'Non spécifié'}`, 25, yPosition);
+        yPosition += 5;
+        doc.text(`Date d'entrée: ${new Date(child.entry_date).toLocaleDateString('fr-FR')}`, 25, yPosition);
+        yPosition += 10;
       });
-      
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Répartition par âge:', 20, yPosition);
-      yPosition += 10;
-      
-      pdf.setFont('helvetica', 'normal');
-      Object.entries(ageCounts).forEach(([ageGroup, count]) => {
-        pdf.text(`${ageGroup}: ${count}`, 25, yPosition);
-        yPosition += 8;
-      });
+    } else {
+      doc.text('Aucun enfant trouvé pour cette période', 25, yPosition);
     }
+    
   } catch (error) {
     console.error('Erreur lors de la récupération des enfants:', error);
-    pdf.text('Erreur lors du chargement des données', 25, yPosition);
+    doc.text('Erreur lors du chargement des données', 20, yPosition);
   }
   
   return yPosition;
 };
 
-const addNutritionReport = async (pdf: jsPDF, yPosition: number, pageWidth: number): Promise<number> => {
-  pdf.setFontSize(14);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Rapport nutritionnel', 20, yPosition);
-  yPosition += 15;
+const addNutritionReportContent = async (doc: jsPDF, startY: number, dateFrom?: Date, dateTo?: Date) => {
+  let yPosition = startY;
   
   try {
-    const { data: nutritionRecords } = await supabase
+    let query = supabase
       .from('nutrition_records')
-      .select('*');
+      .select(`
+        *,
+        children!inner(full_name)
+      `)
+      .order('date', { ascending: false });
     
-    if (nutritionRecords) {
-      const statusCounts = {
-        normal: 0,
-        underweight: 0,
-        overweight: 0,
-        malnourished: 0
-      };
+    if (dateFrom) {
+      query = query.gte('date', dateFrom.toISOString().split('T')[0]);
+    }
+    if (dateTo) {
+      query = query.lte('date', dateTo.toISOString().split('T')[0]);
+    }
+    
+    const { data: nutritionRecords } = await query;
+    
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Rapport nutritionnel', 20, yPosition);
+    yPosition += 15;
+    
+    if (nutritionRecords && nutritionRecords.length > 0) {
+      // Statistiques nutritionnelles
+      const wellNourished = nutritionRecords.filter(record => record.nutrition_status === 'normal').length;
+      const malnourished = nutritionRecords.filter(record => record.nutrition_status !== 'normal').length;
       
-      nutritionRecords.forEach(record => {
-        statusCounts[record.nutrition_status as keyof typeof statusCounts]++;
-      });
+      doc.setFontSize(12);
+      doc.text(`Total mesures: ${nutritionRecords.length}`, 25, yPosition);
+      yPosition += 8;
+      doc.text(`Bien nourris: ${wellNourished}`, 25, yPosition);
+      yPosition += 8;
+      doc.text(`Malnutris: ${malnourished}`, 25, yPosition);
+      yPosition += 15;
       
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'normal');
-      
-      Object.entries(statusCounts).forEach(([status, count]) => {
-        const label = status === 'normal' ? 'Normal' :
-                     status === 'underweight' ? 'Insuffisance pondérale' :
-                     status === 'overweight' ? 'Surpoids' : 'Malnutrition';
+      nutritionRecords.slice(0, 50).forEach((record: any) => {
+        if (yPosition > 250) {
+          doc.addPage();
+          yPosition = 20;
+        }
         
-        pdf.text(`${label}: ${count}`, 25, yPosition);
+        doc.setFontSize(10);
+        doc.text(`${record.children?.full_name || 'Nom inconnu'} - ${record.nutrition_status}`, 25, yPosition);
+        yPosition += 5;
+        doc.text(`  Poids: ${record.weight_kg}kg, Taille: ${record.height_cm}cm, IMC: ${record.bmi?.toFixed(1) || 'N/A'}`, 25, yPosition);
+        yPosition += 5;
+        doc.text(`  Date: ${new Date(record.date).toLocaleDateString('fr-FR')}`, 25, yPosition);
         yPosition += 8;
       });
       
-      // Calcul du pourcentage de malnutrition
-      const totalRecords = nutritionRecords.length;
-      const malnutritionPercentage = totalRecords > 0 
-        ? ((statusCounts.malnourished / totalRecords) * 100).toFixed(1)
-        : '0';
-      
-      yPosition += 10;
-      pdf.setFont('helvetica', 'bold');
-      pdf.text(`Taux de malnutrition: ${malnutritionPercentage}%`, 25, yPosition);
+      if (nutritionRecords.length > 50) {
+        doc.text(`... et ${nutritionRecords.length - 50} autres mesures`, 25, yPosition);
+      }
+    } else {
+      doc.text('Aucune donnée nutritionnelle trouvée pour cette période', 25, yPosition);
     }
+    
   } catch (error) {
     console.error('Erreur lors de la récupération des données nutritionnelles:', error);
-    pdf.text('Erreur lors du chargement des données', 25, yPosition);
+    doc.text('Erreur lors du chargement des données', 20, yPosition);
   }
   
   return yPosition;
 };
 
-const addProvincesReport = async (pdf: jsPDF, yPosition: number, pageWidth: number): Promise<number> => {
-  pdf.setFontSize(14);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Rapport par province', 20, yPosition);
-  yPosition += 15;
+const addProvincesReportContent = async (doc: jsPDF, startY: number, dateFrom?: Date, dateTo?: Date) => {
+  let yPosition = startY;
   
   try {
     const { data: provinceStats } = await supabase
       .from('province_stats')
       .select('*')
-      .order('children_count', { ascending: false });
+      .order('orphanages_count', { ascending: false });
+    
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Rapport par province', 20, yPosition);
+    yPosition += 15;
     
     if (provinceStats && provinceStats.length > 0) {
-      // En-têtes du tableau
-      const headers = ['Province', 'Orphelinats', 'Enfants', 'Bien nourris', 'Malnutris'];
-      const headerY = yPosition;
-      
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(10);
-      headers.forEach((header, index) => {
-        pdf.text(header, 20 + (index * 35), headerY);
-      });
-      
-      yPosition += 8;
-      
-      // Ligne de séparation
-      pdf.setLineWidth(0.3);
-      pdf.line(20, yPosition, pageWidth - 20, yPosition);
-      yPosition += 5;
-      
-      // Données
-      pdf.setFont('helvetica', 'normal');
-      provinceStats.forEach((province) => {
-        const row = [
-          province.province?.substring(0, 15) || '',
-          (province.orphanages_count || 0).toString(),
-          (province.children_count || 0).toString(),
-          (province.well_nourished || 0).toString(),
-          (province.malnourished || 0).toString()
-        ];
-        
-        row.forEach((cell, index) => {
-          pdf.text(cell, 20 + (index * 35), yPosition);
-        });
-        
-        yPosition += 6;
-        
-        // Nouvelle page si nécessaire
+      provinceStats.forEach((province: any) => {
         if (yPosition > 250) {
-          pdf.addPage();
+          doc.addPage();
           yPosition = 20;
         }
+        
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text(province.province, 25, yPosition);
+        yPosition += 8;
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Orphelinats: ${province.orphanages_count || 0}`, 25, yPosition);
+        yPosition += 6;
+        doc.text(`Enfants: ${province.children_count || 0}`, 25, yPosition);
+        yPosition += 6;
+        doc.text(`Bien nourris: ${province.well_nourished || 0}`, 25, yPosition);
+        yPosition += 6;
+        doc.text(`Malnutris: ${province.malnourished || 0}`, 25, yPosition);
+        yPosition += 12;
       });
+    } else {
+      doc.text('Aucune donnée provinciale disponible', 25, yPosition);
     }
+    
   } catch (error) {
     console.error('Erreur lors de la récupération des statistiques provinciales:', error);
-    pdf.text('Erreur lors du chargement des données', 25, yPosition);
+    doc.text('Erreur lors du chargement des données', 20, yPosition);
   }
   
   return yPosition;
-};
-
-const addFooter = (pdf: jsPDF, pageWidth: number, pageHeight: number) => {
-  pdf.setFontSize(8);
-  pdf.setFont('helvetica', 'normal');
-  pdf.text('Congo ChildNet - Système de gestion des orphelinats', pageWidth / 2, pageHeight - 10, { align: 'center' });
 };
