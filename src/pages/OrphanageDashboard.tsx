@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import AddChildForm from '@/components/orphanage/AddChildForm';
+import EditChildForm from '@/components/orphanage/EditChildForm';
 import ChildrenTable from '@/components/orphanage/ChildrenTable';
 
 interface User {
