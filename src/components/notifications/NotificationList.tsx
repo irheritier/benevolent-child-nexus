@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { Link } from 'react-router-dom';
 import { 
   Bell, 
   AlertTriangle, 
@@ -14,7 +15,8 @@ import {
   Users,
   Shield,
   CheckCircle2,
-  X
+  X,
+  ExternalLink
 } from 'lucide-react';
 
 interface NotificationListProps {
@@ -163,13 +165,23 @@ export const NotificationList = ({ onClose }: NotificationListProps) => {
         )}
       </ScrollArea>
 
-      {notifications.length > 10 && (
-        <div className="p-4 border-t">
-          <Button variant="outline" className="w-full" size="sm">
-            Voir toutes les notifications
-          </Button>
-        </div>
-      )}
+      <div className="p-4 border-t space-y-2">
+        {notifications.length > 10 && (
+          <Link to="/admin/notifications" onClick={onClose}>
+            <Button variant="outline" className="w-full" size="sm">
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Voir toutes les notifications ({notifications.length})
+            </Button>
+          </Link>
+        )}
+        {notifications.length > 0 && (
+          <Link to="/admin/notifications" onClick={onClose}>
+            <Button variant="ghost" className="w-full" size="sm">
+              Gérer les notifications
+            </Button>
+          </Link>
+        )}
+      </div>
     </div>
   );
 };
