@@ -18,9 +18,12 @@ export const calculateAge = (birthDate: string | null, estimatedAge: number | nu
 };
 
 export const getGenderBadge = (gender: string) => {
+  const className = gender === 'M' ? 'text-blue-600 border-blue-200' : 'text-pink-600 border-pink-200';
+  const text = gender === 'M' ? 'Garçon' : 'Fille';
+  
   return (
-    <Badge variant="outline" className={gender === 'M' ? 'text-blue-600 border-blue-200' : 'text-pink-600 border-pink-200'}>
-      {gender === 'M' ? 'Garçon' : 'Fille'}
+    <Badge variant="outline" className={className}>
+      {text}
     </Badge>
   );
 };
@@ -32,8 +35,10 @@ export const getParentStatusBadge = (status: string) => {
     'abandoned': 'bg-purple-100 text-purple-800 border-purple-200'
   };
   
+  const className = colorMap[status as keyof typeof colorMap] || 'bg-gray-100 text-gray-800';
+  
   return (
-    <Badge className={colorMap[status as keyof typeof colorMap] || 'bg-gray-100 text-gray-800'}>
+    <Badge className={className}>
       {getParentStatusText(status)}
     </Badge>
   );
