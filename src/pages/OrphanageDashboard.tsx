@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -63,6 +62,7 @@ const OrphanageDashboard = () => {
   const [children, setChildren] = useState<Child[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddChild, setShowAddChild] = useState(false);
+  const [editingChild, setEditingChild] = useState<Child | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -162,8 +162,18 @@ const OrphanageDashboard = () => {
   };
 
   const handleEditChild = (child: Child) => {
-    // TODO: Implémenter l'édition d'enfant
-    console.log('Éditer enfant:', child);
+    setEditingChild(child);
+  };
+
+  const handleEditChildSuccess = () => {
+    setEditingChild(null);
+    if (orphanage) {
+      loadChildren(orphanage.id);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingChild(null);
   };
 
   const handleDeleteChild = async (childId: string) => {
@@ -487,6 +497,22 @@ const OrphanageDashboard = () => {
             onSuccess={handleAddChildSuccess}
             onCancel={() => setShowAddChild(false)}
           />
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog pour modifier un enfant */}
+      <Dialog open={!!editingChild} onOpenChange={(open) => !open && setEditingChild(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Modifier l'enfant</DialogTitle>
+          </DialogHeader>
+          {editingChild && (
+            <EditChildForm
+              child={editingChild}
+              onSuccess={handleEditChildSuccess}
+              onCancel={handleCancelEdit}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>
