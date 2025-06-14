@@ -3,7 +3,12 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
-export const CTASection = () => {
+interface CTASectionProps {
+  registerText: string;
+  exploreMapText: string;
+}
+
+export const CTASection = ({ registerText, exploreMapText }: CTASectionProps) => {
   return (
     <section className="py-20 bg-blue-600">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -17,7 +22,7 @@ export const CTASection = () => {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link to="/register">
             <Button size="lg" variant="secondary" className="w-full sm:w-auto">
-              Enregistrer un orphelinat
+              {registerText}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>
