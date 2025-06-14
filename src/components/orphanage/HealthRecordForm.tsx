@@ -81,13 +81,21 @@ const HealthRecordForm = ({ childId, childName, onSuccess, onCancel }: HealthRec
   const vaccinationStatusStructured = watch('vaccination_status_structured');
 
   const onSubmit = async (data: HealthRecordFormData) => {
+    // Ensure date is properly set from the form data
+    const submissionData = {
+      date: data.date, // This will always be a Date object from react-hook-form
+      vaccination_status: data.vaccination_status,
+      vaccination_status_structured: data.vaccination_status_structured,
+      chronic_conditions: data.chronic_conditions,
+      medications: data.medications,
+      remarks: data.remarks,
+      selectedDiseases,
+    };
+
     await submitHealthRecord(
       childId,
       childName,
-      {
-        ...data,
-        selectedDiseases,
-      },
+      submissionData,
       onSuccess
     );
   };

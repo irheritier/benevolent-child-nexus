@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,15 +18,17 @@ interface ChildDisease {
   };
 }
 
+interface VaccinationStatusStructured {
+  status: string;
+  vaccines: string[];
+  last_updated: string;
+}
+
 interface HealthRecord {
   id: string;
   date: string;
   vaccination_status: string;
-  vaccination_status_structured: {
-    status: string;
-    vaccines: string[];
-    last_updated: string;
-  } | null;
+  vaccination_status_structured: VaccinationStatusStructured | null;
   chronic_conditions: string;
   medications: string;
   remarks: string;
@@ -70,7 +71,14 @@ const HealthHistory = ({ childId, childName, onAddRecord }: HealthHistoryProps) 
         .order('date', { ascending: false });
 
       if (error) throw error;
-      setHealthRecords(data || []);
+      
+      // Transform the data to match our interface
+      const transformedData: HealthRecord[] = (data || []).map(record => ({
+        ...record,
+        vaccination_status_structured: record.vaccination_status_structured as VaccinationStatusStructured | null
+      }));
+      
+      setHealthRecords(transformedData);
     } catch (error) {
       console.error('Erreur lors du chargement:', error);
       toast({
