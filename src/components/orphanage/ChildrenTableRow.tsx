@@ -1,4 +1,3 @@
-
 import { TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { 
@@ -10,7 +9,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { calculateAge, getGenderBadge, getParentStatusBadge } from '../utils/childUtils';
+import { calculateAge, getGenderBadge, getParentStatusBadge } from '../utils/childUtils.tsx';
 
 interface Child {
   id: string;
