@@ -23,13 +23,9 @@ const healthRecordSchema = z.object({
   }),
   vaccination_status: z.string().default(''),
   vaccination_status_structured: z.object({
-    status: z.enum(['vaccinated', 'partially_vaccinated', 'not_vaccinated', 'unknown']).default('unknown'),
-    vaccines: z.array(z.string()).default([]),
-    last_updated: z.string().default(''),
-  }).default({
-    status: 'unknown',
-    vaccines: [],
-    last_updated: '',
+    status: z.enum(['vaccinated', 'partially_vaccinated', 'not_vaccinated', 'unknown']),
+    vaccines: z.array(z.string()),
+    last_updated: z.string(),
   }),
   chronic_conditions: z.string().default(''),
   medications: z.string().default(''),
@@ -69,7 +65,7 @@ const HealthRecordForm = ({ childId, childName, onSuccess, onCancel }: HealthRec
       vaccination_status_structured: {
         status: 'unknown',
         vaccines: [],
-        last_updated: '',
+        last_updated: new Date().toISOString(),
       },
       chronic_conditions: '',
       medications: '',
@@ -81,11 +77,15 @@ const HealthRecordForm = ({ childId, childName, onSuccess, onCancel }: HealthRec
   const vaccinationStatusStructured = watch('vaccination_status_structured');
 
   const onSubmit = async (data: HealthRecordFormData) => {
-    // Ensure date is properly set from the form data
+    // Ensure all required properties are present
     const submissionData = {
-      date: data.date, // This will always be a Date object from react-hook-form
+      date: data.date,
       vaccination_status: data.vaccination_status,
-      vaccination_status_structured: data.vaccination_status_structured,
+      vaccination_status_structured: {
+        status: data.vaccination_status_structured.status,
+        vaccines: data.vaccination_status_structured.vaccines,
+        last_updated: data.vaccination_status_structured.last_updated,
+      },
       chronic_conditions: data.chronic_conditions,
       medications: data.medications,
       remarks: data.remarks,
@@ -102,8 +102,8 @@ const HealthRecordForm = ({ childId, childName, onSuccess, onCancel }: HealthRec
 
   const handleVaccinationStatusChange = (status: string) => {
     setValue('vaccination_status_structured', {
-      ...vaccinationStatusStructured,
       status: status as 'vaccinated' | 'partially_vaccinated' | 'not_vaccinated' | 'unknown',
+      vaccines: vaccinationStatusStructured.vaccines,
       last_updated: new Date().toISOString(),
     });
   };

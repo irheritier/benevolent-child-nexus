@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -72,10 +73,12 @@ const HealthHistory = ({ childId, childName, onAddRecord }: HealthHistoryProps) 
 
       if (error) throw error;
       
-      // Transform the data to match our interface
+      // Transform the data to match our interface with proper type safety
       const transformedData: HealthRecord[] = (data || []).map(record => ({
         ...record,
-        vaccination_status_structured: record.vaccination_status_structured as VaccinationStatusStructured | null
+        vaccination_status_structured: record.vaccination_status_structured 
+          ? (record.vaccination_status_structured as unknown as VaccinationStatusStructured)
+          : null
       }));
       
       setHealthRecords(transformedData);
