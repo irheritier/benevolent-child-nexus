@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -153,11 +152,12 @@ const AdminStatsDashboard = () => {
 
       {/* Graphiques et analyses */}
       <Tabs defaultValue="orphanages" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="orphanages">Orphelinats</TabsTrigger>
           <TabsTrigger value="children">Enfants</TabsTrigger>
           <TabsTrigger value="nutrition">Nutrition</TabsTrigger>
           <TabsTrigger value="provinces">Provinces</TabsTrigger>
+          <TabsTrigger value="reports">Rapports</TabsTrigger>
         </TabsList>
 
         <TabsContent value="orphanages" className="space-y-4">
@@ -174,6 +174,10 @@ const AdminStatsDashboard = () => {
 
         <TabsContent value="provinces" className="space-y-4">
           <ProvinceStatsChart />
+        </TabsContent>
+
+        <TabsContent value="reports" className="space-y-4">
+          <ReportsManager />
         </TabsContent>
       </Tabs>
     </div>
