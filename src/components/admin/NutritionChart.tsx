@@ -188,7 +188,11 @@ const NutritionChart = () => {
                   <XAxis dataKey="status" />
                   <YAxis />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="count" fill={(entry) => entry.color} />
+                  <Bar dataKey="count" fill="#8884d8">
+                    {statusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </ChartContainer>
