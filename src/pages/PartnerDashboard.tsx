@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,17 +7,21 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Heart, LogOut, Bell, BarChart } from 'lucide-react';
+import { Heart, LogOut, Bell, BarChart, Users, TrendingUp, MapPin } from 'lucide-react';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import DashboardAnalyticsTabs from '@/components/admin/DashboardAnalyticsTabs';
+import DashboardStatsCards from '@/components/admin/DashboardStatsCards';
 
 interface DashboardStats {
   totalOrphanages: number;
   totalChildren: number;
   totalProvinces: number;
   verifiedOrphanages: number;
+  pendingOrphanages: number;
+  wellNourishedChildren: number;
+  malnourishedChildren: number;
 }
 
 const PartnerDashboardContent = () => {
@@ -51,7 +56,7 @@ const PartnerDashboardContent = () => {
 
       setUserEmail(session.user.email || '');
 
-      // Charger les statistiques publiques si besoin
+      // Charger les statistiques publiques
       const { data: publicStats } = await supabase
         .from('public_stats')
         .select('*')
@@ -63,6 +68,9 @@ const PartnerDashboardContent = () => {
           totalChildren: publicStats.total_children || 0,
           totalProvinces: publicStats.total_provinces || 0,
           verifiedOrphanages: publicStats.verified_orphanages || 0,
+          pendingOrphanages: (publicStats.total_orphanages || 0) - (publicStats.verified_orphanages || 0),
+          wellNourishedChildren: publicStats.well_nourished_children || 0,
+          malnourishedChildren: publicStats.malnourished_children || 0,
         });
       }
     } catch (error) {
@@ -199,7 +207,22 @@ const PartnerDashboardContent = () => {
               Notifications
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="analytics">
+          <TabsContent value="analytics" className="space-y-6">
+            {/* Cartes de statistiques détaillées - similaires à celles de l'admin */}
+            {stats && (
+              <DashboardStatsCards 
+                stats={{
+                  totalOrphanages: stats.totalOrphanages,
+                  totalChildren: stats.totalChildren,
+                  pendingOrphanages: stats.pendingOrphanages,
+                  verifiedOrphanages: stats.verifiedOrphanages,
+                  wellNourishedChildren: stats.wellNourishedChildren,
+                  malnourishedChildren: stats.malnourishedChildren,
+                  totalProvinces: stats.totalProvinces,
+                }}
+                isLoading={isLoading}
+              />
+            )}
             <DashboardAnalyticsTabs />
           </TabsContent>
           <TabsContent value="notifications">
