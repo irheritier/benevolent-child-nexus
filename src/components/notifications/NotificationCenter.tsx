@@ -92,15 +92,15 @@ export const NotificationCenter = () => {
   // --- Admin : tout voir, Partenaire : seulement les deux alertes principales
   const tabsToShow = userRole === "partner"
     ? [
-        { value: "all", label: "Toutes", badge: notifications.length, variant: "secondary" },
-        { value: "unread", label: "Non lues", badge: notifications.filter(n => !n.is_read).length, variant: "destructive" },
+        { value: "all", label: "Toutes", badge: notifications.length, variant: "secondary" as const },
+        { value: "unread", label: "Non lues", badge: notifications.filter(n => !n.is_read).length, variant: "destructive" as const },
         { value: "read", label: "Lues" },
         { value: "malnutrition_alert", label: "Malnutrition" },
         { value: "capacity_alert", label: "Capacité" }
       ]
     : [
-        { value: "all", label: "Toutes", badge: notifications.length, variant: "secondary" },
-        { value: "unread", label: "Non lues", badge: notifications.filter(n => !n.is_read).length, variant: "destructive" },
+        { value: "all", label: "Toutes", badge: notifications.length, variant: "secondary" as const },
+        { value: "unread", label: "Non lues", badge: notifications.filter(n => !n.is_read).length, variant: "destructive" as const },
         { value: "read", label: "Lues" },
         { value: "orphanage_pending", label: "Orphelinats en attente" },
         { value: "malnutrition_alert", label: "Malnutrition" },
