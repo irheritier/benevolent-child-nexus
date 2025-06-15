@@ -34,7 +34,7 @@ const VaccinationStatsChart = () => {
     try {
       console.log('Chargement des statistiques de vaccination...');
       
-      // Charger les vraies données de vaccination
+      // Charger les données réelles de vaccination
       const { data: healthRecords, error } = await supabase
         .from('health_records')
         .select(`
@@ -51,9 +51,11 @@ const VaccinationStatsChart = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Erreur lors du chargement:', error);
+        console.error('Erreur lors du chargement des vaccinations:', error);
         throw error;
       }
+
+      console.log('Données brutes de vaccination:', healthRecords);
 
       if (!healthRecords || healthRecords.length === 0) {
         console.log('Aucune donnée de vaccination trouvée');
@@ -148,6 +150,9 @@ const VaccinationStatsChart = () => {
 
       const orphanageArray = Array.from(orphanageCounts.values())
         .slice(0, 10); // Top 10 orphelinats
+
+      console.log('Données de statut traitées:', statusArray);
+      console.log('Données d\'orphelinat traitées:', orphanageArray);
 
       setStatusData(statusArray);
       setOrphanageData(orphanageArray);

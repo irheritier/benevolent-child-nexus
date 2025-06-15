@@ -30,7 +30,7 @@ const DiseaseStatsChart = () => {
     try {
       console.log('Chargement des statistiques de maladies...');
       
-      // Charger les vraies statistiques des maladies
+      // Charger les données réelles des maladies
       const { data: childDiseases, error } = await supabase
         .from('child_diseases')
         .select(`
@@ -41,14 +41,20 @@ const DiseaseStatsChart = () => {
         `);
 
       if (error) {
-        console.error('Erreur lors du chargement:', error);
+        console.error('Erreur lors du chargement des maladies:', error);
         throw error;
       }
+
+      console.log('Données brutes des maladies:', childDiseases);
 
       if (!childDiseases || childDiseases.length === 0) {
         console.log('Aucune donnée de maladie trouvée');
         setDiseaseData([]);
-        setSeverityData([]);
+        setSeverityData([
+          { name: 'Léger', value: 0, color: '#10B981' },
+          { name: 'Modéré', value: 0, color: '#F59E0B' },
+          { name: 'Sévère', value: 0, color: '#EF4444' }
+        ]);
         setIsLoading(false);
         return;
       }
@@ -58,7 +64,7 @@ const DiseaseStatsChart = () => {
       const severityMap = new Map<string, number>();
 
       childDiseases.forEach((record) => {
-        const diseaseName = record.diseases?.name || 'Inconnu';
+        const diseaseName = record.diseases?.name || 'Maladie inconnue';
         const severity = record.severity || 'mild';
 
         // Compter par maladie
@@ -90,6 +96,9 @@ const DiseaseStatsChart = () => {
         { name: 'Modéré', value: severityMap.get('moderate') || 0, color: '#F59E0B' },
         { name: 'Sévère', value: severityMap.get('severe') || 0, color: '#EF4444' }
       ];
+
+      console.log('Données de maladies traitées:', diseaseArray);
+      console.log('Données de sévérité traitées:', severityArray);
 
       setDiseaseData(diseaseArray);
       setSeverityData(severityArray);
@@ -178,13 +187,13 @@ const DiseaseStatsChart = () => {
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={severityData}
+                  data={severityData.filter(item => item.value > 0)}
                   cx="50%"
                   cy="50%"
                   outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
-                  label={({ name, value }) => value > 0 ? `${name}: ${value}` : ''}
+                  label={({ name, value }) => `${name}: ${value}`}
                 >
                   {severityData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />

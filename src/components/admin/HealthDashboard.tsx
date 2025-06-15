@@ -36,9 +36,9 @@ const HealthDashboard = () => {
 
   const loadHealthStats = async () => {
     try {
-      console.log('Chargement des statistiques santé...');
+      console.log('Chargement des statistiques de santé...');
 
-      // Charger les vraies statistiques de santé pour tous les utilisateurs
+      // Charger les statistiques réelles
       const [
         healthRecordsResult,
         diseasesResult,
@@ -46,45 +46,75 @@ const HealthDashboard = () => {
         recentRecordsResult,
         criticalCasesResult
       ] = await Promise.all([
-        supabase.from('health_records').select('id', { count: 'exact', head: true }),
-        supabase.from('child_diseases').select('id', { count: 'exact', head: true }),
+        // Total des dossiers de santé
+        supabase
+          .from('health_records')
+          .select('id', { count: 'exact', head: true }),
+        
+        // Total des maladies diagnostiquées
+        supabase
+          .from('child_diseases')
+          .select('id', { count: 'exact', head: true }),
+        
+        // Données de vaccination pour calculer les statistiques
         supabase
           .from('health_records')
           .select('vaccination_status_structured')
           .not('vaccination_status_structured', 'is', null),
+        
+        // Dossiers récents (derniers 7 jours)
         supabase
           .from('health_records')
           .select('id', { count: 'exact', head: true })
           .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+        
+        // Cas critiques (maladies sévères)
         supabase
           .from('child_diseases')
           .select('id', { count: 'exact', head: true })
           .eq('severity', 'severe')
       ]);
 
-      // Calculer les statistiques de vaccination à partir des vraies données
+      // Calculer les statistiques de vaccination
       let vaccinatedCount = 0;
       let unvaccinatedCount = 0;
 
       if (vaccinationResult.data) {
+        // Grouper par enfant pour éviter les doublons
+        const childVaccinationMap = new Map();
+        
         vaccinationResult.data.forEach((record) => {
           const vaccinationData = record.vaccination_status_structured as any;
-          if (vaccinationData?.status === 'vaccinated') {
+          const status = vaccinationData?.status || 'unknown';
+          
+          // Utiliser l'index comme identifiant temporaire (à améliorer avec child_id)
+          const recordKey = JSON.stringify(record);
+          if (!childVaccinationMap.has(recordKey)) {
+            childVaccinationMap.set(recordKey, status);
+          }
+        });
+
+        // Compter les statuts
+        Array.from(childVaccinationMap.values()).forEach((status) => {
+          if (status === 'vaccinated') {
             vaccinatedCount++;
-          } else if (vaccinationData?.status === 'not_vaccinated') {
+          } else if (status === 'not_vaccinated') {
             unvaccinatedCount++;
           }
         });
       }
 
-      setHealthStats({
+      const newStats = {
         totalHealthRecords: healthRecordsResult.count || 0,
         totalDiseases: diseasesResult.count || 0,
         vaccinatedChildren: vaccinatedCount,
         unvaccinatedChildren: unvaccinatedCount,
         recentHealthRecords: recentRecordsResult.count || 0,
         criticalCases: criticalCasesResult.count || 0,
-      });
+      };
+
+      console.log('Statistiques de santé chargées:', newStats);
+      setHealthStats(newStats);
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques de santé:', error);
       toast({
