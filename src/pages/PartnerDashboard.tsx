@@ -1,5 +1,4 @@
 
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,12 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Heart, LogOut, Bell, BarChart, Users, TrendingUp, MapPin } from 'lucide-react';
+import { Heart, LogOut, Bell, BarChart, Users, TrendingUp, MapPin, Activity } from 'lucide-react';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import DashboardAnalyticsTabs from '@/components/admin/DashboardAnalyticsTabs';
 import DashboardStatsCards from '@/components/admin/DashboardStatsCards';
+import HealthDashboard from '@/components/admin/HealthDashboard';
 
 interface DashboardStats {
   totalOrphanages: number;
@@ -140,18 +140,23 @@ const PartnerDashboardContent = () => {
           </p>
         </div>
 
-        {/* Onglets : seulement Analytics et Notifications */}
+        {/* Onglets : Analytics, Santé et Notifications */}
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart className="w-4 h-4" />
               Analyses et statistiques
+            </TabsTrigger>
+            <TabsTrigger value="health" className="flex items-center gap-2">
+              <Activity className="w-4 h-4" />
+              Santé
             </TabsTrigger>
             <TabsTrigger value="notifications" className="flex items-center gap-2">
               <Bell className="w-4 h-4" />
               Notifications
             </TabsTrigger>
           </TabsList>
+          
           <TabsContent value="analytics" className="space-y-6">
             {/* Cartes de statistiques détaillées - similaires à celles de l'admin */}
             {stats && (
@@ -170,6 +175,11 @@ const PartnerDashboardContent = () => {
             )}
             <DashboardAnalyticsTabs />
           </TabsContent>
+          
+          <TabsContent value="health" className="space-y-6">
+            <HealthDashboard />
+          </TabsContent>
+          
           <TabsContent value="notifications">
             <NotificationCenter />
           </TabsContent>
@@ -188,4 +198,3 @@ const PartnerDashboard = () => {
 };
 
 export default PartnerDashboard;
-
