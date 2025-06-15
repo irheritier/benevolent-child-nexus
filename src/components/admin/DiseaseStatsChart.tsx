@@ -30,12 +30,13 @@ const DiseaseStatsChart = () => {
     try {
       console.log('Chargement des statistiques de maladies...');
       
-      // Charger les données réelles des maladies
+      // Charger toutes les maladies diagnostiquées avec les noms des maladies
       const { data: childDiseases, error } = await supabase
         .from('child_diseases')
         .select(`
           severity,
-          diseases (
+          disease_id,
+          diseases!inner (
             name
           )
         `);

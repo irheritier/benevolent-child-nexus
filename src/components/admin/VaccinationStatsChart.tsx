@@ -34,21 +34,22 @@ const VaccinationStatsChart = () => {
     try {
       console.log('Chargement des statistiques de vaccination...');
       
-      // Charger les données réelles de vaccination
+      // Charger toutes les données de vaccination avec les informations des orphelinats
       const { data: healthRecords, error } = await supabase
         .from('health_records')
         .select(`
           vaccination_status_structured,
+          child_id,
           children!inner (
             id,
             full_name,
+            orphanage_id,
             orphanages!inner (
               name
             )
           )
         `)
-        .not('vaccination_status_structured', 'is', null)
-        .order('created_at', { ascending: false });
+        .not('vaccination_status_structured', 'is', null);
 
       if (error) {
         console.error('Erreur lors du chargement des vaccinations:', error);

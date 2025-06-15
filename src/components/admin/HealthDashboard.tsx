@@ -38,59 +38,59 @@ const HealthDashboard = () => {
     try {
       console.log('Chargement des statistiques de santé...');
 
-      // Charger les statistiques réelles
+      // Charger les statistiques réelles depuis la base de données
       const [
         healthRecordsResult,
         diseasesResult,
-        vaccinationResult,
         recentRecordsResult,
         criticalCasesResult
       ] = await Promise.all([
         // Total des dossiers de santé
         supabase
           .from('health_records')
-          .select('id', { count: 'exact', head: true }),
+          .select('*'),
         
         // Total des maladies diagnostiquées
         supabase
           .from('child_diseases')
-          .select('id', { count: 'exact', head: true }),
-        
-        // Données de vaccination pour calculer les statistiques
-        supabase
-          .from('health_records')
-          .select('vaccination_status_structured')
-          .not('vaccination_status_structured', 'is', null),
+          .select('*'),
         
         // Dossiers récents (derniers 7 jours)
         supabase
           .from('health_records')
-          .select('id', { count: 'exact', head: true })
+          .select('*')
           .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
         
         // Cas critiques (maladies sévères)
         supabase
           .from('child_diseases')
-          .select('id', { count: 'exact', head: true })
+          .select('*')
           .eq('severity', 'severe')
       ]);
+
+      // Charger les données de vaccination pour calculer les statistiques
+      const { data: vaccinationResult } = await supabase
+        .from('health_records')
+        .select('vaccination_status_structured, child_id')
+        .not('vaccination_status_structured', 'is', null);
+
+      console.log('Données de vaccination chargées:', vaccinationResult);
 
       // Calculer les statistiques de vaccination
       let vaccinatedCount = 0;
       let unvaccinatedCount = 0;
 
-      if (vaccinationResult.data) {
+      if (vaccinationResult && vaccinationResult.length > 0) {
         // Grouper par enfant pour éviter les doublons
         const childVaccinationMap = new Map();
         
-        vaccinationResult.data.forEach((record) => {
+        vaccinationResult.forEach((record) => {
+          const childId = record.child_id;
           const vaccinationData = record.vaccination_status_structured as any;
-          const status = vaccinationData?.status || 'unknown';
           
-          // Utiliser l'index comme identifiant temporaire (à améliorer avec child_id)
-          const recordKey = JSON.stringify(record);
-          if (!childVaccinationMap.has(recordKey)) {
-            childVaccinationMap.set(recordKey, status);
+          if (!childVaccinationMap.has(childId)) {
+            const status = vaccinationData?.status || 'unknown';
+            childVaccinationMap.set(childId, status);
           }
         });
 
@@ -105,15 +105,15 @@ const HealthDashboard = () => {
       }
 
       const newStats = {
-        totalHealthRecords: healthRecordsResult.count || 0,
-        totalDiseases: diseasesResult.count || 0,
+        totalHealthRecords: healthRecordsResult.data?.length || 0,
+        totalDiseases: diseasesResult.data?.length || 0,
         vaccinatedChildren: vaccinatedCount,
         unvaccinatedChildren: unvaccinatedCount,
-        recentHealthRecords: recentRecordsResult.count || 0,
-        criticalCases: criticalCasesResult.count || 0,
+        recentHealthRecords: recentRecordsResult.data?.length || 0,
+        criticalCases: criticalCasesResult.data?.length || 0,
       };
 
-      console.log('Statistiques de santé chargées:', newStats);
+      console.log('Statistiques de santé calculées:', newStats);
       setHealthStats(newStats);
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques de santé:', error);
