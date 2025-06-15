@@ -97,11 +97,11 @@ const PartnerDashboardContent = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement du tableau de bord...</p>
-        </div>
+      <div className="w-full min-h-[50vh] flex flex-col items-center justify-center">
+        <span className="flex justify-center items-center">
+          <span className="animate-spin rounded-full border-4 border-primary border-t-transparent h-10 w-10 mr-4" />
+          <span className="text-primary text-lg font-semibold">Chargement du tableau de bord...</span>
+        </span>
       </div>
     );
   }
