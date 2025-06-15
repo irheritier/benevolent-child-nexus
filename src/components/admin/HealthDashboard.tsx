@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -27,54 +28,17 @@ const HealthDashboard = () => {
     criticalCases: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [userRole, setUserRole] = useState<string>('');
   const { toast } = useToast();
 
   useEffect(() => {
-    checkUserRoleAndLoadStats();
+    loadHealthStats();
   }, []);
 
-  const checkUserRoleAndLoadStats = async () => {
+  const loadHealthStats = async () => {
     try {
-      // Vérifier le rôle de l'utilisateur
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const { data: userData } = await supabase
-          .from('users')
-          .select('role')
-          .eq('id', session.user.id)
-          .single();
-        
-        if (userData) {
-          setUserRole(userData.role);
-          await loadHealthStats(userData.role);
-        }
-      }
-    } catch (error) {
-      console.error('Erreur lors de la vérification du rôle:', error);
-      await loadHealthStats(''); // Essayer quand même de charger les données
-    }
-  };
+      console.log('Chargement des statistiques santé...');
 
-  const loadHealthStats = async (role: string = '') => {
-    try {
-      console.log('Chargement des statistiques santé pour le rôle:', role);
-
-      if (role === 'partner') {
-        // Charger des données d'exemple pour les partenaires
-        setHealthStats({
-          totalHealthRecords: 10,
-          totalDiseases: 5,
-          vaccinatedChildren: 6,
-          unvaccinatedChildren: 4,
-          recentHealthRecords: 3,
-          criticalCases: 2,
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      // Charger les statistiques de santé pour les admins/orphelinats
+      // Charger les statistiques de santé pour tous les utilisateurs (admin et partenaires)
       const [
         healthRecordsResult,
         diseasesResult,
@@ -123,24 +87,11 @@ const HealthDashboard = () => {
       });
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques de santé:', error);
-      
-      // En cas d'erreur pour les partenaires, charger des données d'exemple
-      if (role === 'partner') {
-        setHealthStats({
-          totalHealthRecords: 10,
-          totalDiseases: 5,
-          vaccinatedChildren: 6,
-          unvaccinatedChildren: 4,
-          recentHealthRecords: 3,
-          criticalCases: 2,
-        });
-      } else {
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger les statistiques de santé.",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les statistiques de santé.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
