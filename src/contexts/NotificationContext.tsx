@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -24,6 +23,7 @@ interface NotificationContextType {
   markAllAsRead: () => Promise<void>;
   refreshNotifications: () => Promise<void>;
   createNotification: (notification: Omit<Notification, 'id' | 'user_id' | 'is_read' | 'created_at'>) => Promise<void>;
+  createNotificationForAllPartners: (notification: Omit<Notification, 'id' | 'user_id' | 'is_read' | 'created_at'>) => Promise<void>;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -141,6 +141,38 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
     }
   };
 
+  const createNotificationForAllPartners = async (notification: Omit<Notification, 'id' | 'user_id' | 'is_read' | 'created_at'>) => {
+    try {
+      // Récupérer tous les utilisateurs partenaires
+      const { data: partners, error } = await supabase
+        .from('users')
+        .select('id')
+        .eq('role', 'partner');
+
+      if (error) {
+        console.error('Erreur lors de la récupération des partenaires:', error);
+        return;
+      }
+      if (!partners) return;
+
+      for (const partner of partners) {
+        await supabase.rpc('create_notification', {
+          target_user_id: partner.id,
+          notification_type: notification.type,
+          notification_title: notification.title,
+          notification_message: notification.message,
+          notification_entity_id: notification.entity_id,
+          notification_entity_type: notification.entity_type,
+          notification_priority: notification.priority
+        });
+      }
+      // Rafraîchir les notifications de l'utilisateur courant si concerné
+      await fetchNotifications();
+    } catch (error) {
+      console.error('Erreur lors de la création de notification multi-partenaires:', error);
+    }
+  };
+
   useEffect(() => {
     fetchNotifications();
 
@@ -187,7 +219,8 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
         markAsRead,
         markAllAsRead,
         refreshNotifications: fetchNotifications,
-        createNotification
+        createNotification,
+        createNotificationForAllPartners
       }}
     >
       {children}

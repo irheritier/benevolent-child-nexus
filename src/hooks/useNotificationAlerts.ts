@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNotifications } from '@/contexts/NotificationContext';
 
 export const useNotificationAlerts = () => {
-  const { createNotification } = useNotifications();
+  const { createNotification, createNotificationForAllPartners } = useNotifications();
 
   const checkOrphanagePendingAlerts = async () => {
     try {
@@ -110,9 +110,8 @@ export const useNotificationAlerts = () => {
         const recordDate = new Date(record.date);
         const daysSinceRecord = Math.floor((new Date().getTime() - recordDate.getTime()) / (1000 * 60 * 60 * 24));
         
-        // Alerter seulement pour les enregistrements récents (moins de 7 jours)
         if (daysSinceRecord <= 7) {
-          // Vérifier si on a déjà envoyé une notification pour cet enregistrement
+          // Vérifier si déjà envoyé une notification pour cet enregistrement
           const { data: existingNotif } = await supabase
             .from('notifications')
             .select('id')
@@ -122,7 +121,7 @@ export const useNotificationAlerts = () => {
             .single();
 
           if (!existingNotif) {
-            await createNotification({
+            await createNotificationForAllPartners({
               type: 'malnutrition_alert',
               title: 'Alerte malnutrition critique',
               message: `${record.children.full_name} de ${record.children.orphanages.name} présente une malnutrition sévère.`,
@@ -231,7 +230,7 @@ export const useNotificationAlerts = () => {
         if (occupancyRate >= thresholds.capacity_warning_percentage) {
           const isCritical = occupancyRate >= thresholds.capacity_critical_percentage;
           
-          // Vérifier si on a déjà envoyé une notification récente
+          // Vérifier si déjà une notification récente
           const { data: existingNotif } = await supabase
             .from('notifications')
             .select('id')
@@ -241,7 +240,7 @@ export const useNotificationAlerts = () => {
             .single();
 
           if (!existingNotif) {
-            await createNotification({
+            await createNotificationForAllPartners({
               type: 'capacity_alert',
               title: `Capacité ${isCritical ? 'critique' : 'élevée'}`,
               message: `${orphanage.name} atteint ${Math.round(occupancyRate)}% de sa capacité (${currentCount}/${capacity} enfants).`,
