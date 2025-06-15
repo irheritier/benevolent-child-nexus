@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { getNotificationIcon } from '../utils/notificationUtils';
 
 interface StatType {
@@ -15,19 +14,20 @@ interface NotificationStatsCardsProps {
 
 export const NotificationStatsCards = ({ stats }: NotificationStatsCardsProps) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {stats.map((type) => (
-        <Card key={type.key}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">{type.label}</p>
-                <p className="text-2xl font-bold text-gray-900">{type.count}</p>
-              </div>
-              {getNotificationIcon(type.key)}
+    <div className="flex flex-wrap items-center gap-6 p-4 bg-gray-50 rounded-lg">
+      {stats.map((type, index) => (
+        <div key={type.key} className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
+            {getNotificationIcon(type.key)}
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-gray-600">{type.label}</span>
+              <span className="text-lg font-bold text-gray-900">{type.count}</span>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          {index < stats.length - 1 && (
+            <div className="h-8 w-px bg-gray-300 ml-4" />
+          )}
+        </div>
       ))}
     </div>
   );
