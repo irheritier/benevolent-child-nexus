@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -40,7 +41,7 @@ const HealthAlertsPanel = () => {
     try {
       console.log('Chargement des alertes de santé...');
       
-      // Charger les alertes de santé basées sur les données actuelles pour tous les utilisateurs
+      // Charger les vraies alertes de santé basées sur les données actuelles
       const alerts: HealthAlert[] = [];
 
       // 1. Détection d'épidémies potentielles (même maladie dans plusieurs enfants d'un orphelinat)
@@ -172,19 +173,9 @@ const HealthAlertsPanel = () => {
         });
       }
 
-      // Si aucune alerte réelle, charger des données par défaut
+      // Si aucune alerte réelle, afficher un message de bon fonctionnement
       if (alerts.length === 0) {
-        console.log('Aucune alerte trouvée, utilisation de données par défaut');
-        alerts.push({
-          id: 'default-nutrition-alert',
-          type: 'chronic_condition',
-          title: 'Surveillance Nutritionnelle',
-          description: 'Système de surveillance de la santé et nutrition des enfants activé',
-          severity: 'low',
-          orphanage_name: 'Système',
-          child_count: 0,
-          created_at: new Date().toISOString()
-        });
+        console.log('Aucune alerte trouvée - système en bon état');
       }
 
       const severityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
@@ -193,21 +184,9 @@ const HealthAlertsPanel = () => {
       setAlerts(alerts);
     } catch (error) {
       console.error('Erreur lors du chargement des alertes de santé:', error);
-      // Charger une alerte par défaut en cas d'erreur
-      setAlerts([{
-        id: 'error-default',
-        type: 'chronic_condition',
-        title: 'Surveillance Nutritionnelle',
-        description: 'Système de surveillance de la santé et nutrition des enfants activé',
-        severity: 'low',
-        orphanage_name: 'Système',
-        child_count: 0,
-        created_at: new Date().toISOString()
-      }]);
-      
       toast({
         title: "Erreur",
-        description: "Impossible de charger les alertes de santé. Données par défaut affichées.",
+        description: "Impossible de charger les alertes de santé.",
         variant: "destructive",
       });
     } finally {

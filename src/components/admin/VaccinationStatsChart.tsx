@@ -34,7 +34,7 @@ const VaccinationStatsChart = () => {
     try {
       console.log('Chargement des statistiques de vaccination...');
       
-      // Charger les derniers enregistrements de vaccination par enfant pour tous les utilisateurs
+      // Charger les vraies données de vaccination
       const { data: healthRecords, error } = await supabase
         .from('health_records')
         .select(`
@@ -52,13 +52,19 @@ const VaccinationStatsChart = () => {
 
       if (error) {
         console.error('Erreur lors du chargement:', error);
-        await loadDefaultVaccinationData();
-        return;
+        throw error;
       }
 
       if (!healthRecords || healthRecords.length === 0) {
-        console.log('Aucune donnée de vaccination trouvée, utilisation de données par défaut');
-        await loadDefaultVaccinationData();
+        console.log('Aucune donnée de vaccination trouvée');
+        setStatusData([
+          { status: 'Vacciné', count: 0, color: '#10B981' },
+          { status: 'Partiellement vacciné', count: 0, color: '#F59E0B' },
+          { status: 'Non vacciné', count: 0, color: '#EF4444' },
+          { status: 'Statut inconnu', count: 0, color: '#6B7280' }
+        ]);
+        setOrphanageData([]);
+        setIsLoading(false);
         return;
       }
 
@@ -147,37 +153,14 @@ const VaccinationStatsChart = () => {
       setOrphanageData(orphanageArray);
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques de vaccination:', error);
-      await loadDefaultVaccinationData();
       toast({
         title: "Erreur",
-        description: "Impossible de charger les statistiques de vaccination. Données par défaut affichées.",
+        description: "Impossible de charger les statistiques de vaccination.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const loadDefaultVaccinationData = async () => {
-    console.log('Chargement de données de vaccination par défaut');
-    
-    // Données par défaut identiques pour tous les utilisateurs
-    setStatusData([
-      { status: 'Vacciné', count: 6, color: '#10B981' },
-      { status: 'Partiellement vacciné', count: 2, color: '#F59E0B' },
-      { status: 'Non vacciné', count: 4, color: '#EF4444' },
-      { status: 'Statut inconnu', count: 1, color: '#6B7280' }
-    ]);
-
-    setOrphanageData([
-      {
-        orphanage_name: 'Orphelinat Example',
-        vaccinated: 6,
-        not_vaccinated: 4,
-        partially_vaccinated: 2,
-        unknown: 1
-      }
-    ]);
   };
 
   if (isLoading) {
@@ -222,6 +205,9 @@ const VaccinationStatsChart = () => {
     },
   };
 
+  const hasStatusData = statusData.some(item => item.count > 0);
+  const hasOrphanageData = orphanageData.length > 0;
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Graphique en camembert du statut vaccinal global */}
@@ -230,24 +216,30 @@ const VaccinationStatsChart = () => {
           <CardTitle>Statut Vaccinal Global</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={statusData}
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="count"
-                label={({ status, count }) => `${status}: ${count}`}
-              >
-                {statusData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <ChartTooltip />
-            </PieChart>
-          </ResponsiveContainer>
+          {hasStatusData ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={statusData.filter(item => item.count > 0)}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="count"
+                  label={({ status, count }) => `${status}: ${count}`}
+                >
+                  {statusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <ChartTooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-64 text-muted-foreground">
+              Aucune donnée de vaccination disponible
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -257,25 +249,31 @@ const VaccinationStatsChart = () => {
           <CardTitle>Vaccination par Orphelinat</CardTitle>
         </CardHeader>
         <CardContent>
-          <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={orphanageData}>
-                <XAxis 
-                  dataKey="orphanage_name" 
-                  angle={-45}
-                  textAnchor="end"
-                  height={100}
-                  interval={0}
-                />
-                <YAxis />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="vaccinated" stackId="a" fill="var(--color-vaccinated)" />
-                <Bar dataKey="partially_vaccinated" stackId="a" fill="var(--color-partially_vaccinated)" />
-                <Bar dataKey="not_vaccinated" stackId="a" fill="var(--color-not_vaccinated)" />
-                <Bar dataKey="unknown" stackId="a" fill="var(--color-unknown)" />
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartContainer>
+          {hasOrphanageData ? (
+            <ChartContainer config={chartConfig}>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={orphanageData}>
+                  <XAxis 
+                    dataKey="orphanage_name" 
+                    angle={-45}
+                    textAnchor="end"
+                    height={100}
+                    interval={0}
+                  />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="vaccinated" stackId="a" fill="var(--color-vaccinated)" />
+                  <Bar dataKey="partially_vaccinated" stackId="a" fill="var(--color-partially_vaccinated)" />
+                  <Bar dataKey="not_vaccinated" stackId="a" fill="var(--color-not_vaccinated)" />
+                  <Bar dataKey="unknown" stackId="a" fill="var(--color-unknown)" />
+                </BarChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          ) : (
+            <div className="flex items-center justify-center h-64 text-muted-foreground">
+              Aucune donnée d'orphelinat disponible
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

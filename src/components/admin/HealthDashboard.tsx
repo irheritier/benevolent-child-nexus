@@ -38,7 +38,7 @@ const HealthDashboard = () => {
     try {
       console.log('Chargement des statistiques santé...');
 
-      // Charger les statistiques de santé pour tous les utilisateurs (admin et partenaires)
+      // Charger les vraies statistiques de santé pour tous les utilisateurs
       const [
         healthRecordsResult,
         diseasesResult,
@@ -62,7 +62,7 @@ const HealthDashboard = () => {
           .eq('severity', 'severe')
       ]);
 
-      // Calculer les statistiques de vaccination
+      // Calculer les statistiques de vaccination à partir des vraies données
       let vaccinatedCount = 0;
       let unvaccinatedCount = 0;
 

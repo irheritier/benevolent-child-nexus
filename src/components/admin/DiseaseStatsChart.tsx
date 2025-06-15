@@ -30,7 +30,7 @@ const DiseaseStatsChart = () => {
     try {
       console.log('Chargement des statistiques de maladies...');
       
-      // Charger les statistiques des maladies pour tous les utilisateurs
+      // Charger les vraies statistiques des maladies
       const { data: childDiseases, error } = await supabase
         .from('child_diseases')
         .select(`
@@ -42,14 +42,14 @@ const DiseaseStatsChart = () => {
 
       if (error) {
         console.error('Erreur lors du chargement:', error);
-        // Charger des données par défaut en cas d'erreur
-        await loadDefaultDiseaseData();
-        return;
+        throw error;
       }
 
       if (!childDiseases || childDiseases.length === 0) {
-        console.log('Aucune donnée de maladie trouvée, utilisation de données par défaut');
-        await loadDefaultDiseaseData();
+        console.log('Aucune donnée de maladie trouvée');
+        setDiseaseData([]);
+        setSeverityData([]);
+        setIsLoading(false);
         return;
       }
 
@@ -95,31 +95,14 @@ const DiseaseStatsChart = () => {
       setSeverityData(severityArray);
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques de maladies:', error);
-      await loadDefaultDiseaseData();
       toast({
         title: "Erreur",
-        description: "Impossible de charger les statistiques de maladies. Données par défaut affichées.",
+        description: "Impossible de charger les statistiques de maladies.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const loadDefaultDiseaseData = async () => {
-    console.log('Chargement de données de maladies par défaut');
-    
-    // Données par défaut identiques pour tous les utilisateurs
-    setDiseaseData([
-      { name: 'Paludisme', count: 2, severity_breakdown: { mild: 1, moderate: 1, severe: 0 } },
-      { name: 'Malnutrition', count: 1, severity_breakdown: { mild: 0, moderate: 0, severe: 1 } }
-    ]);
-
-    setSeverityData([
-      { name: 'Léger', value: 1, color: '#10B981' },
-      { name: 'Modéré', value: 1, color: '#F59E0B' },
-      { name: 'Sévère', value: 1, color: '#EF4444' }
-    ]);
   };
 
   if (isLoading) {
@@ -160,22 +143,28 @@ const DiseaseStatsChart = () => {
           <CardTitle>Maladies les Plus Fréquentes</CardTitle>
         </CardHeader>
         <CardContent>
-          <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={diseaseData}>
-                <XAxis 
-                  dataKey="name" 
-                  angle={-45}
-                  textAnchor="end"
-                  height={100}
-                  interval={0}
-                />
-                <YAxis />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="count" fill="var(--color-count)" />
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartContainer>
+          {diseaseData.length > 0 ? (
+            <ChartContainer config={chartConfig}>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={diseaseData}>
+                  <XAxis 
+                    dataKey="name" 
+                    angle={-45}
+                    textAnchor="end"
+                    height={100}
+                    interval={0}
+                  />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="count" fill="var(--color-count)" />
+                </BarChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          ) : (
+            <div className="flex items-center justify-center h-64 text-muted-foreground">
+              Aucune donnée de maladie disponible
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -185,24 +174,30 @@ const DiseaseStatsChart = () => {
           <CardTitle>Répartition par Sévérité</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={severityData}
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="value"
-                label={({ name, value }) => `${name}: ${value}`}
-              >
-                {severityData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <ChartTooltip />
-            </PieChart>
-          </ResponsiveContainer>
+          {severityData.some(item => item.value > 0) ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={severityData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={({ name, value }) => value > 0 ? `${name}: ${value}` : ''}
+                >
+                  {severityData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <ChartTooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-64 text-muted-foreground">
+              Aucune donnée de sévérité disponible
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
