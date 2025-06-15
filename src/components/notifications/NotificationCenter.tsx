@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +20,7 @@ import {
   CheckCircle2,
   Trash2
 } from 'lucide-react';
+import { supabase } from "@/integrations/supabase/client";
 
 const getNotificationIcon = (type: string) => {
   switch (type) {
@@ -55,11 +56,30 @@ export const NotificationCenter = () => {
   const { notifications, markAsRead, markAllAsRead } = useNotifications();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  // On récupère le rôle à l'ouverture
+  useEffect(() => {
+    const fetchRole = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // On va chercher le rôle via la table users
+        const { data, error } = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        if (!error && data?.role) setUserRole(data.role);
+      }
+    };
+    fetchRole();
+  }, []);
 
   const filteredNotifications = notifications.filter(notification => {
     const matchesSearch = notification.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          notification.message.toLowerCase().includes(searchTerm.toLowerCase());
     
+    // onglet courant
     const matchesTab = activeTab === 'all' ||
                       (activeTab === 'unread' && !notification.is_read) ||
                       (activeTab === 'read' && notification.is_read) ||
@@ -68,13 +88,38 @@ export const NotificationCenter = () => {
     return matchesSearch && matchesTab;
   });
 
-  // On NE GARDE QUE les types à afficher (ni orphanage_pending, ni document_expiry)
-  const notificationTypes = [
-    // { key: 'orphanage_pending', label: 'Orphelinats en attente', count: notifications.filter(n => n.type === 'orphanage_pending').length },
-    { key: 'malnutrition_alert', label: 'Alertes malnutrition', count: notifications.filter(n => n.type === 'malnutrition_alert').length },
-    // { key: 'document_expiry', label: 'Documents à renouveler', count: notifications.filter(n => n.type === 'document_expiry').length },
-    { key: 'capacity_alert', label: 'Alertes capacité', count: notifications.filter(n => n.type === 'capacity_alert').length },
-  ];
+  // Définition des tabs et stats selon le rôle
+  // --- Admin : tout voir, Partenaire : seulement les deux alertes principales
+  const tabsToShow = userRole === "partner"
+    ? [
+        { value: "all", label: "Toutes", badge: notifications.length, variant: "secondary" },
+        { value: "unread", label: "Non lues", badge: notifications.filter(n => !n.is_read).length, variant: "destructive" },
+        { value: "read", label: "Lues" },
+        { value: "malnutrition_alert", label: "Malnutrition" },
+        { value: "capacity_alert", label: "Capacité" }
+      ]
+    : [
+        { value: "all", label: "Toutes", badge: notifications.length, variant: "secondary" },
+        { value: "unread", label: "Non lues", badge: notifications.filter(n => !n.is_read).length, variant: "destructive" },
+        { value: "read", label: "Lues" },
+        { value: "orphanage_pending", label: "Orphelinats en attente" },
+        { value: "malnutrition_alert", label: "Malnutrition" },
+        { value: "document_expiry", label: "Documents" },
+        { value: "capacity_alert", label: "Capacité" }
+      ];
+
+  // Pour les cartes stats
+  const notificationTypes = userRole === "partner"
+    ? [
+        { key: 'malnutrition_alert', label: 'Alertes malnutrition', count: notifications.filter(n => n.type === 'malnutrition_alert').length },
+        { key: 'capacity_alert', label: 'Alertes capacité', count: notifications.filter(n => n.type === 'capacity_alert').length },
+      ]
+    : [
+        { key: 'orphanage_pending', label: 'Orphelinats en attente', count: notifications.filter(n => n.type === 'orphanage_pending').length },
+        { key: 'malnutrition_alert', label: 'Alertes malnutrition', count: notifications.filter(n => n.type === 'malnutrition_alert').length },
+        { key: 'document_expiry', label: 'Documents à renouveler', count: notifications.filter(n => n.type === 'document_expiry').length },
+        { key: 'capacity_alert', label: 'Alertes capacité', count: notifications.filter(n => n.type === 'capacity_alert').length },
+      ];
 
   return (
     <div className="space-y-6">
@@ -106,20 +151,15 @@ export const NotificationCenter = () => {
             </Button>
           </div>
 
-          {/* TabsList : on retire totalement 'document_expiry' et 'orphanage_pending' */}
+          {/* TabsList dynamique selon rôle */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-4 w-full">
-              <TabsTrigger value="all" className="flex items-center gap-2">
-                Toutes
-                <Badge variant="secondary">{notifications.length}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="unread" className="flex items-center gap-2">
-                Non lues
-                <Badge variant="destructive">{notifications.filter(n => !n.is_read).length}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="read">Lues</TabsTrigger>
-              <TabsTrigger value="malnutrition_alert">Malnutrition</TabsTrigger>
-              {/* Plus de Documents ni Orphelinats en attente dans les tabs*/}
+            <TabsList className={`grid grid-cols-${tabsToShow.length} w-full`}>
+              {tabsToShow.map((tab) => (
+                <TabsTrigger key={tab.value} value={tab.value} className="flex items-center gap-2">
+                  {tab.label}
+                  {typeof tab.badge === "number" && <Badge variant={tab.variant || "secondary"}>{tab.badge}</Badge>}
+                </TabsTrigger>
+              ))}
             </TabsList>
 
             <TabsContent value={activeTab} className="mt-6">
@@ -191,7 +231,7 @@ export const NotificationCenter = () => {
         </CardContent>
       </Card>
 
-      {/* Cartes statistiques notifications : on garde capacity_alert & malnutrition_alert uniquement */}
+      {/* Stat cards dynamiques selon le rôle */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {notificationTypes.map((type) => (
           <Card key={type.key}>
@@ -210,4 +250,3 @@ export const NotificationCenter = () => {
     </div>
   );
 };
-
