@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
@@ -34,29 +33,41 @@ const VaccinationStatsChart = () => {
     try {
       console.log('Chargement des statistiques de vaccination...');
       
-      // Charger toutes les données de vaccination avec les informations des orphelinats
+      // Charger tous les orphelinats d'abord
+      const { data: orphanages, error: orphanagesError } = await supabase
+        .from('orphanages')
+        .select('id, name');
+
+      if (orphanagesError) {
+        console.error('Erreur lors du chargement des orphelinats:', orphanagesError);
+        throw orphanagesError;
+      }
+
+      console.log('Orphelinats trouvés:', orphanages);
+
+      // Charger les enfants avec leur orphelinat
+      const { data: children, error: childrenError } = await supabase
+        .from('children')
+        .select('id, orphanage_id');
+
+      if (childrenError) {
+        console.error('Erreur lors du chargement des enfants:', childrenError);
+        throw childrenError;
+      }
+
+      console.log('Enfants trouvés:', children);
+
+      // Charger toutes les données de vaccination
       const { data: healthRecords, error } = await supabase
         .from('health_records')
-        .select(`
-          vaccination_status_structured,
-          child_id,
-          children!inner (
-            id,
-            full_name,
-            orphanage_id,
-            orphanages!inner (
-              name
-            )
-          )
-        `)
-        .not('vaccination_status_structured', 'is', null);
+        .select('vaccination_status_structured, child_id');
 
       if (error) {
         console.error('Erreur lors du chargement des vaccinations:', error);
         throw error;
       }
 
-      console.log('Données brutes de vaccination:', healthRecords);
+      console.log('Données de vaccination trouvées:', healthRecords);
 
       if (!healthRecords || healthRecords.length === 0) {
         console.log('Aucune donnée de vaccination trouvée');
@@ -71,15 +82,27 @@ const VaccinationStatsChart = () => {
         return;
       }
 
+      // Créer des maps pour les relations
+      const orphanageMap = new Map();
+      orphanages?.forEach(orphanage => {
+        orphanageMap.set(orphanage.id, orphanage.name);
+      });
+
+      const childOrphanageMap = new Map();
+      children?.forEach(child => {
+        childOrphanageMap.set(child.id, child.orphanage_id);
+      });
+
       // Regrouper par enfant pour obtenir le statut le plus récent
       const childVaccinationMap = new Map();
       
       healthRecords.forEach((record) => {
-        const childId = record.children.id;
-        const orphanageName = record.children.orphanages.name;
-        const vaccinationData = record.vaccination_status_structured as any;
-        
-        if (!childVaccinationMap.has(childId)) {
+        const childId = record.child_id;
+        if (childId && !childVaccinationMap.has(childId)) {
+          const orphanageId = childOrphanageMap.get(childId);
+          const orphanageName = orphanageMap.get(orphanageId) || 'Orphelinat inconnu';
+          const vaccinationData = record.vaccination_status_structured as any;
+          
           childVaccinationMap.set(childId, {
             status: vaccinationData?.status || 'unknown',
             orphanage_name: orphanageName

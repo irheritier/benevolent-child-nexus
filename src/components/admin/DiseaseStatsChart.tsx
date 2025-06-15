@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
@@ -30,26 +29,33 @@ const DiseaseStatsChart = () => {
     try {
       console.log('Chargement des statistiques de maladies...');
       
-      // Charger toutes les maladies diagnostiquées avec les noms des maladies
+      // Requête simplifiée pour récupérer toutes les maladies d'abord
+      const { data: allDiseases, error: diseasesError } = await supabase
+        .from('diseases')
+        .select('id, name')
+        .eq('is_active', true);
+
+      if (diseasesError) {
+        console.error('Erreur lors du chargement des maladies:', diseasesError);
+        throw diseasesError;
+      }
+
+      console.log('Maladies trouvées:', allDiseases);
+
+      // Récupérer les diagnostics
       const { data: childDiseases, error } = await supabase
         .from('child_diseases')
-        .select(`
-          severity,
-          disease_id,
-          diseases!inner (
-            name
-          )
-        `);
+        .select('disease_id, severity');
+
+      console.log('Diagnostics trouvés:', childDiseases);
 
       if (error) {
-        console.error('Erreur lors du chargement des maladies:', error);
+        console.error('Erreur lors du chargement des diagnostics:', error);
         throw error;
       }
 
-      console.log('Données brutes des maladies:', childDiseases);
-
       if (!childDiseases || childDiseases.length === 0) {
-        console.log('Aucune donnée de maladie trouvée');
+        console.log('Aucun diagnostic trouvé');
         setDiseaseData([]);
         setSeverityData([
           { name: 'Léger', value: 0, color: '#10B981' },
@@ -60,24 +66,30 @@ const DiseaseStatsChart = () => {
         return;
       }
 
+      // Créer une map des maladies par ID
+      const diseaseMap = new Map();
+      allDiseases?.forEach(disease => {
+        diseaseMap.set(disease.id, disease.name);
+      });
+
       // Organiser les données par maladie
-      const diseaseMap = new Map<string, DiseaseData>();
+      const diseaseStats = new Map<string, DiseaseData>();
       const severityMap = new Map<string, number>();
 
       childDiseases.forEach((record) => {
-        const diseaseName = record.diseases?.name || 'Maladie inconnue';
+        const diseaseName = diseaseMap.get(record.disease_id) || 'Maladie inconnue';
         const severity = record.severity || 'mild';
 
         // Compter par maladie
-        if (!diseaseMap.has(diseaseName)) {
-          diseaseMap.set(diseaseName, {
+        if (!diseaseStats.has(diseaseName)) {
+          diseaseStats.set(diseaseName, {
             name: diseaseName,
             count: 0,
             severity_breakdown: { mild: 0, moderate: 0, severe: 0 }
           });
         }
 
-        const diseaseData = diseaseMap.get(diseaseName)!;
+        const diseaseData = diseaseStats.get(diseaseName)!;
         diseaseData.count++;
         if (severity in diseaseData.severity_breakdown) {
           diseaseData.severity_breakdown[severity as keyof typeof diseaseData.severity_breakdown]++;
@@ -88,7 +100,7 @@ const DiseaseStatsChart = () => {
       });
 
       // Convertir en tableaux pour les graphiques
-      const diseaseArray = Array.from(diseaseMap.values())
+      const diseaseArray = Array.from(diseaseStats.values())
         .sort((a, b) => b.count - a.count)
         .slice(0, 10); // Top 10
 

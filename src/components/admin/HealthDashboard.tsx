@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -38,7 +37,7 @@ const HealthDashboard = () => {
     try {
       console.log('Chargement des statistiques de santé...');
 
-      // Charger les statistiques réelles depuis la base de données
+      // Charger toutes les données avec des requêtes plus simples
       const [
         healthRecordsResult,
         diseasesResult,
@@ -48,47 +47,52 @@ const HealthDashboard = () => {
         // Total des dossiers de santé
         supabase
           .from('health_records')
-          .select('*'),
+          .select('id'),
         
         // Total des maladies diagnostiquées
         supabase
           .from('child_diseases')
-          .select('*'),
+          .select('id'),
         
         // Dossiers récents (derniers 7 jours)
         supabase
           .from('health_records')
-          .select('*')
+          .select('id')
           .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
         
         // Cas critiques (maladies sévères)
         supabase
           .from('child_diseases')
-          .select('*')
+          .select('id')
           .eq('severity', 'severe')
       ]);
 
-      // Charger les données de vaccination pour calculer les statistiques
-      const { data: vaccinationResult } = await supabase
-        .from('health_records')
-        .select('vaccination_status_structured, child_id')
-        .not('vaccination_status_structured', 'is', null);
+      console.log('Résultats health_records:', healthRecordsResult.data?.length);
+      console.log('Résultats child_diseases:', diseasesResult.data?.length);
 
-      console.log('Données de vaccination chargées:', vaccinationResult);
+      // Charger les données de vaccination de manière plus simple
+      const { data: allHealthRecords, error: vaccinationError } = await supabase
+        .from('health_records')
+        .select('vaccination_status_structured, child_id');
+
+      console.log('Données de vaccination chargées:', allHealthRecords);
+
+      if (vaccinationError) {
+        console.error('Erreur vaccination:', vaccinationError);
+      }
 
       // Calculer les statistiques de vaccination
       let vaccinatedCount = 0;
       let unvaccinatedCount = 0;
 
-      if (vaccinationResult && vaccinationResult.length > 0) {
+      if (allHealthRecords && allHealthRecords.length > 0) {
         // Grouper par enfant pour éviter les doublons
         const childVaccinationMap = new Map();
         
-        vaccinationResult.forEach((record) => {
+        allHealthRecords.forEach((record) => {
           const childId = record.child_id;
-          const vaccinationData = record.vaccination_status_structured as any;
-          
-          if (!childVaccinationMap.has(childId)) {
+          if (childId && !childVaccinationMap.has(childId)) {
+            const vaccinationData = record.vaccination_status_structured as any;
             const status = vaccinationData?.status || 'unknown';
             childVaccinationMap.set(childId, status);
           }
