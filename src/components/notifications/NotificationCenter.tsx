@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -151,9 +150,9 @@ export const NotificationCenter = () => {
             </Button>
           </div>
 
-          {/* TabsList dynamique selon rôle */}
+          {/* TabsList avec style flex adaptatif */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className={`grid grid-cols-${tabsToShow.length} w-full`}>
+            <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${tabsToShow.length}, 1fr)` }}>
               {tabsToShow.map((tab) => (
                 <TabsTrigger key={tab.value} value={tab.value} className="flex items-center gap-2">
                   {tab.label}
