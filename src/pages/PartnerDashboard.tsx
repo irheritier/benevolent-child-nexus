@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -139,62 +140,6 @@ const PartnerDashboardContent = () => {
           </p>
         </div>
 
-        {/* Statistiques générales */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <span className="inline-flex w-8 h-8 items-center justify-center bg-blue-100 rounded-lg">
-                  <Heart className="h-6 w-6 text-blue-600" />
-                </span>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Orphelinats</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats?.totalOrphanages || 0}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <span className="inline-flex w-8 h-8 items-center justify-center bg-green-100 rounded-lg">
-                  <Heart className="h-6 w-6 text-green-600" />
-                </span>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Enfants</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats?.totalChildren || 0}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <span className="inline-flex w-8 h-8 items-center justify-center bg-purple-100 rounded-lg">
-                  <Heart className="h-6 w-6 text-purple-600" />
-                </span>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Provinces</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats?.totalProvinces || 0}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <span className="inline-flex w-8 h-8 items-center justify-center bg-orange-100 rounded-lg">
-                  <Heart className="h-6 w-6 text-orange-600" />
-                </span>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Orphelinats vérifiés</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats?.verifiedOrphanages || 0}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Onglets : seulement Analytics et Notifications */}
         <Tabs defaultValue="analytics" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
@@ -243,3 +188,4 @@ const PartnerDashboard = () => {
 };
 
 export default PartnerDashboard;
+
