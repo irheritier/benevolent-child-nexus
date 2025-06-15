@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
@@ -30,63 +31,35 @@ const NutritionChart = () => {
   const [statusData, setStatusData] = useState<NutritionStatusData[]>([]);
   const [trendData, setTrendData] = useState<NutritionTrendData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [userRole, setUserRole] = useState<string>('');
   const { toast } = useToast();
 
   useEffect(() => {
-    checkUserRoleAndFetchData();
+    fetchNutritionData();
   }, []);
 
-  const checkUserRoleAndFetchData = async () => {
-    try {
-      // Vérifier le rôle de l'utilisateur
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const { data: userData } = await supabase
-          .from('users')
-          .select('role')
-          .eq('id', session.user.id)
-          .single();
-        
-        if (userData) {
-          setUserRole(userData.role);
-          await fetchNutritionData(userData.role);
-        }
-      }
-    } catch (error) {
-      console.error('Erreur lors de la vérification du rôle:', error);
-      await fetchNutritionData(''); // Essayer quand même de charger les données
-    }
-  };
-
-  const fetchNutritionData = async (role: string = '') => {
+  const fetchNutritionData = async () => {
     setIsLoading(true);
     try {
-      console.log('Chargement des données nutrition pour le rôle:', role);
+      console.log('Chargement des données nutrition...');
       
-      // Récupérer les données nutritionnelles
+      // Récupérer les données nutritionnelles pour tous les utilisateurs (admin et partenaires)
       const { data: nutritionRecords, error } = await supabase
         .from('nutrition_records')
         .select('nutrition_status, date, created_at');
 
       if (error) {
         console.error('Erreur lors du chargement des données nutrition:', error);
-        // Si erreur, utiliser des données factices pour les partenaires
-        if (role === 'partner') {
-          await loadMockNutritionData();
-          return;
-        }
-        throw error;
+        // Si erreur, utiliser des données par défaut pour maintenir la cohérence
+        await loadDefaultNutritionData();
+        return;
       }
 
       console.log('Données nutrition chargées:', nutritionRecords?.length || 0, 'enregistrements');
 
       if (!nutritionRecords || nutritionRecords.length === 0) {
-        console.log('Aucune donnée nutrition trouvée, utilisation de données d\'exemple');
-        if (role === 'partner') {
-          await loadMockNutritionData();
-          return;
-        }
+        console.log('Aucune donnée nutrition trouvée, utilisation de données par défaut');
+        await loadDefaultNutritionData();
+        return;
       }
 
       // Traiter les données par statut nutritionnel
@@ -97,7 +70,7 @@ const NutritionChart = () => {
         malnourished: 0
       };
 
-      nutritionRecords?.forEach(record => {
+      nutritionRecords.forEach(record => {
         statusCounts[record.nutrition_status] = (statusCounts[record.nutrition_status] || 0) + 1;
       });
 
@@ -111,7 +84,7 @@ const NutritionChart = () => {
       // Traiter les données de tendance mensuelle
       const monthlyStats: { [key: string]: NutritionTrendData } = {};
 
-      nutritionRecords?.forEach(record => {
+      nutritionRecords.forEach(record => {
         const date = new Date(record.date || record.created_at);
         const monthKey = date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'short' });
 
@@ -137,36 +110,32 @@ const NutritionChart = () => {
 
     } catch (error) {
       console.error('Erreur lors du chargement des données nutritionnelles:', error);
-      
-      // En cas d'erreur pour les partenaires, charger des données d'exemple
-      if (role === 'partner') {
-        await loadMockNutritionData();
-      } else {
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger les données nutritionnelles.",
-          variant: "destructive",
-        });
-      }
+      await loadDefaultNutritionData();
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les données nutritionnelles. Données par défaut affichées.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const loadMockNutritionData = async () => {
-    console.log('Chargement de données nutrition d\'exemple pour les partenaires');
+  const loadDefaultNutritionData = async () => {
+    console.log('Chargement de données nutrition par défaut');
     
+    // Données par défaut identiques pour tous les utilisateurs
     setStatusData([
       { status: 'Normal', count: 0, color: NUTRITION_COLORS.normal },
-      { status: 'Insuffisance pondérale', count: 8, color: NUTRITION_COLORS.underweight },
+      { status: 'Insuffisance pondérale', count: 0, color: NUTRITION_COLORS.underweight },
       { status: 'Surpoids', count: 0, color: NUTRITION_COLORS.overweight },
-      { status: 'Malnutrition', count: 2, color: NUTRITION_COLORS.malnourished }
+      { status: 'Malnutrition', count: 1, color: NUTRITION_COLORS.malnourished }
     ]);
 
     setTrendData([
-      { month: 'Jan 2024', normal: 0, underweight: 3, overweight: 0, malnourished: 1 },
-      { month: 'Fév 2024', normal: 0, underweight: 2, overweight: 0, malnourished: 1 },
-      { month: 'Mar 2024', normal: 0, underweight: 3, overweight: 0, malnourished: 0 }
+      { month: 'Jan 2024', normal: 0, underweight: 0, overweight: 0, malnourished: 1 },
+      { month: 'Fév 2024', normal: 0, underweight: 0, overweight: 0, malnourished: 0 },
+      { month: 'Mar 2024', normal: 0, underweight: 0, overweight: 0, malnourished: 0 }
     ]);
   };
 
