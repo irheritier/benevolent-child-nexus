@@ -60,7 +60,7 @@ const VaccinationStatsChart = () => {
       // Charger toutes les données de vaccination
       const { data: healthRecords, error } = await supabase
         .from('health_records')
-        .select('vaccination_status_structured, child_id');
+        .select('vaccination_status_structured, child_id, created_at');
 
       if (error) {
         console.error('Erreur lors du chargement des vaccinations:', error);
@@ -93,21 +93,27 @@ const VaccinationStatsChart = () => {
         childOrphanageMap.set(child.id, child.orphanage_id);
       });
 
-      // Regrouper par enfant pour obtenir le statut le plus récent
-      const childVaccinationMap = new Map();
-      
+      // Regrouper tous les dossiers santé par enfant_id, et ne garder que le plus récent
+      const latestHealthRecordPerChild = new Map();
       healthRecords.forEach((record) => {
         const childId = record.child_id;
-        if (childId && !childVaccinationMap.has(childId)) {
-          const orphanageId = childOrphanageMap.get(childId);
-          const orphanageName = orphanageMap.get(orphanageId) || 'Orphelinat inconnu';
-          const vaccinationData = record.vaccination_status_structured as any;
-          
-          childVaccinationMap.set(childId, {
-            status: vaccinationData?.status || 'unknown',
-            orphanage_name: orphanageName
-          });
+        if (!childId) return;
+        const prev = latestHealthRecordPerChild.get(childId);
+        if (!prev || new Date(record.created_at) > new Date(prev.created_at)) {
+          latestHealthRecordPerChild.set(childId, record);
         }
+      });
+
+      // Now reconstitute the childVaccinationMap with **latest record only**
+      const childVaccinationMap = new Map();
+      Array.from(latestHealthRecordPerChild.entries()).forEach(([childId, record]) => {
+        const orphanageId = childOrphanageMap.get(childId);
+        const orphanageName = orphanageMap.get(orphanageId) || 'Orphelinat inconnu';
+        const vaccinationData = record.vaccination_status_structured as any;
+        childVaccinationMap.set(childId, {
+          status: vaccinationData?.status || 'unknown',
+          orphanage_name: orphanageName
+        });
       });
 
       // Compter les statuts globaux
