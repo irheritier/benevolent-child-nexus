@@ -9,7 +9,7 @@ import ReportsManager from './ReportsManager';
 
 const DashboardAnalyticsTabs = () => {
   return (
-    <Tabs defaultValue="orphanages" className="space-y-4">
+    <Tabs defaultValue="nutrition" className="space-y-4">
       <TabsList className="grid w-full grid-cols-6">
         <TabsTrigger value="orphanages">Orphelinats</TabsTrigger>
         <TabsTrigger value="children">Enfants</TabsTrigger>
