@@ -68,10 +68,11 @@ export const NotificationCenter = () => {
     return matchesSearch && matchesTab;
   });
 
+  // On NE GARDE QUE les types à afficher (ni orphanage_pending, ni document_expiry)
   const notificationTypes = [
-    { key: 'orphanage_pending', label: 'Orphelinats en attente', count: notifications.filter(n => n.type === 'orphanage_pending').length },
+    // { key: 'orphanage_pending', label: 'Orphelinats en attente', count: notifications.filter(n => n.type === 'orphanage_pending').length },
     { key: 'malnutrition_alert', label: 'Alertes malnutrition', count: notifications.filter(n => n.type === 'malnutrition_alert').length },
-    { key: 'document_expiry', label: 'Documents à renouveler', count: notifications.filter(n => n.type === 'document_expiry').length },
+    // { key: 'document_expiry', label: 'Documents à renouveler', count: notifications.filter(n => n.type === 'document_expiry').length },
     { key: 'capacity_alert', label: 'Alertes capacité', count: notifications.filter(n => n.type === 'capacity_alert').length },
   ];
 
@@ -105,8 +106,9 @@ export const NotificationCenter = () => {
             </Button>
           </div>
 
+          {/* TabsList : on retire totalement 'document_expiry' et 'orphanage_pending' */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-6 w-full">
+            <TabsList className="grid grid-cols-4 w-full">
               <TabsTrigger value="all" className="flex items-center gap-2">
                 Toutes
                 <Badge variant="secondary">{notifications.length}</Badge>
@@ -116,9 +118,8 @@ export const NotificationCenter = () => {
                 <Badge variant="destructive">{notifications.filter(n => !n.is_read).length}</Badge>
               </TabsTrigger>
               <TabsTrigger value="read">Lues</TabsTrigger>
-              <TabsTrigger value="orphanage_pending">Orphelinats</TabsTrigger>
               <TabsTrigger value="malnutrition_alert">Malnutrition</TabsTrigger>
-              <TabsTrigger value="document_expiry">Documents</TabsTrigger>
+              {/* Plus de Documents ni Orphelinats en attente dans les tabs*/}
             </TabsList>
 
             <TabsContent value={activeTab} className="mt-6">
@@ -190,8 +191,8 @@ export const NotificationCenter = () => {
         </CardContent>
       </Card>
 
-      {/* Statistiques des notifications */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Cartes statistiques notifications : on garde capacity_alert & malnutrition_alert uniquement */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {notificationTypes.map((type) => (
           <Card key={type.key}>
             <CardContent className="p-4">
@@ -209,3 +210,4 @@ export const NotificationCenter = () => {
     </div>
   );
 };
+
