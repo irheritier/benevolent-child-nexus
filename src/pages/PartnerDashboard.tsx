@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +10,7 @@ import { Heart, LogOut, Bell, BarChart } from 'lucide-react';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { NotificationProvider } from '@/contexts/NotificationContext';
-import AdminStatsDashboard from '@/components/admin/AdminStatsDashboard';
+import DashboardAnalyticsTabs from '@/components/admin/DashboardAnalyticsTabs';
 
 interface DashboardStats {
   totalOrphanages: number;
@@ -201,7 +200,7 @@ const PartnerDashboardContent = () => {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="analytics">
-            <AdminStatsDashboard />
+            <DashboardAnalyticsTabs />
           </TabsContent>
           <TabsContent value="notifications">
             <NotificationCenter />
