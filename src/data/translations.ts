@@ -1,11 +1,11 @@
 
 export const texts = {
   fr: {
-    title: "Congo ChildNet",
+    title: "FCS : Find Children To Save",
     subtitle: "Plateforme de recensement et de suivi des centres d'accueil pour enfants vulnérables en RDC",
     heroDescription: "Une solution numérique moderne pour centraliser, protéger et optimiser le suivi des enfants vulnérables à travers la République Démocratique du Congo.",
     mission: "Notre Mission",
-    missionText: "Congo ChildNet centralise les informations sur les centres d'accueil pour enfants vulnérables à travers la République Démocratique du Congo. Notre objectif est de garantir un suivi médical et nutritionnel optimal tout en respectant les droits et la dignité de chaque enfant.",
+    missionText: "FCS centralise les informations sur les centres d'accueil pour enfants vulnérables à travers la République Démocratique du Congo. Notre objectif est de garantir un suivi médical et nutritionnel optimal tout en respectant les droits et la dignité de chaque enfant.",
     impact: "Notre Impact en Temps Réel",
     impactSubtitle: "Des données transparentes pour un impact mesurable",
     stats: {
@@ -41,8 +41,8 @@ export const texts = {
       gdpr: "Conforme RGPD"
     },
     footer: {
-      about: "À propos de CCN",
-      aboutText: "Congo ChildNet est une initiative technologique dédiée à la protection et au suivi des enfants vulnérables en RDC.",
+      about: "À propos de FCS",
+      aboutText: "FCS : Find Children To Save est une initiative technologique dédiée à la protection et au suivi des enfants vulnérables en RDC.",
       links: "Liens utiles",
       privacy: "Politique de confidentialité",
       terms: "Conditions d'utilisation",
@@ -52,11 +52,11 @@ export const texts = {
     }
   },
   en: {
-    title: "Congo ChildNet",
+    title: "FCS : Find Children To Save",
     subtitle: "Platform for registering and monitoring care centers for vulnerable children in DRC",
     heroDescription: "A modern digital solution to centralize, protect and optimize the monitoring of vulnerable children across the Democratic Republic of Congo.",
     mission: "Our Mission",
-    missionText: "Congo ChildNet centralizes information about care centers for vulnerable children across the Democratic Republic of Congo. Our goal is to ensure optimal medical and nutritional monitoring while respecting the rights and dignity of each child.",
+    missionText: "FCS centralizes information about care centers for vulnerable children across the Democratic Republic of Congo. Our goal is to ensure optimal medical and nutritional monitoring while respecting the rights and dignity of each child.",
     impact: "Our Real-Time Impact",
     impactSubtitle: "Transparent data for measurable impact",
     stats: {
@@ -92,8 +92,8 @@ export const texts = {
       gdpr: "GDPR Compliant"
     },
     footer: {
-      about: "About CCN",
-      aboutText: "Congo ChildNet is a technological initiative dedicated to protecting and monitoring vulnerable children in DRC.",
+      about: "About FCS",
+      aboutText: "FCS : Find Children To Save is a technological initiative dedicated to protecting and monitoring vulnerable children in DRC.",
       links: "Useful Links",
       privacy: "Privacy Policy",
       terms: "Terms of Use",
