@@ -1,24 +1,21 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
-  Heart, 
-  LogOut, 
-  Users, 
   UserPlus, 
-  Activity, 
-  FileText, 
-  Settings,
   MapPin,
   Phone,
   Mail,
   Calendar,
-  TrendingUp
+  TrendingUp,
+  FileText,
+  Activity,
+  Heart
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import AddChildForm from '@/components/orphanage/AddChildForm';
@@ -28,6 +25,8 @@ import ChildDetailsDialog from '@/components/orphanage/ChildDetailsDialog';
 import HealthManagement from '@/components/orphanage/HealthManagement';
 import NutritionManagement from '@/components/orphanage/NutritionManagement';
 import DocumentsManagement from '@/components/orphanage/DocumentsManagement';
+import DashboardHeader from '@/components/orphanage/DashboardHeader';
+import StatsCards from '@/components/orphanage/StatsCards';
 
 interface User {
   id: string;
@@ -213,25 +212,12 @@ const OrphanageDashboard = () => {
     setViewingChild(child);
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'verified':
-        return <Badge className="bg-green-100 text-green-800 border-green-200">Vérifié</Badge>;
-      case 'pending':
-        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">En attente</Badge>;
-      case 'rejected':
-        return <Badge className="bg-red-100 text-red-800 border-red-200">Rejeté</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
-
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
-          <span className="text-lg font-medium">Chargement...</span>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div>
+          <span className="text-lg font-medium text-slate-700 dark:text-slate-300">Chargement de votre espace...</span>
         </div>
       </div>
     );
@@ -239,14 +225,13 @@ const OrphanageDashboard = () => {
 
   if (!orphanage) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="w-full max-w-md text-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+        <Card className="w-full max-w-md text-center shadow-xl border-0">
           <CardContent className="pt-6">
-            <div className="text-muted-foreground mb-4">
+            <div className="text-slate-600 dark:text-slate-400 mb-4">
               Aucun centre d'accueil associé à ce compte.
             </div>
             <Button onClick={handleLogout} variant="outline">
-              <LogOut className="w-4 h-4 mr-2" />
               Se déconnecter
             </Button>
           </CardContent>
@@ -256,165 +241,111 @@ const OrphanageDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
-      {/* Header */}
-      <header className="border-b bg-background/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center shadow-lg">
-              <Heart className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-primary">
-                {orphanage.name}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Espace de gestion
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <div className="text-right hidden md:block">
-              <p className="text-sm font-medium">{user?.email}</p>
-              <div className="flex items-center gap-2">
-                {getStatusBadge(orphanage.legal_status)}
-              </div>
-            </div>
-            <Button variant="outline" onClick={handleLogout} size="sm">
-              <LogOut className="w-4 h-4 mr-2" />
-              Déconnexion
-            </Button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      <DashboardHeader user={user} orphanage={orphanage} onLogout={handleLogout} />
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-6 py-8">
         {/* Statistiques rapides */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Enfants hébergés</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{children.length}</div>
-              <p className="text-xs text-muted-foreground">
-                Capacité: {orphanage.child_capacity || 'Non définie'}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Garçons</CardTitle>
-              <Users className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
-                {children.filter(child => child.gender === 'M').length}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Filles</CardTitle>
-              <Users className="h-4 w-4 text-pink-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-pink-600">
-                {children.filter(child => child.gender === 'F').length}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Statut</CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              {getStatusBadge(orphanage.legal_status)}
-            </CardContent>
-          </Card>
+        <div className="mb-8">
+          <StatsCards children={children} orphanage={orphanage} />
         </div>
 
         {/* Contenu principal avec onglets */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-            <TabsTrigger value="children">Enfants</TabsTrigger>
-            <TabsTrigger value="health">Santé</TabsTrigger>
-            <TabsTrigger value="nutrition">Nutrition</TabsTrigger>
-            <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border shadow-lg rounded-xl p-1 h-12">
+            <TabsTrigger value="overview" className="rounded-lg font-semibold">Vue d'ensemble</TabsTrigger>
+            <TabsTrigger value="children" className="rounded-lg font-semibold">Enfants</TabsTrigger>
+            <TabsTrigger value="health" className="rounded-lg font-semibold">Santé</TabsTrigger>
+            <TabsTrigger value="nutrition" className="rounded-lg font-semibold">Nutrition</TabsTrigger>
+            <TabsTrigger value="documents" className="rounded-lg font-semibold">Documents</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Informations du centre */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="w-5 h-5" />
+              <Card className="shadow-lg border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
+                <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                      <MapPin className="w-5 h-5" />
+                    </div>
                     Informations du centre
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="p-6 space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Nom du centre</label>
-                    <p className="font-medium">{orphanage.name}</p>
+                    <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">Nom du centre</label>
+                    <p className="font-bold text-lg text-slate-800 dark:text-slate-200">{orphanage.name}</p>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">Province</label>
-                      <p className="font-medium">{orphanage.province}</p>
+                      <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">Province</label>
+                      <p className="font-medium text-slate-800 dark:text-slate-200">{orphanage.province}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">Ville</label>
-                      <p className="font-medium">{orphanage.city}</p>
+                      <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">Ville</label>
+                      <p className="font-medium text-slate-800 dark:text-slate-200">{orphanage.city}</p>
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Personne de contact</label>
-                    <p className="font-medium">{orphanage.contact_person}</p>
+                    <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">Personne de contact</label>
+                    <p className="font-medium text-slate-800 dark:text-slate-200">{orphanage.contact_person}</p>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-muted-foreground" />
-                      <span>{orphanage.phone || 'Non renseigné'}</span>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                      <Phone className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <span className="text-slate-700 dark:text-slate-300">{orphanage.phone || 'Non renseigné'}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-muted-foreground" />
-                      <span>{orphanage.email}</span>
+                    <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                      <Mail className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <span className="text-slate-700 dark:text-slate-300">{orphanage.email}</span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Activité récente */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5" />
-                    Activité récente
+              {/* Actions rapides */}
+              <Card className="shadow-lg border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
+                <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                      <Activity className="w-5 h-5" />
+                    </div>
+                    Actions rapides
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="text-sm text-muted-foreground">
-                      {children.length === 0 
-                        ? "Aucun enfant enregistré pour le moment."
-                        : `${children.length} enfant(s) enregistré(s) dans votre centre.`
-                      }
-                    </div>
-                    <Button size="sm" className="w-full" onClick={() => setShowAddChild(true)}>
-                      <UserPlus className="w-4 h-4 mr-2" />
+                <CardContent className="p-6 space-y-4">
+                  <div className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+                    {children.length === 0 
+                      ? "Commencez par enregistrer votre premier enfant dans le système."
+                      : `Vous gérez actuellement ${children.length} enfant(s) dans votre centre.`
+                    }
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <Button 
+                      className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg transform hover:scale-[1.02] transition-all"
+                      onClick={() => setShowAddChild(true)}
+                    >
+                      <UserPlus className="w-5 h-5 mr-2" />
                       Ajouter un enfant
                     </Button>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="text-center p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <Heart className="w-6 h-6 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
+                        <p className="text-sm font-medium text-blue-800 dark:text-blue-300">Suivi médical</p>
+                        <p className="text-xs text-blue-600 dark:text-blue-400">Onglet Santé</p>
+                      </div>
+                      <div className="text-center p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+                        <FileText className="w-6 h-6 text-green-600 dark:text-green-400 mx-auto mb-2" />
+                        <p className="text-sm font-medium text-green-800 dark:text-green-300">Documents</p>
+                        <p className="text-xs text-green-600 dark:text-green-400">Onglet Documents</p>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -422,59 +353,80 @@ const OrphanageDashboard = () => {
           </TabsContent>
 
           <TabsContent value="children" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-medium">Gestion des enfants</h3>
-                <p className="text-sm text-muted-foreground">
-                  Enregistrez et gérez les enfants hébergés dans votre centre.
-                </p>
-              </div>
-              <Button onClick={() => setShowAddChild(true)}>
-                <UserPlus className="w-4 h-4 mr-2" />
-                Ajouter un enfant
-              </Button>
-            </div>
-
-            <ChildrenTable
-              children={children}
-              onEdit={handleEditChild}
-              onDelete={handleDeleteChild}
-              onViewDetails={handleViewChildDetails}
-            />
+            <Card className="shadow-lg border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
+              <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-xl font-bold">Gestion des enfants</CardTitle>
+                    <CardDescription className="text-blue-100 mt-1">
+                      Enregistrez et gérez les enfants hébergés dans votre centre.
+                    </CardDescription>
+                  </div>
+                  <Button 
+                    onClick={() => setShowAddChild(true)}
+                    className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+                    variant="outline"
+                  >
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Ajouter un enfant
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-6">
+                <ChildrenTable
+                  children={children}
+                  onEdit={handleEditChild}
+                  onDelete={handleDeleteChild}
+                  onViewDetails={handleViewChildDetails}
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="health" className="space-y-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-lg font-medium">Suivi médical et nutritionnel</h3>
-                <p className="text-sm text-muted-foreground">
+            <Card className="shadow-lg border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
+              <CardHeader className="bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-t-lg">
+                <CardTitle className="text-xl font-bold">Suivi médical et nutritionnel</CardTitle>
+                <CardDescription className="text-red-100 mt-1">
                   Gérez les données de santé et de nutrition des enfants de votre centre.
-                </p>
-              </div>
-            </div>
-
-            <HealthManagement children={children} />
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <HealthManagement children={children} />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="nutrition" className="space-y-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-lg font-medium">Suivi nutritionnel</h3>
-                <p className="text-sm text-muted-foreground">
+            <Card className="shadow-lg border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
+              <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg">
+                <CardTitle className="text-xl font-bold">Suivi nutritionnel</CardTitle>
+                <CardDescription className="text-green-100 mt-1">
                   Gérez les données de poids, taille et statut nutritionnel des enfants.
-                </p>
-              </div>
-            </div>
-
-            <NutritionManagement children={children} />
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <NutritionManagement children={children} />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="documents" className="space-y-6">
-            <DocumentsManagement
-              orphanageId={orphanage.id}
-              orphanageName={orphanage.name}
-              children={children}
-            />
+            <Card className="shadow-lg border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
+              <CardHeader className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-t-lg">
+                <CardTitle className="text-xl font-bold">Gestion des documents</CardTitle>
+                <CardDescription className="text-purple-100 mt-1">
+                  Gérez les documents officiels et les rapports de votre centre.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <DocumentsManagement
+                  orphanageId={orphanage.id}
+                  orphanageName={orphanage.name}
+                  children={children}
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
