@@ -60,10 +60,12 @@ export const HeroSection = ({ title, subtitle, heroDescription, registerText, ex
                 <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
-            <Button variant="outline" size="lg" className="text-lg px-10 py-6 h-16 border-2 border-slate-300 hover:border-blue-400 hover:bg-blue-50 dark:border-slate-600 dark:hover:border-blue-500 dark:hover:bg-blue-950/30 rounded-2xl font-semibold text-slate-700 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-400 transition-all duration-300">
-              <MapPin className="w-6 h-6 mr-3" />
-              {exploreMapText}
-            </Button>
+            <Link to="/partner/request">
+              <Button variant="outline" size="lg" className="text-lg px-10 py-6 h-16 border-2 border-slate-300 hover:border-blue-400 hover:bg-blue-50 dark:border-slate-600 dark:hover:border-blue-500 dark:hover:bg-blue-950/30 rounded-2xl font-semibold text-slate-700 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-400 transition-all duration-300">
+                <MapPin className="w-6 h-6 mr-3" />
+                Demander l'accès partenaire
+              </Button>
+            </Link>
           </div>
           
           {/* Trust indicators */}
