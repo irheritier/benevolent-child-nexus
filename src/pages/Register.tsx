@@ -9,7 +9,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Upload, Shield, FileText, MapPin, Phone, Mail, Building2, Users, Heart, X, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useProvinces } from "@/hooks/useProvinces";
@@ -17,6 +16,7 @@ import { useCities } from "@/hooks/useCities";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { useOrphanageRegistration } from "@/hooks/useOrphanageRegistration";
 import { Footer } from "@/components/landing/Footer";
+import { Header } from "@/components/landing/Header";
 
 interface FormData {
   centerName: string;
@@ -60,8 +60,9 @@ const Register = () => {
   const texts = {
     fr: {
       title: "Inscription Centre d'Accueil",
-      subtitle: "Rejoignez le réseau Congo ChildNet pour protéger et suivre les enfants vulnérables",
+      subtitle: "Rejoignez le réseau FCS pour protéger et suivre les enfants vulnérables",
       backHome: "Retour à l'accueil",
+      adminLoginText: "Connexion Admin",
       steps: {
         info: "Informations générales",
         documents: "Documents légaux",
@@ -122,8 +123,9 @@ const Register = () => {
     },
     en: {
       title: "Care Center Registration",
-      subtitle: "Join the Congo ChildNet network to protect and monitor vulnerable children",
+      subtitle: "Join the FCS network to protect and monitor vulnerable children",
       backHome: "Back to home",
+      adminLoginText: "Admin Login",
       steps: {
         info: "General Information",
         documents: "Legal Documents",
@@ -281,70 +283,28 @@ const Register = () => {
   // Show success page if submitted
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 dark:to-primary/10 flex flex-col">
-        {/* Header */}
-        <header className="border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 shadow-sm">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <Link to="/" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg">
-                <Heart className="w-6 h-6 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-primary">Congo ChildNet</h1>
-                <p className="text-xs text-muted-foreground">Inscription</p>
-              </div>
-            </Link>
-            
-            <div className="flex items-center space-x-4">
-              <div className="flex space-x-1 bg-muted/50 rounded-lg p-1">
-                <button
-                  onClick={() => setLanguage('fr')}
-                  className={`px-3 py-1.5 text-sm rounded-md transition-all font-medium ${
-                    language === 'fr' 
-                      ? 'bg-primary text-primary-foreground shadow-sm' 
-                      : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
-                  }`}
-                >
-                  FR
-                </button>
-                <button
-                  onClick={() => setLanguage('en')}
-                  className={`px-3 py-1.5 text-sm rounded-md transition-all font-medium ${
-                    language === 'en' 
-                      ? 'bg-primary text-primary-foreground shadow-sm' 
-                      : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
-                  }`}
-                >
-                  EN
-                </button>
-              </div>
-              <ThemeToggle />
-              <Link to="/">
-                <Button variant="outline" size="sm" className="hidden md:flex">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  {t.backHome}
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </header>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-blue-950 dark:via-slate-900 dark:to-purple-950 flex flex-col">
+        <Header 
+          language={language} 
+          setLanguage={setLanguage} 
+          adminLoginText={t.adminLoginText}
+        />
 
-        {/* Success Content */}
         <div className="flex-1">
-          <div className="container mx-auto px-4 py-12">
+          <div className="container mx-auto px-4 py-20">
             <div className="max-w-2xl mx-auto text-center">
-              <div className="w-20 h-20 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle className="w-10 h-10 text-green-600 dark:text-green-400" />
+              <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg">
+                <CheckCircle className="w-12 h-12 text-white" />
               </div>
               
-              <h1 className="text-3xl font-bold text-foreground mb-4">{t.validation.success}</h1>
-              <p className="text-lg text-muted-foreground mb-8">
+              <h1 className="text-4xl font-bold text-slate-800 dark:text-slate-100 mb-6">{t.validation.success}</h1>
+              <p className="text-xl text-slate-600 dark:text-slate-300 mb-12 leading-relaxed">
                 {t.validation.pending}
               </p>
               
               <Link to="/">
-                <Button size="lg" className="px-8">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
+                <Button size="lg" className="px-8 py-4 text-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-xl rounded-xl">
+                  <ArrowLeft className="w-5 h-5 mr-3" />
                   {t.backHome}
                 </Button>
               </Link>
@@ -352,9 +312,8 @@ const Register = () => {
           </div>
         </div>
 
-        {/* Footer */}
         <Footer footer={{
-          aboutText: "Congo ChildNet est une plateforme dédiée au suivi et à la protection des enfants vulnérables en République Démocratique du Congo. Notre mission est d'améliorer le bien-être des enfants grâce à une meilleure coordination entre les centres d'accueil.",
+          aboutText: "FCS : Find Children To Save est une plateforme dédiée au suivi et à la protection des enfants vulnérables en République Démocratique du Congo. Notre mission est d'améliorer le bien-être des enfants grâce à une meilleure coordination entre les centres d'accueil.",
           links: "Liens utiles",
           privacy: "Politique de confidentialité",
           terms: "Conditions d'utilisation",
@@ -368,7 +327,7 @@ const Register = () => {
 
   const renderStep1 = () => (
     <Form {...form}>
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -376,13 +335,13 @@ const Register = () => {
             rules={{ required: t.validation.required }}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
+                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold">
                   {t.form.centerName} <span className="text-red-500">*</span>
                 </FormLabel>
                 <FormControl>
                   <Input
                     placeholder={t.form.centerNamePlaceholder}
-                    className="h-11"
+                    className="h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500"
                     {...field}
                   />
                 </FormControl>
@@ -396,12 +355,12 @@ const Register = () => {
             name="capacity"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t.form.capacity}</FormLabel>
+                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold">{t.form.capacity}</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
                     placeholder={t.form.capacityPlaceholder}
-                    className="h-11"
+                    className="h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500"
                     {...field}
                   />
                 </FormControl>
@@ -418,12 +377,12 @@ const Register = () => {
             rules={{ required: t.validation.selectProvince }}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
+                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold">
                   {t.form.province} <span className="text-red-500">*</span>
                 </FormLabel>
                 <Select onValueChange={handleProvinceChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger className="h-11">
+                    <SelectTrigger className="h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500">
                       <SelectValue placeholder="Sélectionnez une province" />
                     </SelectTrigger>
                   </FormControl>
@@ -446,12 +405,12 @@ const Register = () => {
             rules={{ required: t.validation.selectLocality }}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
+                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold">
                   {t.form.locality} <span className="text-red-500">*</span>
                 </FormLabel>
                 <Select onValueChange={field.onChange} value={field.value} disabled={!selectedProvinceId}>
                   <FormControl>
-                    <SelectTrigger className="h-11">
+                    <SelectTrigger className="h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500">
                       <SelectValue placeholder="Sélectionnez une localité" />
                     </SelectTrigger>
                   </FormControl>
@@ -474,11 +433,11 @@ const Register = () => {
           name="address"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t.form.address}</FormLabel>
+              <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold">{t.form.address}</FormLabel>
               <FormControl>
                 <Input
                   placeholder={t.form.addressPlaceholder}
-                  className="h-11"
+                  className="h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500"
                   {...field}
                 />
               </FormControl>
@@ -494,13 +453,13 @@ const Register = () => {
             rules={{ required: t.validation.required }}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
+                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold">
                   {t.form.contactPerson} <span className="text-red-500">*</span>
                 </FormLabel>
                 <FormControl>
                   <Input
                     placeholder={t.form.contactPersonPlaceholder}
-                    className="h-11"
+                    className="h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500"
                     {...field}
                   />
                 </FormControl>
@@ -515,13 +474,13 @@ const Register = () => {
             rules={{ required: t.validation.required }}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
+                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold">
                   {t.form.phone} <span className="text-red-500">*</span>
                 </FormLabel>
                 <FormControl>
                   <Input
                     placeholder={t.form.phonePlaceholder}
-                    className="h-11"
+                    className="h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500"
                     {...field}
                   />
                 </FormControl>
@@ -543,14 +502,14 @@ const Register = () => {
           }}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
+              <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold">
                 {t.form.email} <span className="text-red-500">*</span>
               </FormLabel>
               <FormControl>
                 <Input
                   type="email"
                   placeholder={t.form.emailPlaceholder}
-                  className="h-11"
+                  className="h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500"
                   {...field}
                 />
               </FormControl>
@@ -564,11 +523,11 @@ const Register = () => {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t.form.description}</FormLabel>
+              <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold">{t.form.description}</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder={t.form.descriptionPlaceholder}
-                  className="min-h-[120px] resize-none"
+                  className="min-h-[140px] resize-none border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500"
                   {...field}
                 />
               </FormControl>
@@ -581,29 +540,33 @@ const Register = () => {
   );
 
   const renderStep2 = () => (
-    <div className="space-y-6">
-      <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
-        <div className="flex items-start space-x-3">
-          <FileText className="w-5 h-5 text-amber-600 mt-0.5" />
+    <div className="space-y-8">
+      <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6">
+        <div className="flex items-start space-x-4">
+          <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+            <FileText className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+          </div>
           <div>
-            <h4 className="font-medium text-amber-800 dark:text-amber-200 mb-2">
+            <h4 className="font-semibold text-amber-800 dark:text-amber-200 mb-2 text-lg">
               {t.documents.required}
             </h4>
-            <p className="text-sm text-amber-700 dark:text-amber-300">
+            <p className="text-amber-700 dark:text-amber-300">
               {t.documents.singleFileLabel}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         {!uploadedFile ? (
-          <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
-            <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-sm font-medium text-foreground mb-2">
+          <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-12 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors bg-slate-50/50 dark:bg-slate-800/50">
+            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Upload className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+            </div>
+            <p className="text-lg font-medium text-slate-700 dark:text-slate-300 mb-3">
               {isUploading ? t.documents.uploading : t.documents.uploadText}
             </p>
-            <p className="text-xs text-muted-foreground mb-4">
+            <p className="text-slate-500 dark:text-slate-400 mb-6">
               {t.documents.acceptedFormats}
             </p>
             <input
@@ -616,30 +579,34 @@ const Register = () => {
             />
             <Button 
               variant="outline" 
+              size="lg"
               onClick={() => document.getElementById('file-upload')?.click()}
               disabled={isUploading}
+              className="px-8 py-3 border-2"
             >
-              <Upload className="w-4 h-4 mr-2" />
+              <Upload className="w-5 h-5 mr-3" />
               {isUploading ? t.documents.uploading : t.buttons.upload}
             </Button>
           </div>
         ) : (
-          <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-            <div className="flex items-center space-x-2 text-green-700 dark:text-green-300 mb-3">
-              <CheckCircle className="w-5 h-5" />
-              <span className="text-sm font-medium">
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border border-green-200 dark:border-green-800 rounded-xl p-6">
+            <div className="flex items-center space-x-3 text-green-700 dark:text-green-300 mb-4">
+              <CheckCircle className="w-6 h-6" />
+              <span className="font-semibold text-lg">
                 {t.documents.fileSelected}
               </span>
             </div>
-            <div className="bg-white dark:bg-gray-800 p-3 rounded border">
+            <div className="bg-white dark:bg-slate-800 p-4 rounded-lg border border-green-100 dark:border-green-900">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <FileText className="w-5 h-5 text-muted-foreground" />
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                    <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                  </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <span className="font-medium text-slate-700 dark:text-slate-300 text-lg">
                       {uploadedFile.file.name}
                     </span>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
                       {(uploadedFile.file.size / 1024 / 1024).toFixed(2)} MB
                     </p>
                   </div>
@@ -648,9 +615,9 @@ const Register = () => {
                   variant="ghost"
                   size="sm"
                   onClick={removeFile}
-                  className="text-red-500 hover:text-red-700"
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </Button>
               </div>
             </div>
@@ -658,8 +625,8 @@ const Register = () => {
         )}
       </div>
 
-      <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <p className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+        <p className="text-blue-800 dark:text-blue-200 leading-relaxed">
           <strong>Note légale :</strong> {t.documents.legalNotice}
         </p>
       </div>
@@ -667,48 +634,52 @@ const Register = () => {
   );
 
   const renderStep3 = () => (
-    <div className="space-y-6">
-      <div className="bg-primary/5 border border-primary/20 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
-          <Shield className="w-5 h-5 mr-2" />
+    <div className="space-y-8">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200 dark:border-blue-800 rounded-xl p-8">
+        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6 flex items-center">
+          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mr-4">
+            <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          </div>
           {t.consent.title}
         </h3>
         
-        <div className="space-y-4">
-          <div className="flex items-start space-x-3">
+        <div className="space-y-6">
+          <div className="flex items-start space-x-4 p-4 bg-white dark:bg-slate-800 rounded-lg border border-blue-100 dark:border-blue-900">
             <Checkbox
               id="consent"
               checked={consentChecked}
               onCheckedChange={(checked) => setConsentChecked(checked as boolean)}
               className="mt-1"
             />
-            <Label htmlFor="consent" className="text-sm leading-relaxed text-foreground">
+            <Label htmlFor="consent" className="text-slate-700 dark:text-slate-300 leading-relaxed cursor-pointer">
               {t.consent.declaration}
             </Label>
           </div>
           
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-4 p-4 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">
             <Checkbox id="privacy" />
-            <Label htmlFor="privacy" className="text-sm text-foreground">
+            <Label htmlFor="privacy" className="text-slate-700 dark:text-slate-300 cursor-pointer">
               {t.consent.privacy}
             </Label>
           </div>
           
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-4 p-4 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">
             <Checkbox id="terms" />
-            <Label htmlFor="terms" className="text-sm text-foreground">
+            <Label htmlFor="terms" className="text-slate-700 dark:text-slate-300 cursor-pointer">
               {t.consent.terms}
             </Label>
           </div>
         </div>
       </div>
 
-      <div className="bg-muted/30 rounded-lg p-6 text-center">
-        <Heart className="w-12 h-12 text-primary mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-foreground mb-2">
-          Prêt à rejoindre Congo ChildNet ?
+      <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 rounded-xl p-8 text-center border border-purple-200 dark:border-purple-800">
+        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+          <Heart className="w-8 h-8 text-white" />
+        </div>
+        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-3">
+          Prêt à rejoindre FCS ?
         </h3>
-        <p className="text-muted-foreground">
+        <p className="text-slate-600 dark:text-slate-300">
           Votre demande sera examinée par notre équipe dans les 48 heures.
         </p>
       </div>
@@ -716,7 +687,7 @@ const Register = () => {
   );
 
   const footerTexts = {
-    aboutText: "Congo ChildNet est une plateforme dédiée au suivi et à la protection des enfants vulnérables en République Démocratique du Congo. Notre mission est d'améliorer le bien-être des enfants grâce à une meilleure coordination entre les centres d'accueil.",
+    aboutText: "FCS : Find Children To Save est une plateforme dédiée au suivi et à la protection des enfants vulnérables en République Démocratique du Congo. Notre mission est d'améliorer le bien-être des enfants grâce à une meilleure coordination entre les centres d'accueil.",
     links: "Liens utiles",
     privacy: "Politique de confidentialité",
     terms: "Conditions d'utilisation",
@@ -726,85 +697,49 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 dark:to-primary/10 flex flex-col">
-      {/* Header */}
-      <header className="border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg">
-              <Heart className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-primary">Congo ChildNet</h1>
-              <p className="text-xs text-muted-foreground">Inscription</p>
-            </div>
-          </Link>
-          
-          <div className="flex items-center space-x-4">
-            <div className="flex space-x-1 bg-muted/50 rounded-lg p-1">
-              <button
-                onClick={() => setLanguage('fr')}
-                className={`px-3 py-1.5 text-sm rounded-md transition-all font-medium ${
-                  language === 'fr' 
-                    ? 'bg-primary text-primary-foreground shadow-sm' 
-                    : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
-                }`}
-              >
-                FR
-              </button>
-              <button
-                onClick={() => setLanguage('en')}
-                className={`px-3 py-1.5 text-sm rounded-md transition-all font-medium ${
-                  language === 'en' 
-                    ? 'bg-primary text-primary-foreground shadow-sm' 
-                    : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
-                }`}
-              >
-                EN
-              </button>
-            </div>
-            <ThemeToggle />
-            <Link to="/">
-              <Button variant="outline" size="sm" className="hidden md:flex">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                {t.backHome}
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-blue-950 dark:via-slate-900 dark:to-purple-950 flex flex-col">
+      {/* Use the same Header component as homepage */}
+      <Header 
+        language={language} 
+        setLanguage={setLanguage} 
+        adminLoginText={t.adminLoginText}
+      />
 
       {/* Main Content */}
       <div className="flex-1">
-        <div className="container mx-auto px-4 py-12">
-          <div className="max-w-4xl mx-auto">
-            {/* Header */}
-            <div className="text-center mb-12">
-              <h1 className="text-4xl font-bold text-foreground mb-4">{t.title}</h1>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t.subtitle}</p>
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-5xl mx-auto">
+            {/* Enhanced Header */}
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-800/50 dark:to-purple-800/50 text-blue-800 dark:text-blue-200 rounded-full text-sm font-semibold mb-6 border border-blue-200/50 dark:border-blue-700/50 shadow-lg">
+                <Building2 className="w-5 h-5 mr-3" />
+                <span>Inscription Officielle</span>
+              </div>
+              <h1 className="text-5xl font-black text-slate-800 dark:text-slate-100 mb-6">{t.title}</h1>
+              <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">{t.subtitle}</p>
             </div>
 
-            {/* Progress Steps */}
-            <div className="mb-8">
+            {/* Enhanced Progress Steps */}
+            <div className="mb-12">
               <div className="flex items-center justify-center space-x-8">
                 {[1, 2, 3].map((step) => (
                   <div key={step} className="flex items-center">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
                       currentStep === step 
-                        ? 'bg-primary border-primary text-primary-foreground' 
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 border-transparent text-white shadow-lg scale-110' 
                         : currentStep > step 
-                          ? 'bg-green-500 border-green-500 text-white'
-                          : 'border-muted-foreground/30 text-muted-foreground'
+                          ? 'bg-green-500 border-green-500 text-white shadow-md'
+                          : 'border-slate-300 dark:border-slate-600 text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800'
                     }`}>
                       {currentStep > step ? (
-                        <Shield className="w-5 h-5" />
+                        <CheckCircle className="w-6 h-6" />
                       ) : (
-                        <span className="text-sm font-semibold">{step}</span>
+                        <span className="text-sm font-bold">{step}</span>
                       )}
                     </div>
-                    <div className="ml-3 hidden md:block">
-                      <p className={`text-sm font-medium ${
-                        currentStep >= step ? 'text-foreground' : 'text-muted-foreground'
+                    <div className="ml-4 hidden lg:block">
+                      <p className={`text-sm font-semibold ${
+                        currentStep >= step ? 'text-slate-800 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500'
                       }`}>
                         {step === 1 && t.steps.info}
                         {step === 2 && t.steps.documents}
@@ -812,8 +747,8 @@ const Register = () => {
                       </p>
                     </div>
                     {step < 3 && (
-                      <div className={`w-16 h-px mx-4 ${
-                        currentStep > step ? 'bg-green-500' : 'bg-muted-foreground/30'
+                      <div className={`w-20 h-px mx-6 transition-colors ${
+                        currentStep > step ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'
                       }`} />
                     )}
                   </div>
@@ -821,48 +756,49 @@ const Register = () => {
               </div>
             </div>
 
-            {/* Form Card */}
-            <Card className="shadow-xl border-0 bg-gradient-to-br from-background to-muted/20">
-              <CardHeader className="pb-6">
-                <CardTitle className="text-2xl text-center">
+            {/* Enhanced Form Card */}
+            <Card className="shadow-2xl border-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
+              <CardHeader className="pb-8 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 rounded-t-lg">
+                <CardTitle className="text-2xl text-center text-slate-800 dark:text-slate-100">
                   {currentStep === 1 && (
                     <div className="flex items-center justify-center">
-                      <Building2 className="w-6 h-6 mr-2" />
+                      <Building2 className="w-6 h-6 mr-3 text-blue-600" />
                       {t.steps.info}
                     </div>
                   )}
                   {currentStep === 2 && (
                     <div className="flex items-center justify-center">
-                      <FileText className="w-6 h-6 mr-2" />
+                      <FileText className="w-6 h-6 mr-3 text-purple-600" />
                       {t.documents.title}
                     </div>
                   )}
                   {currentStep === 3 && (
                     <div className="flex items-center justify-center">
-                      <Shield className="w-6 h-6 mr-2" />
+                      <Shield className="w-6 h-6 mr-3 text-green-600" />
                       {t.consent.title}
                     </div>
                   )}
                 </CardTitle>
                 {currentStep === 2 && (
-                  <p className="text-center text-muted-foreground">{t.documents.subtitle}</p>
+                  <p className="text-center text-slate-600 dark:text-slate-300 mt-2">{t.documents.subtitle}</p>
                 )}
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="p-8">
                 {currentStep === 1 && renderStep1()}
                 {currentStep === 2 && renderStep2()}
                 {currentStep === 3 && renderStep3()}
 
-                {/* Navigation Buttons */}
-                <div className="flex justify-between pt-6 border-t">
+                {/* Enhanced Navigation Buttons */}
+                <div className="flex justify-between pt-8 border-t border-slate-200 dark:border-slate-700">
                   <div>
                     {currentStep > 1 && (
                       <Button
                         variant="outline"
+                        size="lg"
                         onClick={() => setCurrentStep(currentStep - 1)}
-                        className="px-6"
+                        className="px-8 py-3 border-2 hover:border-blue-400"
                       >
-                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        <ArrowLeft className="w-5 h-5 mr-3" />
                         {t.buttons.previous}
                       </Button>
                     )}
@@ -871,18 +807,20 @@ const Register = () => {
                     {currentStep < 3 ? (
                       <Button
                         onClick={handleNextStep}
-                        className="px-8"
+                        size="lg"
+                        className="px-10 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
                       >
                         {t.buttons.next}
-                        <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
+                        <ArrowLeft className="w-5 h-5 ml-3 rotate-180" />
                       </Button>
                     ) : (
                       <Button
                         onClick={handleSubmit}
                         disabled={!consentChecked || isSubmitting}
-                        className="px-8 bg-gradient-to-r from-primary to-primary/90"
+                        size="lg"
+                        className="px-10 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg disabled:opacity-50"
                       >
-                        <Users className="w-4 h-4 mr-2" />
+                        <Users className="w-5 h-5 mr-3" />
                         {isSubmitting ? t.validation.processing : t.buttons.submit}
                       </Button>
                     )}
