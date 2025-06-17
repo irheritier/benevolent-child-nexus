@@ -190,7 +190,7 @@ const AdminAuthContent = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
-                Congo ChildNet
+                FCS : Find Children to Save
               </h1>
               <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold tracking-wide uppercase">
                 Portail Administrateur
@@ -212,7 +212,7 @@ const AdminAuthContent = () => {
               Administration Sécurisée
             </h2>
             <p className="text-slate-600 dark:text-slate-400">
-              Accédez au portail d'administration Congo ChildNet
+              Accédez au portail d'administration FCS
             </p>
           </div>
 

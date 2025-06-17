@@ -12,12 +12,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Heart, LogOut, Eye, CheckCircle, XCircle, Clock, Mail, Phone, MapPin, FileText, Download, BarChart, Bell, Users, Building2 } from 'lucide-react';
+import { Eye, CheckCircle, XCircle, Clock, Mail, Phone, MapPin, FileText, Download, BarChart, Bell, Users, Building2, Heart } from 'lucide-react';
 import AdminStatsDashboard from '@/components/admin/AdminStatsDashboard';
-import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { useNotificationAlerts } from '@/hooks/useNotificationAlerts';
+import { AdminDashboardHeader } from '@/components/admin/AdminDashboardHeader';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
 interface Orphanage {
   id: string;
@@ -436,64 +437,64 @@ const AdminDashboardContent = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-indigo-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Chargement des données...</p>
+          <div className="animate-spin w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-slate-600 dark:text-slate-400 font-medium">Chargement des données...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-indigo-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       {/* Header */}
-      <header className="border-b bg-background/80 backdrop-blur-md">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center">
-              <Heart className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-primary">Congo ChildNet</h1>
-              <p className="text-xs text-muted-foreground">Administration</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <NotificationBell />
-            <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
-              <LogOut className="w-4 h-4" />
-              Déconnexion
-            </Button>
-          </div>
-        </div>
-      </header>
+      <AdminDashboardHeader />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-6 py-8">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Tableau de bord administrateur</h2>
-          <p className="text-muted-foreground">
-            Gérez les demandes d'inscription et consultez les statistiques du système.
-          </p>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <Heart className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Tableau de bord administrateur</h2>
+              <p className="text-slate-600 dark:text-slate-400">
+                Gérez les demandes d'inscription et consultez les statistiques du système.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Onglets principaux */}
         <Tabs defaultValue="requests" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="requests" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 shadow-lg">
+            <TabsTrigger 
+              value="requests" 
+              className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
               <Heart className="w-4 h-4" />
               Demandes d'inscription
             </TabsTrigger>
-            <TabsTrigger value="partners" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="partners" 
+              className="flex items-center gap-2 data-[state=active]:bg-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
               <Users className="w-4 h-4" />
               Partenaires
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="analytics" 
+              className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
               <BarChart className="w-4 h-4" />
               Analyses et statistiques
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="notifications" 
+              className="flex items-center gap-2 data-[state=active]:bg-orange-600 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
               <Bell className="w-4 h-4" />
               Notifications
             </TabsTrigger>
@@ -503,66 +504,78 @@ const AdminDashboardContent = () => {
           <TabsContent value="requests" className="space-y-6">
             {/* Statistics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">En attente</CardTitle>
+              <Card className="border-0 shadow-xl bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200/50 dark:border-yellow-800/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold text-yellow-700 dark:text-yellow-300 flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    En attente
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-yellow-600">
+                  <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
                     {orphanages.filter(o => o.legal_status === 'pending').length}
                   </div>
+                  <p className="text-xs text-yellow-600/70 dark:text-yellow-400/70 mt-1">Demandes à traiter</p>
                 </CardContent>
               </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Validés</CardTitle>
+              <Card className="border-0 shadow-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200/50 dark:border-green-800/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold text-green-700 dark:text-green-300 flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4" />
+                    Validés
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-600">
+                  <div className="text-3xl font-bold text-green-600 dark:text-green-400">
                     {orphanages.filter(o => o.legal_status === 'verified').length}
                   </div>
+                  <p className="text-xs text-green-600/70 dark:text-green-400/70 mt-1">Centres approuvés</p>
                 </CardContent>
               </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Rejetés</CardTitle>
+              <Card className="border-0 shadow-xl bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border-red-200/50 dark:border-red-800/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold text-red-700 dark:text-red-300 flex items-center gap-2">
+                    <XCircle className="w-4 h-4" />
+                    Rejetés
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-red-600">
+                  <div className="text-3xl font-bold text-red-600 dark:text-red-400">
                     {orphanages.filter(o => o.legal_status === 'rejected').length}
                   </div>
+                  <p className="text-xs text-red-600/70 dark:text-red-400/70 mt-1">Demandes refusées</p>
                 </CardContent>
               </Card>
             </div>
 
             {/* Orphanages Table */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Liste des demandes</CardTitle>
-                <CardDescription>
+            <Card className="border-0 shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50">
+              <CardHeader className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 dark:from-blue-600/20 dark:to-purple-600/20">
+                <CardTitle className="text-slate-800 dark:text-slate-100">Liste des demandes</CardTitle>
+                <CardDescription className="text-slate-600 dark:text-slate-400">
                   Cliquez sur une demande pour voir les détails et procéder à la validation.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Nom du centre</TableHead>
-                      <TableHead>Province</TableHead>
-                      <TableHead>Contact</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Actions</TableHead>
+                    <TableRow className="bg-slate-50/50 dark:bg-slate-800/50">
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Nom du centre</TableHead>
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Province</TableHead>
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Contact</TableHead>
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Statut</TableHead>
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Date</TableHead>
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {orphanages.map((orphanage) => (
-                      <TableRow key={orphanage.id}>
-                        <TableCell className="font-medium">{orphanage.name}</TableCell>
-                        <TableCell>{orphanage.province}, {orphanage.city}</TableCell>
-                        <TableCell>{orphanage.contact_person}</TableCell>
+                      <TableRow key={orphanage.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                        <TableCell className="font-medium text-slate-800 dark:text-slate-200">{orphanage.name}</TableCell>
+                        <TableCell className="text-slate-600 dark:text-slate-400">{orphanage.province}, {orphanage.city}</TableCell>
+                        <TableCell className="text-slate-600 dark:text-slate-400">{orphanage.contact_person}</TableCell>
                         <TableCell>{getStatusBadge(orphanage.legal_status)}</TableCell>
-                        <TableCell>{new Date(orphanage.created_at).toLocaleDateString('fr-FR')}</TableCell>
+                        <TableCell className="text-slate-600 dark:text-slate-400">{new Date(orphanage.created_at).toLocaleDateString('fr-FR')}</TableCell>
                         <TableCell>
                           <Button
                             variant="outline"
@@ -571,7 +584,7 @@ const AdminDashboardContent = () => {
                               setSelectedOrphanage(orphanage);
                               setShowDialog(true);
                             }}
-                            className="flex items-center gap-1"
+                            className="flex items-center gap-1 border-2 hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20"
                           >
                             <Eye className="w-3 h-3" />
                             Voir
@@ -589,66 +602,78 @@ const AdminDashboardContent = () => {
           <TabsContent value="partners" className="space-y-6">
             {/* Statistics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">En attente</CardTitle>
+              <Card className="border-0 shadow-xl bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200/50 dark:border-yellow-800/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold text-yellow-700 dark:text-yellow-300 flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    En attente
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-yellow-600">
+                  <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
                     {partnerRequests.filter(p => p.status === 'pending').length}
                   </div>
+                  <p className="text-xs text-yellow-600/70 dark:text-yellow-400/70 mt-1">Demandes à traiter</p>
                 </CardContent>
               </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Approuvés</CardTitle>
+              <Card className="border-0 shadow-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200/50 dark:border-green-800/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold text-green-700 dark:text-green-300 flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4" />
+                    Approuvés
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-600">
+                  <div className="text-3xl font-bold text-green-600 dark:text-green-400">
                     {partnerRequests.filter(p => p.status === 'approved').length}
                   </div>
+                  <p className="text-xs text-green-600/70 dark:text-green-400/70 mt-1">Partenaires actifs</p>
                 </CardContent>
               </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Rejetés</CardTitle>
+              <Card className="border-0 shadow-xl bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border-red-200/50 dark:border-red-800/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold text-red-700 dark:text-red-300 flex items-center gap-2">
+                    <XCircle className="w-4 h-4" />
+                    Rejetés
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-red-600">
+                  <div className="text-3xl font-bold text-red-600 dark:text-red-400">
                     {partnerRequests.filter(p => p.status === 'rejected').length}
                   </div>
+                  <p className="text-xs text-red-600/70 dark:text-red-400/70 mt-1">Demandes refusées</p>
                 </CardContent>
               </Card>
             </div>
 
             {/* Partners Table */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Liste des demandes partenaires</CardTitle>
-                <CardDescription>
+            <Card className="border-0 shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50">
+              <CardHeader className="bg-gradient-to-r from-purple-600/10 to-pink-600/10 dark:from-purple-600/20 dark:to-pink-600/20">
+                <CardTitle className="text-slate-800 dark:text-slate-100">Liste des demandes partenaires</CardTitle>
+                <CardDescription className="text-slate-600 dark:text-slate-400">
                   Cliquez sur une demande pour voir les détails et procéder à la validation.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Organisation</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Contact</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Actions</TableHead>
+                    <TableRow className="bg-slate-50/50 dark:bg-slate-800/50">
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Organisation</TableHead>
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Type</TableHead>
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Contact</TableHead>
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Statut</TableHead>
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Date</TableHead>
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {partnerRequests.map((request) => (
-                      <TableRow key={request.id}>
-                        <TableCell className="font-medium">{request.organization_name}</TableCell>
-                        <TableCell>{getOrganizationTypeLabel(request.organization_type)}</TableCell>
-                        <TableCell>{request.contact_person}</TableCell>
+                      <TableRow key={request.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                        <TableCell className="font-medium text-slate-800 dark:text-slate-200">{request.organization_name}</TableCell>
+                        <TableCell className="text-slate-600 dark:text-slate-400">{getOrganizationTypeLabel(request.organization_type)}</TableCell>
+                        <TableCell className="text-slate-600 dark:text-slate-400">{request.contact_person}</TableCell>
                         <TableCell>{getStatusBadge(request.status)}</TableCell>
-                        <TableCell>{new Date(request.created_at).toLocaleDateString('fr-FR')}</TableCell>
+                        <TableCell className="text-slate-600 dark:text-slate-400">{new Date(request.created_at).toLocaleDateString('fr-FR')}</TableCell>
                         <TableCell>
                           <Button
                             variant="outline"
@@ -657,7 +682,7 @@ const AdminDashboardContent = () => {
                               setSelectedPartnerRequest(request);
                               setShowPartnerDialog(true);
                             }}
-                            className="flex items-center gap-1"
+                            className="flex items-center gap-1 border-2 hover:bg-purple-50 hover:border-purple-300 dark:hover:bg-purple-900/20"
                           >
                             <Eye className="w-3 h-3" />
                             Voir
@@ -944,9 +969,11 @@ const AdminDashboardContent = () => {
 
 const AdminDashboard = () => {
   return (
-    <NotificationProvider>
-      <AdminDashboardContent />
-    </NotificationProvider>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <NotificationProvider>
+        <AdminDashboardContent />
+      </NotificationProvider>
+    </ThemeProvider>
   );
 };
 
