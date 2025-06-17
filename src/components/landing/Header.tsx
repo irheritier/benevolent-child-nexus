@@ -14,10 +14,15 @@ interface HeaderProps {
 export const Header = ({ language, setLanguage, adminLoginText }: HeaderProps) => {
   const navigate = useNavigate();
 
+  const loginText = language === 'fr' ? 'Connexion' : 'Login';
+
   return (
     <header className="border-b bg-white/90 backdrop-blur-lg supports-[backdrop-filter]:bg-white/70 sticky top-0 z-50 shadow-lg border-primary/10">
       <div className="container mx-auto px-6 py-5 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+        <div 
+          className="flex items-center space-x-4 cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={() => navigate('/')}
+        >
           <div className="relative">
             <div className="w-14 h-14 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl transform hover:scale-105 transition-transform duration-300">
               <Heart className="w-8 h-8 text-white" />
@@ -62,10 +67,10 @@ export const Header = ({ language, setLanguage, adminLoginText }: HeaderProps) =
             variant="outline" 
             size="sm" 
             className="hidden md:flex border-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 font-semibold px-6 rounded-xl"
-            onClick={() => navigate('/admin/auth')}
+            onClick={() => navigate('/orphelinat/auth')}
           >
             <LogIn className="w-4 h-4 mr-2" />
-            {adminLoginText}
+            {loginText}
           </Button>
         </div>
       </div>
