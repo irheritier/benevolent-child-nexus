@@ -1,16 +1,8 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Upload, Shield, FileText, MapPin, Phone, Mail, Building2, Users, Heart, X, CheckCircle } from "lucide-react";
-import { Link } from "react-router-dom";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { ArrowLeft, Building2, FileText, Shield, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useProvinces } from "@/hooks/useProvinces";
 import { useCities } from "@/hooks/useCities";
@@ -18,6 +10,11 @@ import { useFileUpload } from "@/hooks/useFileUpload";
 import { useOrphanageRegistration } from "@/hooks/useOrphanageRegistration";
 import { Footer } from "@/components/landing/Footer";
 import { Header } from "@/components/landing/Header";
+import { RegistrationSteps } from "@/components/register/RegistrationSteps";
+import { BasicInfoForm } from "@/components/register/BasicInfoForm";
+import { DocumentUpload } from "@/components/register/DocumentUpload";
+import { ConsentForm } from "@/components/register/ConsentForm";
+import { SuccessPage } from "@/components/register/SuccessPage";
 
 interface FormData {
   centerName: string;
@@ -283,409 +280,8 @@ const Register = () => {
 
   // Show success page if submitted
   if (isSubmitted) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-blue-950 dark:via-slate-900 dark:to-purple-950 flex flex-col">
-        <Header 
-          language={language} 
-          setLanguage={setLanguage} 
-          adminLoginText={t.adminLoginText}
-        />
-
-        <div className="flex-1">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-20">
-            <div className="max-w-2xl mx-auto text-center">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 sm:mb-8 shadow-lg">
-                <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-white" />
-              </div>
-              
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-800 dark:text-slate-100 mb-4 sm:mb-6 px-4">{t.validation.success}</h1>
-              <p className="text-base sm:text-lg lg:text-xl text-slate-600 dark:text-slate-300 mb-8 sm:mb-12 leading-relaxed px-4">
-                {t.validation.pending}
-              </p>
-              
-              <Link to="/">
-                <Button size="lg" className="px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-xl rounded-xl w-full sm:w-auto">
-                  <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
-                  {t.backHome}
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <Footer footer={{
-          aboutText: "FCS : Find Children To Save est une plateforme dédiée au suivi et à la protection des enfants vulnérables en République Démocratique du Congo. Notre mission est d'améliorer le bien-être des enfants grâce à une meilleure coordination entre les centres d'accueil.",
-          links: "Liens utiles",
-          privacy: "Politique de confidentialité",
-          terms: "Conditions d'utilisation",
-          contact: "Contact",
-          partners: "Partenaires",
-          partnersText: "Nous travaillons en étroite collaboration avec le Ministère des Affaires Sociales, les ONG locales et internationales pour assurer le meilleur suivi possible des enfants."
-        }} />
-      </div>
-    );
+    return <SuccessPage language={language} setLanguage={setLanguage} texts={t} />;
   }
-
-  const renderStep1 = () => (
-    <Form {...form}>
-      <div className="space-y-6 sm:space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          <FormField
-            control={form.control}
-            name="centerName"
-            rules={{ required: t.validation.required }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
-                  {t.form.centerName} <span className="text-red-500">*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder={t.form.centerNamePlaceholder}
-                    className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="capacity"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">{t.form.capacity}</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder={t.form.capacityPlaceholder}
-                    className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          <FormField
-            control={form.control}
-            name="provinceId"
-            rules={{ required: t.validation.selectProvince }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
-                  {t.form.province} <span className="text-red-500">*</span>
-                </FormLabel>
-                <Select onValueChange={handleProvinceChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base">
-                      <SelectValue placeholder="Sélectionnez une province" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {provinces.map((province) => (
-                      <SelectItem key={province.id} value={province.id}>
-                        {province.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="cityId"
-            rules={{ required: t.validation.selectLocality }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
-                  {t.form.locality} <span className="text-red-500">*</span>
-                </FormLabel>
-                <Select onValueChange={field.onChange} value={field.value} disabled={!selectedProvinceId}>
-                  <FormControl>
-                    <SelectTrigger className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base">
-                      <SelectValue placeholder="Sélectionnez une localité" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {cities.map((city) => (
-                      <SelectItem key={city.id} value={city.id}>
-                        {city.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">{t.form.address}</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder={t.form.addressPlaceholder}
-                  className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          <FormField
-            control={form.control}
-            name="contactPerson"
-            rules={{ required: t.validation.required }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
-                  {t.form.contactPerson} <span className="text-red-500">*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder={t.form.contactPersonPlaceholder}
-                    className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="phone"
-            rules={{ required: t.validation.required }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
-                  {t.form.phone} <span className="text-red-500">*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder={t.form.phonePlaceholder}
-                    className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="email"
-          rules={{ 
-            required: t.validation.required,
-            pattern: {
-              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-              message: t.validation.email
-            }
-          }}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
-                {t.form.email} <span className="text-red-500">*</span>
-              </FormLabel>
-              <FormControl>
-                <Input
-                  type="email"
-                  placeholder={t.form.emailPlaceholder}
-                  className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">{t.form.description}</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder={t.form.descriptionPlaceholder}
-                  className="min-h-[120px] sm:min-h-[140px] resize-none border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-    </Form>
-  );
-
-  const renderStep2 = () => (
-    <div className="space-y-6 sm:space-y-8">
-      <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 sm:p-6">
-        <div className="flex items-start space-x-3 sm:space-x-4">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center flex-shrink-0">
-            <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600 dark:text-amber-400" />
-          </div>
-          <div>
-            <h4 className="font-semibold text-amber-800 dark:text-amber-200 mb-2 text-base sm:text-lg">
-              {t.documents.required}
-            </h4>
-            <p className="text-amber-700 dark:text-amber-300 text-sm sm:text-base">
-              {t.documents.singleFileLabel}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-4 sm:space-y-6">
-        {!uploadedFile ? (
-          <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-8 sm:p-12 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors bg-slate-50/50 dark:bg-slate-800/50">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
-              <Upload className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 dark:text-blue-400" />
-            </div>
-            <p className="text-base sm:text-lg font-medium text-slate-700 dark:text-slate-300 mb-2 sm:mb-3">
-              {isUploading ? t.documents.uploading : t.documents.uploadText}
-            </p>
-            <p className="text-slate-500 dark:text-slate-400 mb-4 sm:mb-6 text-sm sm:text-base">
-              {t.documents.acceptedFormats}
-            </p>
-            <input
-              type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
-              onChange={handleFileUpload}
-              className="hidden"
-              id="file-upload"
-              disabled={isUploading}
-            />
-            <Button 
-              variant="outline" 
-              size="lg"
-              onClick={() => document.getElementById('file-upload')?.click()}
-              disabled={isUploading}
-              className="px-6 sm:px-8 py-2 sm:py-3 border-2 text-sm sm:text-base w-full sm:w-auto"
-            >
-              <Upload className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
-              {isUploading ? t.documents.uploading : t.buttons.upload}
-            </Button>
-          </div>
-        ) : (
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border border-green-200 dark:border-green-800 rounded-xl p-4 sm:p-6">
-            <div className="flex items-center space-x-3 text-green-700 dark:text-green-300 mb-3 sm:mb-4">
-              <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-              <span className="font-semibold text-base sm:text-lg">
-                {t.documents.fileSelected}
-              </span>
-            </div>
-            <div className="bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-lg border border-green-100 dark:border-green-900">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <span className="font-medium text-slate-700 dark:text-slate-300 text-sm sm:text-lg block truncate">
-                      {uploadedFile.file.name}
-                    </span>
-                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                      {(uploadedFile.file.size / 1024 / 1024).toFixed(2)} MB
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={removeFile}
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 flex-shrink-0 ml-2"
-                >
-                  <X className="w-4 h-4 sm:w-5 sm:h-5" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 sm:p-6">
-        <p className="text-blue-800 dark:text-blue-200 leading-relaxed text-sm sm:text-base">
-          <strong>Note légale :</strong> {t.documents.legalNotice}
-        </p>
-      </div>
-    </div>
-  );
-
-  const renderStep3 = () => (
-    <div className="space-y-6 sm:space-y-8">
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6 sm:p-8">
-        <h3 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 mb-4 sm:mb-6 flex items-center">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mr-3 sm:mr-4">
-            <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" />
-          </div>
-          {t.consent.title}
-        </h3>
-        
-        <div className="space-y-4 sm:space-y-6">
-          <div className="flex items-start space-x-3 sm:space-x-4 p-3 sm:p-4 bg-white dark:bg-slate-800 rounded-lg border border-blue-100 dark:border-blue-900">
-            <Checkbox
-              id="consent"
-              checked={consentChecked}
-              onCheckedChange={(checked) => setConsentChecked(checked as boolean)}
-              className="mt-1"
-            />
-            <Label htmlFor="consent" className="text-slate-700 dark:text-slate-300 leading-relaxed cursor-pointer text-sm sm:text-base">
-              {t.consent.declaration}
-            </Label>
-          </div>
-          
-          <div className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">
-            <Checkbox id="privacy" />
-            <Label htmlFor="privacy" className="text-slate-700 dark:text-slate-300 cursor-pointer text-sm sm:text-base">
-              {t.consent.privacy}
-            </Label>
-          </div>
-          
-          <div className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">
-            <Checkbox id="terms" />
-            <Label htmlFor="terms" className="text-slate-700 dark:text-slate-300 cursor-pointer text-sm sm:text-base">
-              {t.consent.terms}
-            </Label>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 rounded-xl p-6 sm:p-8 text-center border border-purple-200 dark:border-purple-800">
-        <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg">
-          <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-        </div>
-        <h3 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 mb-2 sm:mb-3">
-          Prêt à rejoindre FCS ?
-        </h3>
-        <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base">
-          Votre demande sera examinée par notre équipe dans les 48 heures.
-        </p>
-      </div>
-    </div>
-  );
 
   const footerTexts = {
     aboutText: "FCS : Find Children To Save est une plateforme dédiée au suivi et à la protection des enfants vulnérables en République Démocratique du Congo. Notre mission est d'améliorer le bien-être des enfants grâce à une meilleure coordination entre les centres d'accueil.",
@@ -699,14 +295,12 @@ const Register = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-blue-950 dark:via-slate-900 dark:to-purple-950 flex flex-col">
-      {/* Use the same Header component as homepage */}
       <Header 
         language={language} 
         setLanguage={setLanguage} 
         adminLoginText={t.adminLoginText}
       />
 
-      {/* Main Content */}
       <div className="flex-1">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
           <div className="max-w-4xl lg:max-w-5xl mx-auto">
@@ -721,50 +315,7 @@ const Register = () => {
             </div>
 
             {/* Enhanced Progress Steps */}
-            <div className="mb-8 sm:mb-12">
-              <div className="flex items-center justify-center space-x-4 sm:space-x-6 lg:space-x-8 overflow-x-auto pb-4">
-                {[1, 2, 3].map((step) => (
-                  <div key={step} className="flex items-center flex-shrink-0">
-                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
-                      currentStep === step 
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 border-transparent text-white shadow-lg scale-110' 
-                        : currentStep > step 
-                          ? 'bg-green-500 border-green-500 text-white shadow-md'
-                          : 'border-slate-300 dark:border-slate-600 text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800'
-                    }`}>
-                      {currentStep > step ? (
-                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-                      ) : (
-                        <span className="text-xs sm:text-sm font-bold">{step}</span>
-                      )}
-                    </div>
-                    <div className="ml-3 sm:ml-4 hidden sm:block">
-                      <p className={`text-xs sm:text-sm font-semibold ${
-                        currentStep >= step ? 'text-slate-800 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500'
-                      }`}>
-                        {step === 1 && t.steps.info}
-                        {step === 2 && t.steps.documents}
-                        {step === 3 && t.steps.confirmation}
-                      </p>
-                    </div>
-                    {step < 3 && (
-                      <div className={`w-16 sm:w-20 h-px mx-4 sm:mx-6 transition-colors hidden lg:block ${
-                        currentStep > step ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'
-                      }`} />
-                    )}
-                  </div>
-                ))}
-              </div>
-              
-              {/* Mobile step labels */}
-              <div className="text-center mt-4 sm:hidden">
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                  {currentStep === 1 && t.steps.info}
-                  {currentStep === 2 && t.steps.documents}
-                  {currentStep === 3 && t.steps.confirmation}
-                </p>
-              </div>
-            </div>
+            <RegistrationSteps currentStep={currentStep} texts={t} />
 
             {/* Enhanced Form Card */}
             <Card className="shadow-2xl border-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
@@ -794,9 +345,32 @@ const Register = () => {
                 )}
               </CardHeader>
               <CardContent className="p-4 sm:p-6 lg:p-8">
-                {currentStep === 1 && renderStep1()}
-                {currentStep === 2 && renderStep2()}
-                {currentStep === 3 && renderStep3()}
+                {currentStep === 1 && (
+                  <BasicInfoForm
+                    form={form}
+                    texts={t}
+                    provinces={provinces}
+                    cities={cities}
+                    selectedProvinceId={selectedProvinceId}
+                    onProvinceChange={handleProvinceChange}
+                  />
+                )}
+                {currentStep === 2 && (
+                  <DocumentUpload
+                    texts={t}
+                    uploadedFile={uploadedFile}
+                    isUploading={isUploading}
+                    onFileUpload={handleFileUpload}
+                    onRemoveFile={removeFile}
+                  />
+                )}
+                {currentStep === 3 && (
+                  <ConsentForm
+                    texts={t}
+                    consentChecked={consentChecked}
+                    onConsentChange={setConsentChecked}
+                  />
+                )}
 
                 {/* Enhanced Navigation Buttons */}
                 <div className="flex flex-col sm:flex-row justify-between pt-6 sm:pt-8 border-t border-slate-200 dark:border-slate-700 gap-4 sm:gap-0">
@@ -842,7 +416,6 @@ const Register = () => {
         </div>
       </div>
 
-      {/* Footer */}
       <Footer footer={footerTexts} />
     </div>
   );
