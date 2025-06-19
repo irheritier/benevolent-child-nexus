@@ -14,6 +14,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 const PartnerAuth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -212,16 +213,32 @@ const PartnerAuth = () => {
                   <label htmlFor="password" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                     {t.password}
                   </label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={t.passwordPlaceholder}
-                    required
-                    className="h-12 border-slate-200 dark:border-slate-600 focus:border-purple-500 dark:focus:border-purple-400 bg-white dark:bg-slate-700"
-                    disabled={isLoading}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder={t.passwordPlaceholder}
+                      required
+                      className="h-12 border-slate-200 dark:border-slate-600 focus:border-purple-500 dark:focus:border-purple-400 bg-white dark:bg-slate-700 pr-12"
+                      disabled={isLoading}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-0 top-0 h-12 w-12 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
+                      onClick={() => setShowPassword(!showPassword)}
+                      disabled={isLoading}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
 
                 <Button

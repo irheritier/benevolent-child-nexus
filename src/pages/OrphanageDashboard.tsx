@@ -244,41 +244,43 @@ const OrphanageDashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       <DashboardHeader user={user} orphanage={orphanage} onLogout={handleLogout} />
 
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {/* Statistiques rapides */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <StatsCards children={children} orphanage={orphanage} />
         </div>
 
         {/* Contenu principal avec onglets */}
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border shadow-lg rounded-xl p-1 h-12">
-            <TabsTrigger value="overview" className="rounded-lg font-semibold">Vue d'ensemble</TabsTrigger>
-            <TabsTrigger value="children" className="rounded-lg font-semibold">Enfants</TabsTrigger>
-            <TabsTrigger value="health" className="rounded-lg font-semibold">Santé</TabsTrigger>
-            <TabsTrigger value="nutrition" className="rounded-lg font-semibold">Nutrition</TabsTrigger>
-            <TabsTrigger value="documents" className="rounded-lg font-semibold">Documents</TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
+          <div className="overflow-x-auto">
+            <TabsList className="grid w-full grid-cols-5 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border shadow-lg rounded-xl p-1 h-12 min-w-[600px] sm:min-w-0">
+              <TabsTrigger value="overview" className="rounded-lg font-semibold text-xs sm:text-sm">Vue d'ensemble</TabsTrigger>
+              <TabsTrigger value="children" className="rounded-lg font-semibold text-xs sm:text-sm">Enfants</TabsTrigger>
+              <TabsTrigger value="health" className="rounded-lg font-semibold text-xs sm:text-sm">Santé</TabsTrigger>
+              <TabsTrigger value="nutrition" className="rounded-lg font-semibold text-xs sm:text-sm">Nutrition</TabsTrigger>
+              <TabsTrigger value="documents" className="rounded-lg font-semibold text-xs sm:text-sm">Documents</TabsTrigger>
+            </TabsList>
+          </div>
 
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TabsContent value="overview" className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
               {/* Informations du centre */}
               <Card className="shadow-lg border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
-                <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
-                  <CardTitle className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                      <MapPin className="w-5 h-5" />
+                <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg p-4 sm:p-6">
+                  <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                      <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
-                    Informations du centre
+                    <span className="text-sm sm:text-base">Informations du centre</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6 space-y-4">
+                <CardContent className="p-4 sm:p-6 space-y-4">
                   <div>
                     <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">Nom du centre</label>
-                    <p className="font-bold text-lg text-slate-800 dark:text-slate-200">{orphanage.name}</p>
+                    <p className="font-bold text-lg sm:text-xl text-slate-800 dark:text-slate-200 break-words">{orphanage.name}</p>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">Province</label>
                       <p className="font-medium text-slate-800 dark:text-slate-200">{orphanage.province}</p>
@@ -291,17 +293,17 @@ const OrphanageDashboard = () => {
 
                   <div>
                     <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">Personne de contact</label>
-                    <p className="font-medium text-slate-800 dark:text-slate-200">{orphanage.contact_person}</p>
+                    <p className="font-medium text-slate-800 dark:text-slate-200 break-words">{orphanage.contact_person}</p>
                   </div>
 
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                      <Phone className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                      <span className="text-slate-700 dark:text-slate-300">{orphanage.phone || 'Non renseigné'}</span>
+                      <Phone className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                      <span className="text-slate-700 dark:text-slate-300 break-all text-sm sm:text-base">{orphanage.phone || 'Non renseigné'}</span>
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                      <Mail className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                      <span className="text-slate-700 dark:text-slate-300">{orphanage.email}</span>
+                      <Mail className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                      <span className="text-slate-700 dark:text-slate-300 break-all text-sm sm:text-base">{orphanage.email}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -309,15 +311,15 @@ const OrphanageDashboard = () => {
 
               {/* Actions rapides */}
               <Card className="shadow-lg border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
-                <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg">
-                  <CardTitle className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                      <Activity className="w-5 h-5" />
+                <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg p-4 sm:p-6">
+                  <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                      <Activity className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
-                    Actions rapides
+                    <span className="text-sm sm:text-base">Actions rapides</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6 space-y-4">
+                <CardContent className="p-4 sm:p-6 space-y-4">
                   <div className="text-sm text-slate-600 dark:text-slate-400 mb-6">
                     {children.length === 0 
                       ? "Commencez par enregistrer votre premier enfant dans le système."
@@ -327,22 +329,22 @@ const OrphanageDashboard = () => {
                   
                   <div className="space-y-3">
                     <Button 
-                      className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg transform hover:scale-[1.02] transition-all"
+                      className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg transform hover:scale-[1.02] transition-all text-sm sm:text-base"
                       onClick={() => setShowAddChild(true)}
                     >
-                      <UserPlus className="w-5 h-5 mr-2" />
+                      <UserPlus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                       Ajouter un enfant
                     </Button>
                     
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="text-center p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <Heart className="w-6 h-6 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
-                        <p className="text-sm font-medium text-blue-800 dark:text-blue-300">Suivi médical</p>
+                      <div className="text-center p-3 sm:p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <Heart className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
+                        <p className="text-xs sm:text-sm font-medium text-blue-800 dark:text-blue-300">Suivi médical</p>
                         <p className="text-xs text-blue-600 dark:text-blue-400">Onglet Santé</p>
                       </div>
-                      <div className="text-center p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
-                        <FileText className="w-6 h-6 text-green-600 dark:text-green-400 mx-auto mb-2" />
-                        <p className="text-sm font-medium text-green-800 dark:text-green-300">Documents</p>
+                      <div className="text-center p-3 sm:p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+                        <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 dark:text-green-400 mx-auto mb-2" />
+                        <p className="text-xs sm:text-sm font-medium text-green-800 dark:text-green-300">Documents</p>
                         <p className="text-xs text-green-600 dark:text-green-400">Onglet Documents</p>
                       </div>
                     </div>
@@ -352,74 +354,77 @@ const OrphanageDashboard = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="children" className="space-y-6">
+          <TabsContent value="children" className="space-y-4 sm:space-y-6">
             <Card className="shadow-lg border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
-              <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
-                <div className="flex items-center justify-between">
+              <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <CardTitle className="text-xl font-bold">Gestion des enfants</CardTitle>
-                    <CardDescription className="text-blue-100 mt-1">
+                    <CardTitle className="text-lg sm:text-xl font-bold">Gestion des enfants</CardTitle>
+                    <CardDescription className="text-blue-100 mt-1 text-sm sm:text-base">
                       Enregistrez et gérez les enfants hébergés dans votre centre.
                     </CardDescription>
                   </div>
                   <Button 
                     onClick={() => setShowAddChild(true)}
-                    className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+                    className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm text-sm sm:text-base"
                     variant="outline"
+                    size="sm"
                   >
                     <UserPlus className="w-4 h-4 mr-2" />
                     Ajouter un enfant
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="p-6">
-                <ChildrenTable
-                  children={children}
-                  onEdit={handleEditChild}
-                  onDelete={handleDeleteChild}
-                  onViewDetails={handleViewChildDetails}
-                />
+              <CardContent className="p-4 sm:p-6">
+                <div className="overflow-x-auto">
+                  <ChildrenTable
+                    children={children}
+                    onEdit={handleEditChild}
+                    onDelete={handleDeleteChild}
+                    onViewDetails={handleViewChildDetails}
+                  />
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="health" className="space-y-6">
+          <TabsContent value="health" className="space-y-4 sm:space-y-6">
             <Card className="shadow-lg border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
-              <CardHeader className="bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-t-lg">
-                <CardTitle className="text-xl font-bold">Suivi médical et nutritionnel</CardTitle>
-                <CardDescription className="text-red-100 mt-1">
+              <CardHeader className="bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-t-lg p-4 sm:p-6">
+                <CardTitle className="text-lg sm:text-xl font-bold">Suivi médical et nutritionnel</CardTitle>
+                <CardDescription className="text-red-100 mt-1 text-sm sm:text-base">
                   Gérez les données de santé et de nutrition des enfants de votre centre.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <HealthManagement children={children} />
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="nutrition" className="space-y-6">
+          <TabsContent value="nutrition" className="space-y-4 sm:space-y-6">
             <Card className="shadow-lg border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
-              <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg">
-                <CardTitle className="text-xl font-bold">Suivi nutritionnel</CardTitle>
-                <CardDescription className="text-green-100 mt-1">
+              <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg p-4 sm:p-6">
+                <CardTitle className="text-lg sm:text-xl font-bold">Suivi nutritionnel</CardTitle>
+                <CardDescription className="text-green-100 mt-1 text-sm sm:text-base">
                   Gérez les données de poids, taille et statut nutritionnel des enfants.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <NutritionManagement children={children} />
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="documents" className="space-y-6">
+          <TabsContent value="documents" className="space-y-4 sm:space-y-6">
             <Card className="shadow-lg border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
-              <CardHeader className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-t-lg">
-                <CardTitle className="text-xl font-bold">Gestion des documents</CardTitle>
-                <CardDescription className="text-purple-100 mt-1">
+              <CardHeader className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-t-lg p-4 sm:p-6">
+                <CardTitle className="text-lg sm:text-xl font-bold">Gestion des documents</CardTitle>
+                <CardDescription className="text-purple-100 mt-1 text-sm sm:text-base">
                   Gérez les documents officiels et les rapports de votre centre.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <DocumentsManagement
                   orphanageId={orphanage.id}
                   orphanageName={orphanage.name}
@@ -433,9 +438,9 @@ const OrphanageDashboard = () => {
 
       {/* Dialog pour ajouter un enfant */}
       <Dialog open={showAddChild} onOpenChange={setShowAddChild}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mx-4 sm:mx-auto">
           <DialogHeader>
-            <DialogTitle>Ajouter un nouvel enfant</DialogTitle>
+            <DialogTitle className="text-lg sm:text-xl">Ajouter un nouvel enfant</DialogTitle>
           </DialogHeader>
           <AddChildForm
             orphanageId={orphanage.id}
@@ -447,9 +452,9 @@ const OrphanageDashboard = () => {
 
       {/* Dialog pour modifier un enfant */}
       <Dialog open={!!editingChild} onOpenChange={(open) => !open && setEditingChild(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mx-4 sm:mx-auto">
           <DialogHeader>
-            <DialogTitle>Modifier l'enfant</DialogTitle>
+            <DialogTitle className="text-lg sm:text-xl">Modifier l'enfant</DialogTitle>
           </DialogHeader>
           {editingChild && (
             <EditChildForm
