@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -291,20 +292,20 @@ const Register = () => {
         />
 
         <div className="flex-1">
-          <div className="container mx-auto px-4 py-20">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-20">
             <div className="max-w-2xl mx-auto text-center">
-              <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg">
-                <CheckCircle className="w-12 h-12 text-white" />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 sm:mb-8 shadow-lg">
+                <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-white" />
               </div>
               
-              <h1 className="text-4xl font-bold text-slate-800 dark:text-slate-100 mb-6">{t.validation.success}</h1>
-              <p className="text-xl text-slate-600 dark:text-slate-300 mb-12 leading-relaxed">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-800 dark:text-slate-100 mb-4 sm:mb-6 px-4">{t.validation.success}</h1>
+              <p className="text-base sm:text-lg lg:text-xl text-slate-600 dark:text-slate-300 mb-8 sm:mb-12 leading-relaxed px-4">
                 {t.validation.pending}
               </p>
               
               <Link to="/">
-                <Button size="lg" className="px-8 py-4 text-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-xl rounded-xl">
-                  <ArrowLeft className="w-5 h-5 mr-3" />
+                <Button size="lg" className="px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-xl rounded-xl w-full sm:w-auto">
+                  <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
                   {t.backHome}
                 </Button>
               </Link>
@@ -327,21 +328,21 @@ const Register = () => {
 
   const renderStep1 = () => (
     <Form {...form}>
-      <div className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="space-y-6 sm:space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <FormField
             control={form.control}
             name="centerName"
             rules={{ required: t.validation.required }}
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold">
+                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
                   {t.form.centerName} <span className="text-red-500">*</span>
                 </FormLabel>
                 <FormControl>
                   <Input
                     placeholder={t.form.centerNamePlaceholder}
-                    className="h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500"
+                    className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
                     {...field}
                   />
                 </FormControl>
@@ -355,12 +356,12 @@ const Register = () => {
             name="capacity"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold">{t.form.capacity}</FormLabel>
+                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">{t.form.capacity}</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
                     placeholder={t.form.capacityPlaceholder}
-                    className="h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500"
+                    className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
                     {...field}
                   />
                 </FormControl>
@@ -370,19 +371,19 @@ const Register = () => {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <FormField
             control={form.control}
             name="provinceId"
             rules={{ required: t.validation.selectProvince }}
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold">
+                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
                   {t.form.province} <span className="text-red-500">*</span>
                 </FormLabel>
                 <Select onValueChange={handleProvinceChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger className="h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500">
+                    <SelectTrigger className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base">
                       <SelectValue placeholder="Sélectionnez une province" />
                     </SelectTrigger>
                   </FormControl>
@@ -405,12 +406,12 @@ const Register = () => {
             rules={{ required: t.validation.selectLocality }}
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold">
+                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
                   {t.form.locality} <span className="text-red-500">*</span>
                 </FormLabel>
                 <Select onValueChange={field.onChange} value={field.value} disabled={!selectedProvinceId}>
                   <FormControl>
-                    <SelectTrigger className="h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500">
+                    <SelectTrigger className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base">
                       <SelectValue placeholder="Sélectionnez une localité" />
                     </SelectTrigger>
                   </FormControl>
@@ -433,11 +434,11 @@ const Register = () => {
           name="address"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold">{t.form.address}</FormLabel>
+              <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">{t.form.address}</FormLabel>
               <FormControl>
                 <Input
                   placeholder={t.form.addressPlaceholder}
-                  className="h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500"
+                  className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
                   {...field}
                 />
               </FormControl>
@@ -446,20 +447,20 @@ const Register = () => {
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <FormField
             control={form.control}
             name="contactPerson"
             rules={{ required: t.validation.required }}
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold">
+                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
                   {t.form.contactPerson} <span className="text-red-500">*</span>
                 </FormLabel>
                 <FormControl>
                   <Input
                     placeholder={t.form.contactPersonPlaceholder}
-                    className="h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500"
+                    className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
                     {...field}
                   />
                 </FormControl>
@@ -474,13 +475,13 @@ const Register = () => {
             rules={{ required: t.validation.required }}
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold">
+                <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
                   {t.form.phone} <span className="text-red-500">*</span>
                 </FormLabel>
                 <FormControl>
                   <Input
                     placeholder={t.form.phonePlaceholder}
-                    className="h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500"
+                    className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
                     {...field}
                   />
                 </FormControl>
@@ -502,14 +503,14 @@ const Register = () => {
           }}
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold">
+              <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
                 {t.form.email} <span className="text-red-500">*</span>
               </FormLabel>
               <FormControl>
                 <Input
                   type="email"
                   placeholder={t.form.emailPlaceholder}
-                  className="h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500"
+                  className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
                   {...field}
                 />
               </FormControl>
@@ -523,11 +524,11 @@ const Register = () => {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold">{t.form.description}</FormLabel>
+              <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">{t.form.description}</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder={t.form.descriptionPlaceholder}
-                  className="min-h-[140px] resize-none border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500"
+                  className="min-h-[120px] sm:min-h-[140px] resize-none border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
                   {...field}
                 />
               </FormControl>
@@ -540,33 +541,33 @@ const Register = () => {
   );
 
   const renderStep2 = () => (
-    <div className="space-y-8">
-      <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6">
-        <div className="flex items-start space-x-4">
-          <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center flex-shrink-0">
-            <FileText className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+    <div className="space-y-6 sm:space-y-8">
+      <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 sm:p-6">
+        <div className="flex items-start space-x-3 sm:space-x-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+            <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600 dark:text-amber-400" />
           </div>
           <div>
-            <h4 className="font-semibold text-amber-800 dark:text-amber-200 mb-2 text-lg">
+            <h4 className="font-semibold text-amber-800 dark:text-amber-200 mb-2 text-base sm:text-lg">
               {t.documents.required}
             </h4>
-            <p className="text-amber-700 dark:text-amber-300">
+            <p className="text-amber-700 dark:text-amber-300 text-sm sm:text-base">
               {t.documents.singleFileLabel}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {!uploadedFile ? (
-          <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-12 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors bg-slate-50/50 dark:bg-slate-800/50">
-            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Upload className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+          <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-8 sm:p-12 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors bg-slate-50/50 dark:bg-slate-800/50">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <Upload className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 dark:text-blue-400" />
             </div>
-            <p className="text-lg font-medium text-slate-700 dark:text-slate-300 mb-3">
+            <p className="text-base sm:text-lg font-medium text-slate-700 dark:text-slate-300 mb-2 sm:mb-3">
               {isUploading ? t.documents.uploading : t.documents.uploadText}
             </p>
-            <p className="text-slate-500 dark:text-slate-400 mb-6">
+            <p className="text-slate-500 dark:text-slate-400 mb-4 sm:mb-6 text-sm sm:text-base">
               {t.documents.acceptedFormats}
             </p>
             <input
@@ -582,31 +583,31 @@ const Register = () => {
               size="lg"
               onClick={() => document.getElementById('file-upload')?.click()}
               disabled={isUploading}
-              className="px-8 py-3 border-2"
+              className="px-6 sm:px-8 py-2 sm:py-3 border-2 text-sm sm:text-base w-full sm:w-auto"
             >
-              <Upload className="w-5 h-5 mr-3" />
+              <Upload className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
               {isUploading ? t.documents.uploading : t.buttons.upload}
             </Button>
           </div>
         ) : (
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border border-green-200 dark:border-green-800 rounded-xl p-6">
-            <div className="flex items-center space-x-3 text-green-700 dark:text-green-300 mb-4">
-              <CheckCircle className="w-6 h-6" />
-              <span className="font-semibold text-lg">
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border border-green-200 dark:border-green-800 rounded-xl p-4 sm:p-6">
+            <div className="flex items-center space-x-3 text-green-700 dark:text-green-300 mb-3 sm:mb-4">
+              <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+              <span className="font-semibold text-base sm:text-lg">
                 {t.documents.fileSelected}
               </span>
             </div>
-            <div className="bg-white dark:bg-slate-800 p-4 rounded-lg border border-green-100 dark:border-green-900">
+            <div className="bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-lg border border-green-100 dark:border-green-900">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                    <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <div>
-                    <span className="font-medium text-slate-700 dark:text-slate-300 text-lg">
+                  <div className="min-w-0 flex-1">
+                    <span className="font-medium text-slate-700 dark:text-slate-300 text-sm sm:text-lg block truncate">
                       {uploadedFile.file.name}
                     </span>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
                       {(uploadedFile.file.size / 1024 / 1024).toFixed(2)} MB
                     </p>
                   </div>
@@ -615,9 +616,9 @@ const Register = () => {
                   variant="ghost"
                   size="sm"
                   onClick={removeFile}
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 flex-shrink-0 ml-2"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Button>
               </div>
             </div>
@@ -625,8 +626,8 @@ const Register = () => {
         )}
       </div>
 
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
-        <p className="text-blue-800 dark:text-blue-200 leading-relaxed">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 sm:p-6">
+        <p className="text-blue-800 dark:text-blue-200 leading-relaxed text-sm sm:text-base">
           <strong>Note légale :</strong> {t.documents.legalNotice}
         </p>
       </div>
@@ -634,52 +635,52 @@ const Register = () => {
   );
 
   const renderStep3 = () => (
-    <div className="space-y-8">
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200 dark:border-blue-800 rounded-xl p-8">
-        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6 flex items-center">
-          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mr-4">
-            <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+    <div className="space-y-6 sm:space-y-8">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6 sm:p-8">
+        <h3 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 mb-4 sm:mb-6 flex items-center">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mr-3 sm:mr-4">
+            <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" />
           </div>
           {t.consent.title}
         </h3>
         
-        <div className="space-y-6">
-          <div className="flex items-start space-x-4 p-4 bg-white dark:bg-slate-800 rounded-lg border border-blue-100 dark:border-blue-900">
+        <div className="space-y-4 sm:space-y-6">
+          <div className="flex items-start space-x-3 sm:space-x-4 p-3 sm:p-4 bg-white dark:bg-slate-800 rounded-lg border border-blue-100 dark:border-blue-900">
             <Checkbox
               id="consent"
               checked={consentChecked}
               onCheckedChange={(checked) => setConsentChecked(checked as boolean)}
               className="mt-1"
             />
-            <Label htmlFor="consent" className="text-slate-700 dark:text-slate-300 leading-relaxed cursor-pointer">
+            <Label htmlFor="consent" className="text-slate-700 dark:text-slate-300 leading-relaxed cursor-pointer text-sm sm:text-base">
               {t.consent.declaration}
             </Label>
           </div>
           
-          <div className="flex items-center space-x-4 p-4 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">
+          <div className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">
             <Checkbox id="privacy" />
-            <Label htmlFor="privacy" className="text-slate-700 dark:text-slate-300 cursor-pointer">
+            <Label htmlFor="privacy" className="text-slate-700 dark:text-slate-300 cursor-pointer text-sm sm:text-base">
               {t.consent.privacy}
             </Label>
           </div>
           
-          <div className="flex items-center space-x-4 p-4 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">
+          <div className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">
             <Checkbox id="terms" />
-            <Label htmlFor="terms" className="text-slate-700 dark:text-slate-300 cursor-pointer">
+            <Label htmlFor="terms" className="text-slate-700 dark:text-slate-300 cursor-pointer text-sm sm:text-base">
               {t.consent.terms}
             </Label>
           </div>
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 rounded-xl p-8 text-center border border-purple-200 dark:border-purple-800">
-        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-          <Heart className="w-8 h-8 text-white" />
+      <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 rounded-xl p-6 sm:p-8 text-center border border-purple-200 dark:border-purple-800">
+        <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg">
+          <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
         </div>
-        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-3">
+        <h3 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 mb-2 sm:mb-3">
           Prêt à rejoindre FCS ?
         </h3>
-        <p className="text-slate-600 dark:text-slate-300">
+        <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base">
           Votre demande sera examinée par notre équipe dans les 48 heures.
         </p>
       </div>
@@ -707,24 +708,24 @@ const Register = () => {
 
       {/* Main Content */}
       <div className="flex-1">
-        <div className="container mx-auto px-4 py-16">
-          <div className="max-w-5xl mx-auto">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+          <div className="max-w-4xl lg:max-w-5xl mx-auto">
             {/* Enhanced Header */}
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-800/50 dark:to-purple-800/50 text-blue-800 dark:text-blue-200 rounded-full text-sm font-semibold mb-6 border border-blue-200/50 dark:border-blue-700/50 shadow-lg">
-                <Building2 className="w-5 h-5 mr-3" />
+            <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+              <div className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-800/50 dark:to-purple-800/50 text-blue-800 dark:text-blue-200 rounded-full text-xs sm:text-sm font-semibold mb-4 sm:mb-6 border border-blue-200/50 dark:border-blue-700/50 shadow-lg">
+                <Building2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
                 <span>Inscription Officielle</span>
               </div>
-              <h1 className="text-5xl font-black text-slate-800 dark:text-slate-100 mb-6">{t.title}</h1>
-              <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">{t.subtitle}</p>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-800 dark:text-slate-100 mb-4 sm:mb-6 px-4">{t.title}</h1>
+              <p className="text-base sm:text-lg lg:text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed px-4">{t.subtitle}</p>
             </div>
 
             {/* Enhanced Progress Steps */}
-            <div className="mb-12">
-              <div className="flex items-center justify-center space-x-8">
+            <div className="mb-8 sm:mb-12">
+              <div className="flex items-center justify-center space-x-4 sm:space-x-6 lg:space-x-8 overflow-x-auto pb-4">
                 {[1, 2, 3].map((step) => (
-                  <div key={step} className="flex items-center">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                  <div key={step} className="flex items-center flex-shrink-0">
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
                       currentStep === step 
                         ? 'bg-gradient-to-r from-blue-600 to-purple-600 border-transparent text-white shadow-lg scale-110' 
                         : currentStep > step 
@@ -732,13 +733,13 @@ const Register = () => {
                           : 'border-slate-300 dark:border-slate-600 text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800'
                     }`}>
                       {currentStep > step ? (
-                        <CheckCircle className="w-6 h-6" />
+                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
                       ) : (
-                        <span className="text-sm font-bold">{step}</span>
+                        <span className="text-xs sm:text-sm font-bold">{step}</span>
                       )}
                     </div>
-                    <div className="ml-4 hidden lg:block">
-                      <p className={`text-sm font-semibold ${
+                    <div className="ml-3 sm:ml-4 hidden sm:block">
+                      <p className={`text-xs sm:text-sm font-semibold ${
                         currentStep >= step ? 'text-slate-800 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500'
                       }`}>
                         {step === 1 && t.steps.info}
@@ -747,80 +748,89 @@ const Register = () => {
                       </p>
                     </div>
                     {step < 3 && (
-                      <div className={`w-20 h-px mx-6 transition-colors ${
+                      <div className={`w-16 sm:w-20 h-px mx-4 sm:mx-6 transition-colors hidden lg:block ${
                         currentStep > step ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'
                       }`} />
                     )}
                   </div>
                 ))}
               </div>
+              
+              {/* Mobile step labels */}
+              <div className="text-center mt-4 sm:hidden">
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                  {currentStep === 1 && t.steps.info}
+                  {currentStep === 2 && t.steps.documents}
+                  {currentStep === 3 && t.steps.confirmation}
+                </p>
+              </div>
             </div>
 
             {/* Enhanced Form Card */}
             <Card className="shadow-2xl border-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
-              <CardHeader className="pb-8 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 rounded-t-lg">
-                <CardTitle className="text-2xl text-center text-slate-800 dark:text-slate-100">
+              <CardHeader className="pb-6 sm:pb-8 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 rounded-t-lg">
+                <CardTitle className="text-xl sm:text-2xl text-center text-slate-800 dark:text-slate-100">
                   {currentStep === 1 && (
                     <div className="flex items-center justify-center">
-                      <Building2 className="w-6 h-6 mr-3 text-blue-600" />
+                      <Building2 className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-blue-600" />
                       {t.steps.info}
                     </div>
                   )}
                   {currentStep === 2 && (
                     <div className="flex items-center justify-center">
-                      <FileText className="w-6 h-6 mr-3 text-purple-600" />
+                      <FileText className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-purple-600" />
                       {t.documents.title}
                     </div>
                   )}
                   {currentStep === 3 && (
                     <div className="flex items-center justify-center">
-                      <Shield className="w-6 h-6 mr-3 text-green-600" />
+                      <Shield className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-green-600" />
                       {t.consent.title}
                     </div>
                   )}
                 </CardTitle>
                 {currentStep === 2 && (
-                  <p className="text-center text-slate-600 dark:text-slate-300 mt-2">{t.documents.subtitle}</p>
+                  <p className="text-center text-slate-600 dark:text-slate-300 mt-2 text-sm sm:text-base px-4">{t.documents.subtitle}</p>
                 )}
               </CardHeader>
-              <CardContent className="p-8">
+              <CardContent className="p-4 sm:p-6 lg:p-8">
                 {currentStep === 1 && renderStep1()}
                 {currentStep === 2 && renderStep2()}
                 {currentStep === 3 && renderStep3()}
 
                 {/* Enhanced Navigation Buttons */}
-                <div className="flex justify-between pt-8 border-t border-slate-200 dark:border-slate-700">
+                <div className="flex flex-col sm:flex-row justify-between pt-6 sm:pt-8 border-t border-slate-200 dark:border-slate-700 gap-4 sm:gap-0">
                   <div>
                     {currentStep > 1 && (
                       <Button
                         variant="outline"
                         size="lg"
                         onClick={() => setCurrentStep(currentStep - 1)}
-                        className="px-8 py-3 border-2 hover:border-blue-400"
+                        className="px-6 sm:px-8 py-2 sm:py-3 border-2 hover:border-blue-400 text-sm sm:text-base w-full sm:w-auto"
                       >
-                        <ArrowLeft className="w-5 h-5 mr-3" />
+                        <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
                         {t.buttons.previous}
                       </Button>
                     )}
                   </div>
-                  <div>
+                  <div className="w-full sm:w-auto">
                     {currentStep < 3 ? (
                       <Button
                         onClick={handleNextStep}
                         size="lg"
-                        className="px-10 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
+                        className="px-8 sm:px-10 py-2 sm:py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg text-sm sm:text-base w-full sm:w-auto"
                       >
                         {t.buttons.next}
-                        <ArrowLeft className="w-5 h-5 ml-3 rotate-180" />
+                        <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 ml-2 sm:ml-3 rotate-180" />
                       </Button>
                     ) : (
                       <Button
                         onClick={handleSubmit}
                         disabled={!consentChecked || isSubmitting}
                         size="lg"
-                        className="px-10 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg disabled:opacity-50"
+                        className="px-8 sm:px-10 py-2 sm:py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg disabled:opacity-50 text-sm sm:text-base w-full sm:w-auto"
                       >
-                        <Users className="w-5 h-5 mr-3" />
+                        <Users className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
                         {isSubmitting ? t.validation.processing : t.buttons.submit}
                       </Button>
                     )}
