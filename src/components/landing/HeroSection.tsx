@@ -34,10 +34,10 @@ export const HeroSection = ({ title, subtitle, heroDescription, registerText, ex
           {/* Main title - Fully responsive */}
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-black text-slate-800 dark:text-slate-100 mb-6 sm:mb-8 leading-tight tracking-tight">
             <span className="block text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2 sm:mb-4 tracking-wider">
-              FCS
+              FCTS
             </span>
             <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 dark:from-blue-400 dark:via-purple-400 dark:to-blue-300 bg-clip-text text-transparent block text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">
-              Find Children To Save
+              Find The Children To Save
             </span>
           </h1>
           
