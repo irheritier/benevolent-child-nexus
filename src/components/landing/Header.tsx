@@ -53,10 +53,10 @@ export const Header = ({ language, setLanguage, adminLoginText }: HeaderProps) =
             </div>
             <div>
               <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
-                FCS
+                FCTS
               </h1>
               <p className="text-[8px] sm:text-xs text-slate-600 dark:text-slate-400 font-semibold tracking-wide uppercase">
-                Find Children To Save
+                Find The Children To Save
               </p>
             </div>
           </div>
