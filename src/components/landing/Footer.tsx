@@ -33,7 +33,7 @@ export const Footer = ({ footer }: FooterProps) => {
                 <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                   FCTS
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-400 font-semibold tracking-wide">Find Children To Save</p>
+                <p className="text-xs sm:text-sm text-slate-400 font-semibold tracking-wide">Find The Children To Save</p>
                 <p className="text-xs text-slate-500 mt-1">Protection • Suivi • Dignité</p>
               </div>
             </div>
@@ -45,7 +45,7 @@ export const Footer = ({ footer }: FooterProps) => {
             <div className="space-y-3 sm:space-y-4">
               <div className="flex items-center gap-3 text-slate-400 text-sm sm:text-base">
                 <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400 flex-shrink-0" />
-                <span>contact@fcs-congo.org</span>
+                <span></span>
               </div>
               <div className="flex items-center gap-3 text-slate-400 text-sm sm:text-base">
                 <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400 flex-shrink-0" />

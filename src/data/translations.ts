@@ -1,7 +1,7 @@
 
 export const texts = {
   fr: {
-    title: "FCS : Find Children To Save",
+    title: "FCTS : Find The Children To Save",
     subtitle: "Plateforme de recensement et de suivi des centres d'accueil pour enfants vulnérables en RDC",
     heroDescription: "Une solution numérique moderne pour centraliser, protéger et optimiser le suivi des enfants vulnérables à travers la République Démocratique du Congo.",
     mission: "Notre Mission",
@@ -42,7 +42,7 @@ export const texts = {
     },
     footer: {
       about: "À propos de FCS",
-      aboutText: "FCS : Find Children To Save est une initiative technologique dédiée à la protection et au suivi des enfants vulnérables en RDC.",
+      aboutText: "FCTS : Find The Children To Save est une initiative technologique dédiée à la protection et au suivi des enfants vulnérables en RDC.",
       links: "Liens utiles",
       privacy: "Politique de confidentialité",
       terms: "Conditions d'utilisation",
@@ -52,7 +52,7 @@ export const texts = {
     }
   },
   en: {
-    title: "FCS : Find Children To Save",
+    title: "FCTS : Find The Children To Save",
     subtitle: "Platform for registering and monitoring care centers for vulnerable children in DRC",
     heroDescription: "A modern digital solution to centralize, protect and optimize the monitoring of vulnerable children across the Democratic Republic of Congo.",
     mission: "Our Mission",
@@ -92,8 +92,8 @@ export const texts = {
       gdpr: "GDPR Compliant"
     },
     footer: {
-      about: "About FCS",
-      aboutText: "FCS : Find Children To Save is a technological initiative dedicated to protecting and monitoring vulnerable children in DRC.",
+      about: "About FCTS",
+      aboutText: "FCTS : Find The Children To Save is a technological initiative dedicated to protecting and monitoring vulnerable children in DRC.",
       links: "Useful Links",
       privacy: "Privacy Policy",
       terms: "Terms of Use",
