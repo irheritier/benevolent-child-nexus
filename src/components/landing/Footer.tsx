@@ -31,7 +31,7 @@ export const Footer = ({ footer }: FooterProps) => {
               </div>
               <div>
                 <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                  FCS
+                  FCTS
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-400 font-semibold tracking-wide">Find Children To Save</p>
                 <p className="text-xs text-slate-500 mt-1">Protection • Suivi • Dignité</p>
@@ -49,7 +49,7 @@ export const Footer = ({ footer }: FooterProps) => {
               </div>
               <div className="flex items-center gap-3 text-slate-400 text-sm sm:text-base">
                 <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400 flex-shrink-0" />
-                <span>+243 XXX XXX XXX</span>
+                <span>+243 842 354 044</span>
               </div>
               <div className="flex items-center gap-3 text-slate-400 text-sm sm:text-base">
                 <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400 flex-shrink-0" />
@@ -98,7 +98,7 @@ export const Footer = ({ footer }: FooterProps) => {
         {/* Bottom section - Responsive */}
         <div className="border-t border-slate-700 pt-6 sm:pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-slate-400 font-medium text-xs sm:text-sm text-center md:text-left">
-            © 2024 FCS : Find Children To Save. Tous droits réservés.
+            © 2024 FCTS : Find The Children To Save. Tous droits réservés.
           </p>
           <div className="flex items-center space-x-4 sm:space-x-6 text-slate-400">
             <span className="flex items-center gap-2 text-xs sm:text-sm">
