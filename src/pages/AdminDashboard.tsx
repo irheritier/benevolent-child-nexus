@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Users, UserCheck, UserX, Building, CheckCircle, XCircle, Clock, BarChart, Bell } from 'lucide-react';
-import { AdminDashboardHeader } from '@/components/admin/AdminDashboardHeader';
+import AdminDashboardHeader from '@/components/admin/AdminDashboardHeader';
 import AdminStatsDashboard from '@/components/admin/AdminStatsDashboard';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { NotificationProvider } from '@/contexts/NotificationContext';
@@ -114,14 +114,7 @@ const AdminDashboardContent = () => {
         .order('created_at', { ascending: false });
 
       setOrphanageRequests(orphanages || []);
-      
-      // Type-safe mapping for partner requests
-      const typedPartners: PartnerRequest[] = (partners || []).map(partner => ({
-        ...partner,
-        status: partner.status as 'pending' | 'approved' | 'rejected'
-      }));
-      
-      setPartnerRequests(typedPartners);
+      setPartnerRequests(partners || []);
 
       // Calculate stats
       const orphanageStats = (orphanages || []).reduce((acc, org) => {
@@ -131,7 +124,7 @@ const AdminDashboardContent = () => {
         return acc;
       }, { pendingOrphanages: 0, verifiedOrphanages: 0, rejectedOrphanages: 0 });
 
-      const partnerStats = typedPartners.reduce((acc, partner) => {
+      const partnerStats = (partners || []).reduce((acc, partner) => {
         if (partner.status === 'pending') acc.pendingPartners++;
         else if (partner.status === 'approved') acc.approvedPartners++;
         else if (partner.status === 'rejected') acc.rejectedPartners++;
@@ -177,7 +170,7 @@ const AdminDashboardContent = () => {
       transition: {
         duration: 0.6,
         ease: "easeOut" as const,
-        type: "spring" as const,
+        type: "spring",
         stiffness: 100
       }
     }

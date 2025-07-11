@@ -167,46 +167,37 @@ const ReportsManager = () => {
               variants={containerVariants}
             >
               <motion.div variants={reportItemVariants}>
-                <motion.div
+                <Button 
+                  className="w-full h-20 flex flex-col gap-2" 
+                  variant="outline"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <Button 
-                    className="w-full h-20 flex flex-col gap-2" 
-                    variant="outline"
-                  >
-                    <Calendar className="w-6 h-6" />
-                    <span className="text-sm">Rapport mensuel</span>
-                  </Button>
-                </motion.div>
+                  <Calendar className="w-6 h-6" />
+                  <span className="text-sm">Rapport mensuel</span>
+                </Button>
               </motion.div>
               <motion.div variants={reportItemVariants}>
-                <motion.div
+                <Button 
+                  className="w-full h-20 flex flex-col gap-2" 
+                  variant="outline"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <Button 
-                    className="w-full h-20 flex flex-col gap-2" 
-                    variant="outline"
-                  >
-                    <Activity className="w-6 h-6" />
-                    <span className="text-sm">Rapport nutritionnel</span>
-                  </Button>
-                </motion.div>
+                  <Activity className="w-6 h-6" />
+                  <span className="text-sm">Rapport nutritionnel</span>
+                </Button>
               </motion.div>
               <motion.div variants={reportItemVariants}>
-                <motion.div
+                <Button 
+                  className="w-full h-20 flex flex-col gap-2" 
+                  variant="outline"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <Button 
-                    className="w-full h-20 flex flex-col gap-2" 
-                    variant="outline"
-                  >
-                    <Users className="w-6 h-6" />
-                    <span className="text-sm">Rapport de santé</span>
-                  </Button>
-                </motion.div>
+                  <Users className="w-6 h-6" />
+                  <span className="text-sm">Rapport de santé</span>
+                </Button>
               </motion.div>
             </motion.div>
           </CardContent>
