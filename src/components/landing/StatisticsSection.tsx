@@ -1,10 +1,16 @@
+
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, Users, Heart, MapPin, Shield, Activity } from 'lucide-react';
 import { useDashboardStats } from '@/components/admin/hooks/useDashboardStats';
 
 const StatisticsSection = () => {
+  console.log('StatisticsSection rendering...');
+  
   const { stats, isLoading } = useDashboardStats();
+  
+  console.log('Stats data:', stats);
+  console.log('Loading state:', isLoading);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -56,6 +62,7 @@ const StatisticsSection = () => {
   };
 
   if (isLoading) {
+    console.log('Rendering loading state');
     return (
       <section className="py-20 bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
         <div className="container mx-auto px-4">
@@ -94,6 +101,7 @@ const StatisticsSection = () => {
     );
   }
 
+  console.log('Rendering main statistics section');
   return (
     <section className="py-20 bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
       <div className="container mx-auto px-4">
