@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
@@ -113,7 +112,7 @@ const OrphanagesChart = () => {
       scale: 1,
       transition: {
         duration: 0.6,
-        ease: "easeOut" as const
+        ease: "easeOut"
       }
     }
   };

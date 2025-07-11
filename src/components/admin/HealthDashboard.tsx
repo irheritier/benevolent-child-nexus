@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -142,7 +141,7 @@ const HealthDashboard = () => {
       y: 0,
       transition: {
         duration: 0.5,
-        ease: "easeOut" as const
+        ease: "easeOut"
       }
     }
   };
