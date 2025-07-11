@@ -1,370 +1,412 @@
-
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Progress } from "@/components/ui/progress"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
-import { format } from "date-fns"
-import { Button } from "@/components/ui/button"
-import { CalendarIcon } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer"
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Heart, LogOut, Bell, BarChart, Users, TrendingUp, MapPin, Activity, Shield } from 'lucide-react';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
+import { NotificationProvider } from '@/contexts/NotificationContext';
+import DashboardAnalyticsTabs from '@/components/admin/DashboardAnalyticsTabs';
+import DashboardStatsCards from '@/components/admin/DashboardStatsCards';
+import HealthDashboard from '@/components/admin/HealthDashboard';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const PartnerDashboard = () => {
+interface DashboardStats {
+  totalOrphanages: number;
+  totalChildren: number;
+  totalProvinces: number;
+  verifiedOrphanages: number;
+  pendingOrphanages: number;
+  wellNourishedChildren: number;
+  malnourishedChildren: number;
+}
+
+const PartnerDashboardContent = () => {
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [userEmail, setUserEmail] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Simulate loading data
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+    checkAuthAndLoadData();
   }, []);
 
-  const pieChartData = [
-    { name: 'Orphelins', value: 400 },
-    { name: 'Enfants Vulnérables', value: 300 },
-    { name: 'Enfants Abandonnés', value: 300 },
-    { name: 'Autres', value: 200 },
-  ];
+  const checkAuthAndLoadData = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate('/partner/auth');
+        return;
+      }
+      // Vérifier le rôle
+      const { data: userData } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+      if (userData?.role !== 'partner') {
+        navigate('/partner/auth');
+        return;
+      }
 
-  const barChartData = [
-    { name: 'Jan', uv: 4000, pv: 2400, amt: 2400 },
-    { name: 'Feb', uv: 3000, pv: 1398, amt: 2210 },
-    { name: 'Mar', uv: 2000, pv: 9800, amt: 2290 },
-    { name: 'Apr', uv: 2780, pv: 3908, amt: 2000 },
-    { name: 'May', uv: 1890, pv: 4800, amt: 2181 },
-    { name: 'Jun', uv: 2390, pv: 3800, amt: 2500 },
-    { name: 'Jul', uv: 3490, pv: 4300, amt: 2100 },
-  ];
+      setUserEmail(session.user.email || '');
 
-  // Animation variants with proper TypeScript types
-  const containerVariants = {
+      // Charger les statistiques publiques
+      const { data: publicStats } = await supabase
+        .from('public_stats')
+        .select('*')
+        .single();
+
+      if (publicStats) {
+        setStats({
+          totalOrphanages: publicStats.total_orphanages || 0,
+          totalChildren: publicStats.total_children || 0,
+          totalProvinces: publicStats.total_provinces || 0,
+          verifiedOrphanages: publicStats.verified_orphanages || 0,
+          pendingOrphanages: (publicStats.total_orphanages || 0) - (publicStats.verified_orphanages || 0),
+          wellNourishedChildren: publicStats.well_nourished_children || 0,
+          malnourishedChildren: publicStats.malnourished_children || 0,
+        });
+      }
+    } catch (error) {
+      console.error('Error loading dashboard:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les données du tableau de bord.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  // Animation variants
+  const pageVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { 
-        duration: 0.6, 
-        ease: "easeOut" as const,
-        staggerChildren: 0.1 
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+        staggerChildren: 0.1
       }
     }
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+  const headerVariants = {
+    hidden: { opacity: 0, y: -50 },
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { 
-        duration: 0.4, 
-        ease: "easeOut" as const
+      transition: {
+        duration: 0.8,
+        ease: "easeOut"
       }
     }
   };
 
   const cardVariants = {
-    hidden: { opacity: 0, scale: 0.95 },
-    visible: { 
-      opacity: 1, 
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: {
+      opacity: 1,
       scale: 1,
-      transition: { 
-        duration: 0.4, 
-        ease: "easeOut" as const
+      transition: {
+        duration: 0.5,
+        ease: "easeOut"
       }
     }
   };
 
-  const chartVariants = {
-    hidden: { opacity: 0, scale: 0.95 },
-    visible: { 
-      opacity: 1, 
-      scale: 1,
-      transition: { 
-        duration: 0.5, 
-        ease: "easeOut" as const
-      }
-    }
-  };
+  if (isLoading) {
+    return (
+      <motion.div 
+        className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="text-center space-y-4">
+          <motion.div 
+            className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          ></motion.div>
+          <div className="space-y-2">
+            <motion.h3 
+              className="text-xl font-semibold text-slate-800 dark:text-slate-200"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              Chargement du tableau de bord
+            </motion.h3>
+            <motion.p 
+              className="text-slate-600 dark:text-slate-400"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              Accès aux données partenaires en cours...
+            </motion.p>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-6">
-      <motion.div
-        className="container mx-auto"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
+    <motion.div 
+      className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900"
+      variants={pageVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      {/* Header moderne */}
+      <motion.header 
+        className="border-b bg-white/90 backdrop-blur-lg supports-[backdrop-filter]:bg-white/70 dark:bg-slate-900/90 dark:supports-[backdrop-filter]:bg-slate-900/70 sticky top-0 z-50 shadow-lg border-primary/10 dark:border-slate-700/50"
+        variants={headerVariants}
       >
-        <motion.header className="mb-8" variants={itemVariants}>
-          <div className="flex items-center justify-between">
+        <div className="container mx-auto px-6 py-5 flex items-center justify-between">
+          <motion.div 
+            className="flex items-center space-x-4 cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => navigate('/')}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="relative">
+              <motion.div 
+                className="w-14 h-14 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 rounded-2xl flex items-center justify-center shadow-xl transform hover:scale-105 transition-transform duration-300"
+                whileHover={{ rotate: 5 }}
+              >
+                <Heart className="w-8 h-8 text-white" />
+              </motion.div>
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                <Shield className="w-3 h-3 text-white" />
+              </div>
+            </div>
             <div>
-              <h1 className="text-2xl font-semibold">Tableau de Bord Partenaire</h1>
-              <p className="text-gray-500 dark:text-gray-400">Bienvenue sur votre espace partenaire.</p>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
+                FCS : Find Children to Save
+              </h1>
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold tracking-wide uppercase">
+                Portail Partenaire
+              </p>
             </div>
-            <div className="space-x-4 flex items-center">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-[280px] justify-start text-left font-normal",
-                      !date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "PPP") : <span>Choisir une date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="center">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    disabled={(date) =>
-                      date > new Date() || date < new Date("2020-01-01")
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <NotificationCenter />
-              <Avatar>
-                <AvatarImage src="https://github.com/shadcn.png" />
-                <AvatarFallback>CN</AvatarFallback>
-              </Avatar>
-            </div>
+          </motion.div>
+          
+          <div className="flex items-center gap-6">
+            <Badge variant="outline" className="hidden md:flex bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 px-4 py-2 rounded-xl font-medium">
+              <Users className="w-4 h-4 mr-2" />
+              {userEmail}
+            </Badge>
+            <ThemeToggle />
+            <NotificationBell />
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button 
+                variant="outline" 
+                onClick={handleLogout} 
+                className="flex items-center gap-2 border-2 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 hover:border-red-300 dark:hover:border-red-700 font-semibold px-6 rounded-xl"
+              >
+                <LogOut className="w-4 h-4" />
+                Déconnexion
+              </Button>
+            </motion.div>
           </div>
-        </motion.header>
+        </div>
+      </motion.header>
 
-        <motion.section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8" variants={itemVariants}>
-          <motion.div variants={cardVariants}>
-            <Card>
-              <CardHeader>
-                <CardTitle>Total des Enfants Pris en Charge</CardTitle>
-                <CardDescription>Nombre total d'enfants sous votre responsabilité.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <Skeleton className="h-5 w-20" />
-                ) : (
-                  <div className="text-3xl font-bold">1,457</div>
-                )}
-                <Progress value={75} className="mt-4"/>
-                <div className="flex justify-between text-muted-foreground mt-2">
-                  <span>0%</span>
-                  <span>100%</span>
-                </div>
-              </CardContent>
-            </Card>
+      {/* Main Content */}
+      <main className="container mx-auto px-6 py-12">
+        {/* Section d'en-tête avec animations */}
+        <motion.div 
+          className="mb-12 text-center space-y-6"
+          variants={cardVariants}
+        >
+          <div className="space-y-4">
+            <motion.h2 
+              className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent animate-fade-in"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
+              Tableau de bord partenaire
+            </motion.h2>
+            <motion.p 
+              className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            >
+              Accédez aux statistiques complètes, analyses détaillées et notifications en temps réel 
+              concernant les orphelinats et centres d'accueil de la République Démocratique du Congo.
+            </motion.p>
+          </div>
+          
+          {/* Indicateurs visuels */}
+          <motion.div 
+            className="flex justify-center items-center gap-8 mt-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+          >
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+              <motion.div 
+                className="w-3 h-3 bg-green-500 rounded-full animate-pulse"
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              ></motion.div>
+              <span className="text-sm font-medium">Données en temps réel</span>
+            </div>
+            <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+              <Shield className="w-4 h-4" />
+              <span className="text-sm font-medium">Accès sécurisé</span>
+            </div>
           </motion.div>
+        </motion.div>
 
-          <motion.div variants={cardVariants}>
-            <Card>
-              <CardHeader>
-                <CardTitle>Nouveaux Enfants ce Mois-ci</CardTitle>
-                <CardDescription>Nombre d'enfants ajoutés ce mois-ci.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <Skeleton className="h-5 w-20" />
-                ) : (
-                  <div className="text-3xl font-bold">125</div>
-                )}
-                <Progress value={25} className="mt-4"/>
-                <div className="flex justify-between text-muted-foreground mt-2">
-                  <span>0%</span>
-                  <span>100%</span>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+        {/* Onglets avec design amélioré */}
+        <motion.div
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <Tabs defaultValue="analytics" className="space-y-8">
+            <TabsList className="grid w-full grid-cols-3 h-16 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 rounded-2xl p-2 shadow-lg">
+              <TabsTrigger 
+                value="analytics" 
+                className="flex items-center gap-3 h-12 rounded-xl font-semibold text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
+              >
+                <BarChart className="w-5 h-5" />
+                Analyses et statistiques
+              </TabsTrigger>
+              <TabsTrigger 
+                value="health" 
+                className="flex items-center gap-3 h-12 rounded-xl font-semibold text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
+              >
+                <Activity className="w-5 h-5" />
+                Santé
+              </TabsTrigger>
+              <TabsTrigger 
+                value="notifications" 
+                className="flex items-center gap-3 h-12 rounded-xl font-semibold text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
+              >
+                <Bell className="w-5 h-5" />
+                Notifications
+              </TabsTrigger>
+            </TabsList>
+            
+            <AnimatePresence mode="wait">
+              <TabsContent value="analytics" className="space-y-8 animate-fade-in">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  {/* Cartes de statistiques détaillées */}
+                  {stats && (
+                    <div className="mb-8">
+                      <DashboardStatsCards 
+                        stats={{
+                          totalOrphanages: stats.totalOrphanages,
+                          totalChildren: stats.totalChildren,
+                          pendingOrphanages: stats.pendingOrphanages,
+                          verifiedOrphanages: stats.verifiedOrphanages,
+                          wellNourishedChildren: stats.wellNourishedChildren,
+                          malnourishedChildren: stats.malnourishedChildren,
+                          totalProvinces: stats.totalProvinces,
+                        }}
+                        isLoading={isLoading}
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Onglets d'analyse détaillés */}
+                  <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-0 shadow-2xl rounded-3xl overflow-hidden">
+                    <CardHeader className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 text-white p-8">
+                      <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                        <TrendingUp className="w-7 h-7" />
+                        Analyses avancées et tendances
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-8">
+                      <DashboardAnalyticsTabs />
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </TabsContent>
+              
+              <TabsContent value="health" className="space-y-8 animate-fade-in">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-0 shadow-2xl rounded-3xl overflow-hidden">
+                    <CardHeader className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white p-8">
+                      <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                        <Activity className="w-7 h-7" />
+                        Surveillance sanitaire
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-8">
+                      <HealthDashboard />
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </TabsContent>
+              
+              <TabsContent value="notifications" className="animate-fade-in">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-0 shadow-2xl rounded-3xl overflow-hidden">
+                    <CardHeader className="bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 text-white p-8">
+                      <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                        <Bell className="w-7 h-7" />
+                        Centre de notifications
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-8">
+                      <NotificationCenter />
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </TabsContent>
+            </AnimatePresence>
+          </Tabs>
+        </motion.div>
+      </main>
+    </motion.div>
+  );
+};
 
-          <motion.div variants={cardVariants}>
-            <Card>
-              <CardHeader>
-                <CardTitle>Dons Reçus</CardTitle>
-                <CardDescription>Montant total des dons reçus ce mois-ci.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <Skeleton className="h-5 w-20" />
-                ) : (
-                  <div className="text-3xl font-bold">$5,250</div>
-                )}
-                <Progress value={50} className="mt-4"/>
-                <div className="flex justify-between text-muted-foreground mt-2">
-                  <span>0%</span>
-                  <span>100%</span>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </motion.section>
-
-        <motion.section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8" variants={itemVariants}>
-          <motion.div variants={chartVariants}>
-            <Card>
-              <CardHeader>
-                <CardTitle>Répartition des Enfants</CardTitle>
-                <CardDescription>Par type de vulnérabilité.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <Skeleton className="h-[300px]" />
-                ) : (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={pieChartData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {pieChartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          <motion.div variants={chartVariants}>
-            <Card>
-              <CardHeader>
-                <CardTitle>Tendances des Dons Mensuels</CardTitle>
-                <CardDescription>Évolution des dons au cours des derniers mois.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <Skeleton className="h-[300px]" />
-                ) : (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={barChartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="pv" fill="#8884d8" />
-                      <Bar dataKey="uv" fill="#82ca9d" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        </motion.section>
-
-        <motion.section className="mb-8" variants={itemVariants}>
-          <Card>
-            <CardHeader>
-              <CardTitle>Dernières Activités</CardTitle>
-              <CardDescription>Suivi des activités récentes.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <Skeleton className="h-[200px]" />
-              ) : (
-                <Table>
-                  <TableCaption>Quelques activités récentes dans votre réseau.</TableCaption>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[100px]">Date</TableHead>
-                      <TableHead>Activité</TableHead>
-                      <TableHead>Utilisateur</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell className="font-medium">12/05/2024</TableCell>
-                      <TableCell>Enfant ajouté au système</TableCell>
-                      <TableCell>Admin</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">11/05/2024</TableCell>
-                      <TableCell>Don de $100 reçu</TableCell>
-                      <TableCell>Utilisateur</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </motion.section>
-
-        <motion.section variants={itemVariants}>
-          <Card>
-            <CardHeader>
-              <CardTitle>Support et Contact</CardTitle>
-              <CardDescription>Contactez-nous pour toute question ou assistance.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form className="grid gap-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="name">Nom</Label>
-                    <Input type="text" id="name" defaultValue="Votre Nom" />
-                  </div>
-                  <div>
-                    <Label htmlFor="email">Email</Label>
-                    <Input type="email" id="email" defaultValue="votre@email.com" />
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="subject">Sujet</Label>
-                  <Input type="text" id="subject" defaultValue="Sujet de votre demande" />
-                </div>
-                <div>
-                  <Label htmlFor="message">Message</Label>
-                  <Textarea id="message" rows={4} defaultValue="Votre message ici..." />
-                </div>
-                <Button>Envoyer le Message</Button>
-              </form>
-            </CardContent>
-          </Card>
-        </motion.section>
-      </motion.div>
-    </div>
+const PartnerDashboard = () => {
+  return (
+    <NotificationProvider>
+      <PartnerDashboardContent />
+    </NotificationProvider>
   );
 };
 

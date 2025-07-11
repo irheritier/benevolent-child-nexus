@@ -2,220 +2,572 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from "@/components/ui/button";
-import { User, Settings, Home, Plus, LogOut } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import {
-    Table,
-    TableBody,
-    TableCaption,
-    TableCell,
-    TableFooter,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table"
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { enUS } from 'date-fns/locale';
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "@/components/ui/use-toast"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Checkbox } from "@/components/ui/checkbox"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Slider } from "@/components/ui/slider"
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
-import { AspectRatio } from "@/components/ui/aspect-ratio"
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu"
-import { FileVideo, ImagePlus, MessageSquare, Calendar as CalendarIcon } from "lucide-react"
+import { useToast } from '@/hooks/use-toast';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Users, UserCheck, UserX, Building, CheckCircle, XCircle, Clock, BarChart, Bell } from 'lucide-react';
+import AdminDashboardHeader from '@/components/admin/AdminDashboardHeader';
+import AdminStatsDashboard from '@/components/admin/AdminStatsDashboard';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
+import { NotificationProvider } from '@/contexts/NotificationContext';
+import { motion, AnimatePresence } from 'framer-motion';
+
+interface OrphanageRequest {
+  id: string;
+  name: string;
+  contact_person: string;
+  email: string;
+  phone: string;
+  city: string;
+  province: string;
+  legal_status: 'pending' | 'verified' | 'rejected';
+  created_at: string;
+}
+
+interface PartnerRequest {
+  id: string;
+  organization_name: string;
+  contact_person: string;
+  email: string;
+  phone: string;
+  organization_type: string;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+}
+
+interface Stats {
+  pendingOrphanages: number;
+  verifiedOrphanages: number;
+  rejectedOrphanages: number;
+  pendingPartners: number;
+  approvedPartners: number;
+  rejectedPartners: number;
+}
+
+const AdminDashboardContent = () => {
+  const [userEmail, setUserEmail] = useState<string>('');
+  const [orphanageRequests, setOrphanageRequests] = useState<OrphanageRequest[]>([]);
+  const [partnerRequests, setPartnerRequests] = useState<PartnerRequest[]>([]);
+  const [stats, setStats] = useState<Stats>({
+    pendingOrphanages: 0,
+    verifiedOrphanages: 0,
+    rejectedOrphanages: 0,
+    pendingPartners: 0,
+    approvedPartners: 0,
+    rejectedPartners: 0,
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    checkAuthAndLoadData();
+  }, []);
+
+  const checkAuthAndLoadData = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate('/admin/auth');
+        return;
+      }
+
+      const { data: userData } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+
+      if (userData?.role !== 'admin') {
+        navigate('/admin/auth');
+        return;
+      }
+
+      setUserEmail(session.user.email || '');
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Error loading dashboard:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les données du tableau de bord.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadDashboardData = async () => {
+    try {
+      // Load orphanage requests
+      const { data: orphanages } = await supabase
+        .from('orphanages')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      // Load partner requests
+      const { data: partners } = await supabase
+        .from('partner_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      setOrphanageRequests(orphanages || []);
+      setPartnerRequests(partners || []);
+
+      // Calculate stats
+      const orphanageStats = (orphanages || []).reduce((acc, org) => {
+        if (org.legal_status === 'pending') acc.pendingOrphanages++;
+        else if (org.legal_status === 'verified') acc.verifiedOrphanages++;
+        else if (org.legal_status === 'rejected') acc.rejectedOrphanages++;
+        return acc;
+      }, { pendingOrphanages: 0, verifiedOrphanages: 0, rejectedOrphanages: 0 });
+
+      const partnerStats = (partners || []).reduce((acc, partner) => {
+        if (partner.status === 'pending') acc.pendingPartners++;
+        else if (partner.status === 'approved') acc.approvedPartners++;
+        else if (partner.status === 'rejected') acc.rejectedPartners++;
+        return acc;
+      }, { pendingPartners: 0, approvedPartners: 0, rejectedPartners: 0 });
+
+      setStats({ ...orphanageStats, ...partnerStats });
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    }
+  };
+
+  // Animation variants
+  const pageVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20, scale: 0.95 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut" as const
+      }
+    }
+  };
+
+  const statsCardVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: { 
+      opacity: 1, 
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut" as const,
+        type: "spring",
+        stiffness: 100
+      }
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <motion.div 
+        className="min-h-screen bg-gray-50 flex items-center justify-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="text-center space-y-4">
+          <motion.div 
+            className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          ></motion.div>
+          <motion.h3 
+            className="text-xl font-semibold text-gray-800"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            Chargement du tableau de bord administrateur...
+          </motion.h3>
+        </div>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div 
+      className="min-h-screen bg-gray-50"
+      variants={pageVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <AdminDashboardHeader userEmail={userEmail} />
+
+      <main className="container mx-auto px-6 py-8">
+        <motion.div variants={cardVariants}>
+          <Tabs defaultValue="requests" className="space-y-8">
+            <TabsList className="grid w-full grid-cols-4 h-12 bg-white shadow-sm">
+              <TabsTrigger value="requests" className="flex items-center gap-2">
+                <Building className="w-4 h-4" />
+                Demandes d'inscription
+              </TabsTrigger>
+              <TabsTrigger value="partners" className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Partenaires
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex items-center gap-2">
+                <BarChart className="w-4 h-4" />
+                Analyses et statistiques
+              </TabsTrigger>
+              <TabsTrigger value="notifications" className="flex items-center gap-2">
+                <Bell className="w-4 h-4" />
+                Notifications
+              </TabsTrigger>
+            </TabsList>
+
+            <AnimatePresence mode="wait">
+              {/* Orphanage Requests Tab */}
+              <TabsContent value="requests" className="space-y-6">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  {/* Stats Cards for Orphanages */}
+                  <motion.div 
+                    className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+                    variants={pageVariants}
+                  >
+                    <motion.div variants={statsCardVariants} whileHover={{ scale: 1.02 }}>
+                      <Card className="hover:shadow-lg transition-shadow duration-300">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                          <CardTitle className="text-sm font-medium">En attente</CardTitle>
+                          <motion.div
+                            whileHover={{ rotate: 15 }}
+                            transition={{ type: "spring", stiffness: 300 }}
+                          >
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                          </motion.div>
+                        </CardHeader>
+                        <CardContent>
+                          <motion.div 
+                            className="text-2xl font-bold text-orange-600"
+                            initial={{ opacity: 0, scale: 0.5 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.3, type: "spring" }}
+                          >
+                            {stats.pendingOrphanages}
+                          </motion.div>
+                          <p className="text-xs text-muted-foreground">
+                            Demandes à examiner
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+
+                    <motion.div variants={statsCardVariants} whileHover={{ scale: 1.02 }}>
+                      <Card className="hover:shadow-lg transition-shadow duration-300">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                          <CardTitle className="text-sm font-medium">Validés</CardTitle>
+                          <motion.div
+                            whileHover={{ rotate: 15 }}
+                            transition={{ type: "spring", stiffness: 300 }}
+                          >
+                            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                          </motion.div>
+                        </CardHeader>
+                        <CardContent>
+                          <motion.div 
+                            className="text-2xl font-bold text-green-600"
+                            initial={{ opacity: 0, scale: 0.5 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.4, type: "spring" }}
+                          >
+                            {stats.verifiedOrphanages}
+                          </motion.div>
+                          <p className="text-xs text-muted-foreground">
+                            Orphelinats approuvés
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+
+                    <motion.div variants={statsCardVariants} whileHover={{ scale: 1.02 }}>
+                      <Card className="hover:shadow-lg transition-shadow duration-300">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                          <CardTitle className="text-sm font-medium">Rejetés</CardTitle>
+                          <motion.div
+                            whileHover={{ rotate: 15 }}
+                            transition={{ type: "spring", stiffness: 300 }}
+                          >
+                            <XCircle className="h-4 w-4 text-muted-foreground" />
+                          </motion.div>
+                        </CardHeader>
+                        <CardContent>
+                          <motion.div 
+                            className="text-2xl font-bold text-red-600"
+                            initial={{ opacity: 0, scale: 0.5 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.5, type: "spring" }}
+                          >
+                            {stats.rejectedOrphanages}
+                          </motion.div>
+                          <p className="text-xs text-muted-foreground">
+                            Demandes refusées
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  </motion.div>
+
+                  {/* Orphanage Requests List */}
+                  <motion.div variants={cardVariants}>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Demandes d'inscription des orphelinats</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <motion.div 
+                          className="space-y-4"
+                          variants={pageVariants}
+                        >
+                          {orphanageRequests.slice(0, 10).map((request, index) => (
+                            <motion.div
+                              key={request.id}
+                              variants={cardVariants}
+                              whileHover={{ scale: 1.01, backgroundColor: "rgba(0,0,0,0.02)" }}
+                              className="flex items-center justify-between p-4 border rounded-lg transition-colors"
+                            >
+                              <div>
+                                <h4 className="font-medium">{request.name}</h4>
+                                <p className="text-sm text-gray-500">
+                                  {request.contact_person} • {request.city}, {request.province}
+                                </p>
+                                <p className="text-xs text-gray-400">
+                                  {new Date(request.created_at).toLocaleDateString('fr-FR')}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge 
+                                  variant={request.legal_status === 'pending' ? 'secondary' : 
+                                          request.legal_status === 'verified' ? 'default' : 'destructive'}
+                                >
+                                  {request.legal_status === 'pending' ? 'En attente' :
+                                   request.legal_status === 'verified' ? 'Validé' : 'Rejeté'}
+                                </Badge>
+                                {request.legal_status === 'pending' && (
+                                  <motion.div
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                  >
+                                    <Button size="sm">Examiner</Button>
+                                  </motion.div>
+                                )}
+                              </div>
+                            </motion.div>
+                          ))}
+                        </motion.div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                </motion.div>
+              </TabsContent>
+
+              {/* Partners Tab */}
+              <TabsContent value="partners" className="space-y-6">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  {/* Stats Cards for Partners */}
+                  <motion.div 
+                    className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+                    variants={pageVariants}
+                  >
+                    <motion.div variants={statsCardVariants} whileHover={{ scale: 1.02 }}>
+                      <Card className="hover:shadow-lg transition-shadow duration-300">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                          <CardTitle className="text-sm font-medium">En attente</CardTitle>
+                          <motion.div
+                            whileHover={{ rotate: 15 }}
+                            transition={{ type: "spring", stiffness: 300 }}
+                          >
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                          </motion.div>
+                        </CardHeader>
+                        <CardContent>
+                          <motion.div 
+                            className="text-2xl font-bold text-orange-600"
+                            initial={{ opacity: 0, scale: 0.5 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.3, type: "spring" }}
+                          >
+                            {stats.pendingPartners}
+                          </motion.div>
+                          <p className="text-xs text-muted-foreground">
+                            Demandes de partenariat
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+
+                    <motion.div variants={statsCardVariants} whileHover={{ scale: 1.02 }}>
+                      <Card className="hover:shadow-lg transition-shadow duration-300">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                          <CardTitle className="text-sm font-medium">Approuvés</CardTitle>
+                          <motion.div
+                            whileHover={{ rotate: 15 }}
+                            transition={{ type: "spring", stiffness: 300 }}
+                          >
+                            <UserCheck className="h-4 w-4 text-muted-foreground" />
+                          </motion.div>
+                        </CardHeader>
+                        <CardContent>
+                          <motion.div 
+                            className="text-2xl font-bold text-green-600"
+                            initial={{ opacity: 0, scale: 0.5 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.4, type: "spring" }}
+                          >
+                            {stats.approvedPartners}
+                          </motion.div>
+                          <p className="text-xs text-muted-foreground">
+                            Partenaires actifs
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+
+                    <motion.div variants={statsCardVariants} whileHover={{ scale: 1.02 }}>
+                      <Card className="hover:shadow-lg transition-shadow duration-300">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                          <CardTitle className="text-sm font-medium">Rejetés</CardTitle>
+                          <motion.div
+                            whileHover={{ rotate: 15 }}
+                            transition={{ type: "spring", stiffness: 300 }}
+                          >
+                            <UserX className="h-4 w-4 text-muted-foreground" />
+                          </motion.div>
+                        </CardHeader>
+                        <CardContent>
+                          <motion.div 
+                            className="text-2xl font-bold text-red-600"
+                            initial={{ opacity: 0, scale: 0.5 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.5, type: "spring" }}
+                          >
+                            {stats.rejectedPartners}
+                          </motion.div>
+                          <p className="text-xs text-muted-foreground">
+                            Demandes refusées
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  </motion.div>
+
+                  {/* Partner Requests List */}
+                  <motion.div variants={cardVariants}>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Demandes de partenariat</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <motion.div 
+                          className="space-y-4"
+                          variants={pageVariants}
+                        >
+                          {partnerRequests.slice(0, 10).map((request, index) => (
+                            <motion.div
+                              key={request.id}
+                              variants={cardVariants}
+                              whileHover={{ scale: 1.01, backgroundColor: "rgba(0,0,0,0.02)" }}
+                              className="flex items-center justify-between p-4 border rounded-lg transition-colors"
+                            >
+                              <div>
+                                <h4 className="font-medium">{request.organization_name}</h4>
+                                <p className="text-sm text-gray-500">
+                                  {request.contact_person} • {request.organization_type}
+                                </p>
+                                <p className="text-xs text-gray-400">
+                                  {new Date(request.created_at).toLocaleDateString('fr-FR')}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge 
+                                  variant={request.status === 'pending' ? 'secondary' : 
+                                          request.status === 'approved' ? 'default' : 'destructive'}
+                                >
+                                  {request.status === 'pending' ? 'En attente' :
+                                   request.status === 'approved' ? 'Approuvé' : 'Rejeté'}
+                                </Badge>
+                                {request.status === 'pending' && (
+                                  <motion.div
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                  >
+                                    <Button size="sm">Examiner</Button>
+                                  </motion.div>
+                                )}
+                              </div>
+                            </motion.div>
+                          ))}
+                        </motion.div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                </motion.div>
+              </TabsContent>
+
+              {/* Analytics Tab */}
+              <TabsContent value="analytics" className="space-y-6">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <AdminStatsDashboard />
+                </motion.div>
+              </TabsContent>
+
+              {/* Notifications Tab */}
+              <TabsContent value="notifications" className="space-y-6">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <NotificationCenter />
+                </motion.div>
+              </TabsContent>
+            </AnimatePresence>
+          </Tabs>
+        </motion.div>
+      </main>
+    </motion.div>
+  );
+};
 
 const AdminDashboard = () => {
-    const navigate = useNavigate();
-    const [user, setUser] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    const [isDarkTheme, setIsDarkTheme] = useState(false);
-    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-    const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-
-    useEffect(() => {
-        const getUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            setUser(user);
-            setLoading(false);
-            
-            if (!user) {
-                navigate('/admin/auth');
-            }
-        };
-        
-        getUser();
-    }, [navigate]);
-
-    const handleSignOut = async () => {
-        try {
-            await supabase.auth.signOut();
-            navigate('/admin/auth');
-        } catch (error) {
-            console.error("Failed to sign out", error);
-        }
-    };
-
-    if (loading) {
-        return <div>Loading...</div>;
-    }
-
-    if (!user) {
-        return <div>Redirecting to login...</div>;
-    }
-
-    return (
-        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-            <header className="bg-white dark:bg-gray-800 shadow">
-                <div className="container mx-auto py-4 px-6 flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                        <Home className="h-6 w-6" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} />
-                        <h1 className="text-xl font-semibold">Admin Dashboard</h1>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                        <NotificationCenter />
-                        <Button variant="outline" size="sm" onClick={() => setIsSettingsOpen(true)}>
-                            <Settings className="h-4 w-4 mr-2" />
-                            Settings
-                        </Button>
-                        <Button variant="destructive" size="sm" onClick={handleSignOut}>
-                            <LogOut className="h-4 w-4 mr-2" />
-                            Logout
-                        </Button>
-                    </div>
-                </div>
-            </header>
-
-            <div className="container mx-auto mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
-                {/* User Profile Card */}
-                <Card className="bg-white dark:bg-gray-700 shadow-md rounded-md">
-                    <CardHeader>
-                        <CardTitle>User Profile</CardTitle>
-                        <CardDescription>Manage your account settings and set preferences.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex flex-col items-center p-6">
-                        <Avatar className="h-20 w-20 rounded-full border-2 border-blue-500 dark:border-blue-400">
-                            <AvatarImage src="https://github.com/shadcn.png" alt="Admin Avatar" />
-                            <AvatarFallback>CN</AvatarFallback>
-                        </Avatar>
-                        <div className="mt-4 text-center">
-                            <p className="text-lg font-semibold">{user.email}</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Administrator</p>
-                        </div>
-                    </CardContent>
-                    <CardFooter className="justify-between">
-                        <Button onClick={() => navigate('/admin/users')}>
-                            <User className="h-4 w-4 mr-2" />
-                            Manage Users
-                        </Button>
-                    </CardFooter>
-                </Card>
-
-                {/* Quick Actions Card */}
-                <Card className="bg-white dark:bg-gray-700 shadow-md rounded-md">
-                    <CardHeader>
-                        <CardTitle>Quick Actions</CardTitle>
-                        <CardDescription>Perform common tasks quickly.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-6">
-                        <div className="grid grid-cols-1 gap-4">
-                            <Button onClick={() => navigate('/admin/orphanages')} className="w-full">
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add Orphanage
-                            </Button>
-                            <Button onClick={() => navigate('/admin/partners')} className="w-full">
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add Partner
-                            </Button>
-                            <Button onClick={() => navigate('/admin/children')} className="w-full">
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add Children
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Calendar Card */}
-                <Card className="bg-white dark:bg-gray-700 shadow-md rounded-md">
-                    <CardHeader>
-                        <CardTitle>Calendar</CardTitle>
-                        <CardDescription>View events and schedule tasks.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="grid gap-6 p-6">
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                        "w-[240px] justify-start text-left font-normal",
-                                        !selectedDate && "text-muted-foreground"
-                                    )}
-                                >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {selectedDate ? format(selectedDate, "PPP", { locale: enUS }) : <span>Pick a date</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="center" side="bottom">
-                                <Calendar
-                                    mode="single"
-                                    selected={selectedDate}
-                                    onSelect={setSelectedDate}
-                                    disabled={(date) =>
-                                        date > new Date()
-                                    }
-                                    initialFocus
-                                />
-                            </PopoverContent>
-                        </Popover>
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* Settings Modal */}
-            {isSettingsOpen && (
-                <div className="fixed inset-0 z-50 overflow-auto bg-black/50 dark:bg-black/75 flex items-center justify-center">
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-md w-full mx-4">
-                        <h2 className="text-2xl font-semibold mb-6">Settings</h2>
-                        <div className="flex items-center justify-between mb-4">
-                            <Label htmlFor="theme-toggle">Dark Mode</Label>
-                            <ThemeToggle />
-                        </div>
-                        <Button variant="secondary" onClick={() => setIsSettingsOpen(false)}>Close</Button>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
+  return (
+    <NotificationProvider>
+      <AdminDashboardContent />
+    </NotificationProvider>
+  );
 };
 
 export default AdminDashboard;

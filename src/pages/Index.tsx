@@ -1,18 +1,15 @@
+
 import { motion } from 'framer-motion';
-import { Header } from '@/components/landing/Header';
-import { HeroSection } from '@/components/landing/HeroSection';
+import Header from '@/components/landing/Header';
+import HeroSection from '@/components/landing/HeroSection';
 import StatisticsSection from '@/components/landing/StatisticsSection';
-import { FeaturesSection } from '@/components/landing/FeaturesSection';
-import { TrustSection } from '@/components/landing/TrustSection';
-import { CTASection } from '@/components/landing/CTASection';
-import { Footer } from '@/components/landing/Footer';
+import FeaturesSection from '@/components/landing/FeaturesSection';
+import TrustSection from '@/components/landing/TrustSection';
+import CTASection from '@/components/landing/CTASection';
+import Footer from '@/components/landing/Footer';
 import { Helmet } from 'react-helmet-async';
-import { texts } from '@/data/translations';
 
 const Index = () => {
-  const currentLanguage = 'fr'; // Default to French
-  const t = texts[currentLanguage];
-
   // Animation variants for page sections
   const pageVariants = {
     hidden: { opacity: 0 },
@@ -144,11 +141,7 @@ const Index = () => {
       >
         {/* Header avec animation d'entrée depuis le haut */}
         <motion.div variants={headerVariants}>
-          <Header 
-            language={currentLanguage}
-            setLanguage={() => {}}
-            adminLoginText={t.cta.adminLogin}
-          />
+          <Header />
         </motion.div>
 
         {/* Hero Section avec animation fade-in + slide-up */}
@@ -158,13 +151,7 @@ const Index = () => {
           initial="hidden"
           viewport={{ once: true, amount: 0.3 }}
         >
-          <HeroSection 
-            title={t.title}
-            subtitle={t.subtitle}
-            heroDescription={t.heroDescription}
-            registerText={t.cta.register}
-            exploreMapText={t.cta.exploreMap}
-          />
+          <HeroSection />
         </motion.div>
 
         {/* Statistics Section avec animation retardée */}
@@ -184,7 +171,7 @@ const Index = () => {
           initial="hidden"
           viewport={{ once: true, amount: 0.3 }}
         >
-          <FeaturesSection features={t.features} />
+          <FeaturesSection />
         </motion.div>
 
         {/* Trust Section avec animation scale + fade */}
@@ -194,7 +181,7 @@ const Index = () => {
           initial="hidden"
           viewport={{ once: true, amount: 0.4 }}
         >
-          <TrustSection trust={t.trust} />
+          <TrustSection />
         </motion.div>
 
         {/* CTA Section avec animation dynamique */}
@@ -204,10 +191,7 @@ const Index = () => {
           initial="hidden"
           viewport={{ once: true, amount: 0.3 }}
         >
-          <CTASection 
-            registerText={t.cta.register}
-            exploreMapText={t.cta.exploreMap}
-          />
+          <CTASection />
         </motion.div>
 
         {/* Footer avec animation finale */}
@@ -217,7 +201,7 @@ const Index = () => {
           initial="hidden"
           viewport={{ once: true, amount: 0.1 }}
         >
-          <Footer footer={t.footer} />
+          <Footer />
         </motion.div>
       </motion.div>
     </>
