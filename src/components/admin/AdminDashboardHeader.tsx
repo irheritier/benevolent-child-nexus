@@ -31,7 +31,7 @@ export const AdminDashboardHeader = () => {
           </div>
           <div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
-              FCS : Find Children to Save
+              FCTS : Find The Children To Save
             </h1>
             <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold tracking-wide uppercase">
               Administration

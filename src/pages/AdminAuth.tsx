@@ -177,7 +177,7 @@ const AdminAuthContent = () => {
       </div>
 
       {/* Header */}
-      <header className="relative z-10 bg-white/80 backdrop-blur-md border-b border-slate-200/50 dark:bg-slate-900/80 dark:border-slate-700/50">
+      <header onClick={() => navigate('/')} className="relative z-10 bg-white/80 backdrop-blur-md border-b border-slate-200/50 dark:bg-slate-900/80 dark:border-slate-700/50 cursor-pointer ">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="relative">
@@ -190,7 +190,7 @@ const AdminAuthContent = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
-                FCS : Find Children to Save
+                FCTS : Find The Children To Save
               </h1>
               <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold tracking-wide uppercase">
                 Portail Administrateur

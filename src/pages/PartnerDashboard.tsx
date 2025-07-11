@@ -14,7 +14,7 @@ import { NotificationProvider } from '@/contexts/NotificationContext';
 import DashboardAnalyticsTabs from '@/components/admin/DashboardAnalyticsTabs';
 import DashboardStatsCards from '@/components/admin/DashboardStatsCards';
 import HealthDashboard from '@/components/admin/HealthDashboard';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 
 interface DashboardStats {
   totalOrphanages: number;
@@ -97,7 +97,7 @@ const PartnerDashboardContent = () => {
   };
 
   // Animation variants
-  const pageVariants = {
+  const pageVariants : Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
@@ -110,7 +110,7 @@ const PartnerDashboardContent = () => {
     }
   };
 
-  const headerVariants = {
+  const headerVariants : Variants = {
     hidden: { opacity: 0, y: -50 },
     visible: {
       opacity: 1,
@@ -122,7 +122,7 @@ const PartnerDashboardContent = () => {
     }
   };
 
-  const cardVariants = {
+  const cardVariants : Variants = {
     hidden: { opacity: 0, scale: 0.9 },
     visible: {
       opacity: 1,
@@ -203,7 +203,7 @@ const PartnerDashboardContent = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
-                FCS : Find Children to Save
+                FCTS : Find The Children To Save
               </h1>
               <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold tracking-wide uppercase">
                 Portail Partenaire

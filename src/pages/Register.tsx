@@ -283,7 +283,7 @@ const Register = () => {
   }
 
   const footerTexts = {
-    aboutText: "FCS : Find Children To Save est une plateforme dédiée au suivi et à la protection des enfants vulnérables en République Démocratique du Congo. Notre mission est d'améliorer le bien-être des enfants grâce à une meilleure coordination entre les centres d'accueil.",
+    aboutText: "FCTS : Find The Children To Save est une plateforme dédiée au suivi et à la protection des enfants vulnérables en République Démocratique du Congo. Notre mission est d'améliorer le bien-être des enfants grâce à une meilleure coordination entre les centres d'accueil.",
     links: "Liens utiles",
     privacy: "Politique de confidentialité",
     terms: "Conditions d'utilisation",
