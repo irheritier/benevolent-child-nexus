@@ -11,6 +11,7 @@ import { Footer } from "@/components/landing/Footer";
 import { useLanguage } from "@/hooks/useLanguage";
 import { texts } from "@/data/translations";
 import { motion } from "framer-motion";
+import { Variants } from "framer-motion";
 
 interface PublicStats {
   total_orphanages: number;
@@ -88,20 +89,19 @@ const Index = () => {
     mealsPerDay: "Repas/jour (moy.)",
   };
 
-  // Animation variants for staggered sections
-  const sectionVariants = {
+  const sectionVariants: Variants = {
     hidden: { opacity: 0, y: 50 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
         duration: 0.8,
-        ease: "easeOut"
+        ease: [0.16, 1, 0.3, 1] // Utilisez un easing array ou une string valide
       }
     }
   };
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,

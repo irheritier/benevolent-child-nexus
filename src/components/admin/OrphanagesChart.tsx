@@ -4,7 +4,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 
 interface OrphanageData {
   month: string;
@@ -34,14 +34,12 @@ const OrphanagesChart = () => {
   const fetchOrphanageData = async () => {
     setIsLoading(true);
     try {
-      // Récupérer les données des orphelinats
       const { data: orphanages, error } = await supabase
         .from('orphanages')
         .select('legal_status, created_at');
 
       if (error) throw error;
 
-      // Traiter les données pour le graphique mensuel
       const monthlyStats: { [key: string]: OrphanageData } = {};
       const statusCounts = { pending: 0, verified: 0, rejected: 0 };
 
@@ -62,14 +60,11 @@ const OrphanagesChart = () => {
         statusCounts[orphanage.legal_status as keyof typeof statusCounts]++;
       });
 
-      // Convertir en tableau et trier par date
       const monthlyArray = Object.values(monthlyStats).sort((a, b) => 
         new Date(a.month).getTime() - new Date(b.month).getTime()
       );
 
       setMonthlyData(monthlyArray);
-
-      // Données pour le graphique en secteurs
       setStatusData([
         { name: 'En attente', value: statusCounts.pending, color: COLORS[0] },
         { name: 'Validés', value: statusCounts.verified, color: COLORS[1] },
@@ -103,8 +98,8 @@ const OrphanagesChart = () => {
     },
   };
 
-  // Animation variants
-  const cardVariants = {
+  // Animation variants avec typage correct
+  const cardVariants: Variants = {
     hidden: { opacity: 0, y: 20, scale: 0.95 },
     visible: { 
       opacity: 1, 
@@ -112,12 +107,12 @@ const OrphanagesChart = () => {
       scale: 1,
       transition: {
         duration: 0.6,
-        ease: "easeOut"
+        ease: [0.16, 1, 0.3, 1] // Format cubic bezier
       }
     }
   };
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -128,6 +123,12 @@ const OrphanagesChart = () => {
     }
   };
 
+  const chartAnimation = {
+    initial: { opacity: 0, scale: 0.8 },
+    animate: { opacity: 1, scale: 1 },
+    transition: { duration: 0.8 }
+  };
+
   if (isLoading) {
     return (
       <motion.div 
@@ -136,20 +137,15 @@ const OrphanagesChart = () => {
         initial="hidden"
         animate="visible"
       >
-        <motion.div variants={cardVariants}>
-          <Card>
-            <CardContent className="p-6">
-              <div className="animate-pulse h-64 bg-gray-200 rounded"></div>
-            </CardContent>
-          </Card>
-        </motion.div>
-        <motion.div variants={cardVariants}>
-          <Card>
-            <CardContent className="p-6">
-              <div className="animate-pulse h-64 bg-gray-200 rounded"></div>
-            </CardContent>
-          </Card>
-        </motion.div>
+        {[1, 2].map((item) => (
+          <motion.div key={item} variants={cardVariants}>
+            <Card>
+              <CardContent className="p-6">
+                <div className="animate-pulse h-64 bg-gray-200 rounded"></div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
       </motion.div>
     );
   }
@@ -161,7 +157,7 @@ const OrphanagesChart = () => {
       initial="hidden"
       animate="visible"
     >
-      {/* Graphique en barres - Évolution mensuelle */}
+      {/* Graphique en barres */}
       <motion.div variants={cardVariants} whileHover={{ scale: 1.02 }}>
         <Card className="hover:shadow-lg transition-shadow duration-300">
           <CardHeader>
@@ -171,11 +167,7 @@ const OrphanagesChart = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
+            <motion.div {...chartAnimation}>
               <ChartContainer config={chartConfig}>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={monthlyData}>
@@ -194,7 +186,7 @@ const OrphanagesChart = () => {
         </Card>
       </motion.div>
 
-      {/* Graphique en secteurs - Répartition des statuts */}
+      {/* Graphique en secteurs */}
       <motion.div variants={cardVariants} whileHover={{ scale: 1.02 }}>
         <Card className="hover:shadow-lg transition-shadow duration-300">
           <CardHeader>
@@ -204,11 +196,7 @@ const OrphanagesChart = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-            >
+            <motion.div {...chartAnimation} transition={{ ...chartAnimation.transition, delay: 0.2 }}>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie

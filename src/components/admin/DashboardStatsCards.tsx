@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, Users, Heart, MapPin } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 
 interface DashboardStats {
   totalOrphanages: number;
@@ -19,7 +19,7 @@ interface DashboardStatsCardsProps {
 }
 
 const DashboardStatsCards = ({ stats, isLoading }: DashboardStatsCardsProps) => {
-  const cardVariants = {
+  const cardVariants: Variants = {
     hidden: { 
       opacity: 0, 
       scale: 0.9,
@@ -31,12 +31,12 @@ const DashboardStatsCards = ({ stats, isLoading }: DashboardStatsCardsProps) => 
       y: 0,
       transition: {
         duration: 0.5,
-        ease: "easeOut"
+        ease: [0.16, 1, 0.3, 1]
       }
     }
   };
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,

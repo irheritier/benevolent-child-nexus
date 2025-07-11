@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import DiseaseStatsChart from './DiseaseStatsChart';
 import VaccinationStatsChart from './VaccinationStatsChart';
 import HealthAlertsPanel from './HealthAlertsPanel';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, Variants,  AnimatePresence } from 'framer-motion';
 
 interface HealthStats {
   totalHealthRecords: number;
@@ -133,7 +133,7 @@ const HealthDashboard = () => {
   };
 
   // Animation variants
-  const cardVariants = {
+  const cardVariants: Variants = {
     hidden: { opacity: 0, scale: 0.9, y: 20 },
     visible: { 
       opacity: 1, 
@@ -141,7 +141,7 @@ const HealthDashboard = () => {
       y: 0,
       transition: {
         duration: 0.5,
-        ease: "easeOut"
+        ease: "easeOut" as const // force le type
       }
     }
   };

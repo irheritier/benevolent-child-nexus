@@ -4,6 +4,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { motion, Variants } from 'framer-motion';
 
 interface ChildrenGenderData {
   gender: string;
@@ -28,6 +29,36 @@ const ChildrenChart = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState<string>('');
   const { toast } = useToast();
+
+  // Définition des animations
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.1
+      }
+    }
+  };
+
+  const cardVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: [0.16, 1, 0.3, 1]
+      }
+    }
+  };
+
+  const chartAnimation = {
+    initial: { opacity: 0, scale: 0.95 },
+    animate: { opacity: 1, scale: 1 },
+    transition: { duration: 0.7 }
+  };
 
   useEffect(() => {
     checkUserRoleAndFetchData();
@@ -223,102 +254,151 @@ const ChildrenChart = () => {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <motion.div 
+        className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {[...Array(3)].map((_, i) => (
-          <Card key={i}>
-            <CardContent className="p-6">
-              <div className="animate-pulse h-64 bg-gray-200 rounded"></div>
-            </CardContent>
-          </Card>
+          <motion.div 
+            key={i} 
+            variants={cardVariants}
+            className="h-full"
+          >
+            <Card className="h-full">
+              <CardContent className="p-6 h-full">
+                <div className="animate-pulse h-64 w-full bg-gray-200 rounded"></div>
+              </CardContent>
+            </Card>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <motion.div 
+      className="space-y-6"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <motion.div 
+        className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+        variants={containerVariants}
+      >
         {/* Répartition par genre */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Répartition par genre</CardTitle>
-            <CardDescription>
-              Distribution des enfants par genre
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer config={chartConfig}>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={genderData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="gender" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="count" fill={chartConfig.count.color} />
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          </CardContent>
-        </Card>
+        <motion.div 
+          variants={cardVariants}
+          whileHover={{ scale: 1.02 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+        >
+          <Card className="hover:shadow-lg transition-shadow duration-300 h-full">
+            <CardHeader>
+              <CardTitle>Répartition par genre</CardTitle>
+              <CardDescription>
+                Distribution des enfants par genre
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <motion.div {...chartAnimation}>
+                <ChartContainer config={chartConfig}>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={genderData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="gender" />
+                      <YAxis />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="count" fill={chartConfig.count.color} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </motion.div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Répartition par âge */}
-        <Card>
+        <motion.div 
+          variants={cardVariants}
+          whileHover={{ scale: 1.02 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+        >
+          <Card className="hover:shadow-lg transition-shadow duration-300 h-full">
+            <CardHeader>
+              <CardTitle>Répartition par âge</CardTitle>
+              <CardDescription>
+                Distribution des enfants par groupe d'âge
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <motion.div 
+                {...chartAnimation}
+                transition={{ ...chartAnimation.transition, delay: 0.1 }}
+              >
+                <ChartContainer config={chartConfig}>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={ageData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="ageGroup" />
+                      <YAxis />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="count" fill={chartConfig.count.color} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </motion.div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
+
+      {/* Évolution temporelle */}
+      <motion.div
+        variants={cardVariants}
+        whileHover={{ scale: 1.01 }}
+        transition={{ delay: 0.2 }}
+      >
+        <Card className="hover:shadow-lg transition-shadow duration-300">
           <CardHeader>
-            <CardTitle>Répartition par âge</CardTitle>
+            <CardTitle>Évolution du nombre d'enfants</CardTitle>
             <CardDescription>
-              Distribution des enfants par groupe d'âge
+              Nouveaux enregistrements et total cumulé par mois
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={chartConfig}>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={ageData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="ageGroup" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="count" fill={chartConfig.count.color} />
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartContainer>
+            <motion.div 
+              {...chartAnimation}
+              transition={{ ...chartAnimation.transition, delay: 0.2 }}
+            >
+              <ChartContainer config={chartConfig}>
+                <ResponsiveContainer width="100%" height={400}>
+                  <LineChart data={timeData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Line 
+                      type="monotone" 
+                      dataKey="newChildren" 
+                      stroke={chartConfig.newChildren.color} 
+                      strokeWidth={2}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="totalChildren" 
+                      stroke={chartConfig.totalChildren.color} 
+                      strokeWidth={2}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </motion.div>
           </CardContent>
         </Card>
-      </div>
-
-      {/* Évolution temporelle */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Évolution du nombre d'enfants</CardTitle>
-          <CardDescription>
-            Nouveaux enregistrements et total cumulé par mois
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" height={400}>
-              <LineChart data={timeData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Line 
-                  type="monotone" 
-                  dataKey="newChildren" 
-                  stroke={chartConfig.newChildren.color} 
-                  strokeWidth={2}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="totalChildren" 
-                  stroke={chartConfig.totalChildren.color} 
-                  strokeWidth={2}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

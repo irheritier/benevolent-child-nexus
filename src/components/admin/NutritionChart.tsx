@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { motion, Variants } from 'framer-motion';
 
 interface NutritionStatusData {
   status: string;
@@ -33,6 +33,36 @@ const NutritionChart = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
+  // Définition des animations
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.1
+      }
+    }
+  };
+
+  const cardVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: [0.16, 1, 0.3, 1]
+      }
+    }
+  };
+
+  const chartAnimation = {
+    initial: { opacity: 0, scale: 0.95 },
+    animate: { opacity: 1, scale: 1 },
+    transition: { duration: 0.7 }
+  };
+
   useEffect(() => {
     fetchNutritionData();
   }, []);
@@ -42,14 +72,12 @@ const NutritionChart = () => {
     try {
       console.log('Chargement des données nutrition...');
       
-      // Récupérer les données nutritionnelles pour tous les utilisateurs (admin et partenaires)
       const { data: nutritionRecords, error } = await supabase
         .from('nutrition_records')
         .select('nutrition_status, date, created_at');
 
       if (error) {
         console.error('Erreur lors du chargement des données nutrition:', error);
-        // Si erreur, utiliser des données par défaut pour maintenir la cohérence
         await loadDefaultNutritionData();
         return;
       }
@@ -124,7 +152,6 @@ const NutritionChart = () => {
   const loadDefaultNutritionData = async () => {
     console.log('Chargement de données nutrition par défaut');
     
-    // Données par défaut identiques pour tous les utilisateurs
     setStatusData([
       { status: 'Normal', count: 0, color: NUTRITION_COLORS.normal },
       { status: 'Insuffisance pondérale', count: 0, color: NUTRITION_COLORS.underweight },
@@ -160,120 +187,169 @@ const NutritionChart = () => {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <motion.div 
+        className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {[...Array(2)].map((_, i) => (
-          <Card key={i}>
-            <CardContent className="p-6">
-              <div className="animate-pulse h-64 bg-gray-200 rounded"></div>
-            </CardContent>
-          </Card>
+          <motion.div 
+            key={i} 
+            variants={cardVariants}
+            className="h-full"
+          >
+            <Card className="h-full">
+              <CardContent className="p-6 h-full">
+                <div className="animate-pulse h-64 w-full bg-gray-200 rounded"></div>
+              </CardContent>
+            </Card>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <motion.div 
+      className="space-y-6"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <motion.div 
+        className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+        variants={containerVariants}
+      >
         {/* Répartition des statuts nutritionnels */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Statuts nutritionnels</CardTitle>
-            <CardDescription>
-              Répartition des enfants par statut nutritionnel
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={statusData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ status, percent }) => `${status} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="count"
-                >
-                  {statusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <ChartTooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        <motion.div 
+          variants={cardVariants}
+          whileHover={{ scale: 1.02 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+        >
+          <Card className="hover:shadow-lg transition-shadow duration-300 h-full">
+            <CardHeader>
+              <CardTitle>Statuts nutritionnels</CardTitle>
+              <CardDescription>
+                Répartition des enfants par statut nutritionnel
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <motion.div {...chartAnimation}>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={statusData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ status, percent }) => `${status} ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="count"
+                    >
+                      {statusData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <ChartTooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </motion.div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Comparaison par statut */}
-        <Card>
+        <motion.div 
+          variants={cardVariants}
+          whileHover={{ scale: 1.02 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+        >
+          <Card className="hover:shadow-lg transition-shadow duration-300 h-full">
+            <CardHeader>
+              <CardTitle>Comparaison nutritionnelle</CardTitle>
+              <CardDescription>
+                Nombre d'enfants par catégorie nutritionnelle
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <motion.div 
+                {...chartAnimation}
+                transition={{ ...chartAnimation.transition, delay: 0.1 }}
+              >
+                <ChartContainer config={chartConfig}>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={statusData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="status" />
+                      <YAxis />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="count" fill="#8884d8">
+                        {statusData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </motion.div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
+
+      {/* Évolution temporelle */}
+      <motion.div
+        variants={cardVariants}
+        whileHover={{ scale: 1.01 }}
+        transition={{ delay: 0.2 }}
+      >
+        <Card className="hover:shadow-lg transition-shadow duration-300">
           <CardHeader>
-            <CardTitle>Comparaison nutritionnelle</CardTitle>
+            <CardTitle>Évolution nutritionnelle</CardTitle>
             <CardDescription>
-              Nombre d'enfants par catégorie nutritionnelle
+              Tendances des statuts nutritionnels par mois
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={chartConfig}>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={statusData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="status" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="count" fill="#8884d8">
-                    {statusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartContainer>
+            <motion.div 
+              {...chartAnimation}
+              transition={{ ...chartAnimation.transition, delay: 0.2 }}
+            >
+              <ChartContainer config={chartConfig}>
+                <ResponsiveContainer width="100%" height={400}>
+                  <LineChart data={trendData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Line 
+                      type="monotone" 
+                      dataKey="normal" 
+                      stroke={chartConfig.normal.color} 
+                      strokeWidth={2}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="underweight" 
+                      stroke={chartConfig.underweight.color} 
+                      strokeWidth={2}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="malnourished" 
+                      stroke={chartConfig.malnourished.color} 
+                      strokeWidth={2}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </motion.div>
           </CardContent>
         </Card>
-      </div>
-
-      {/* Évolution temporelle */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Évolution nutritionnelle</CardTitle>
-          <CardDescription>
-            Tendances des statuts nutritionnels par mois
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" height={400}>
-              <LineChart data={trendData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Line 
-                  type="monotone" 
-                  dataKey="normal" 
-                  stroke={chartConfig.normal.color} 
-                  strokeWidth={2}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="underweight" 
-                  stroke={chartConfig.underweight.color} 
-                  strokeWidth={2}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="malnourished" 
-                  stroke={chartConfig.malnourished.color} 
-                  strokeWidth={2}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

@@ -19,6 +19,8 @@ import { NotificationProvider } from '@/contexts/NotificationContext';
 import { useNotificationAlerts } from '@/hooks/useNotificationAlerts';
 import { AdminDashboardHeader } from '@/components/admin/AdminDashboardHeader';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { motion, Variants } from 'framer-motion';
+
 
 interface Orphanage {
   id: string;
@@ -74,6 +76,49 @@ const AdminDashboardContent = () => {
     fetchOrphanages();
     fetchPartnerRequests();
   }, []);
+
+  // Variants d'animation
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const cardVariants: Variants = {
+    hidden: { 
+      opacity: 0, 
+      y: 20,
+      scale: 0.95
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 10
+      }
+    }
+  };
+
+  const tableRowVariants: Variants = {
+    hidden: { opacity: 0, x: -10 },
+    visible: (i: number) => ({
+      opacity: 1,
+      x: 0,
+      transition: {
+        delay: i * 0.05,
+        type: "spring",
+        stiffness: 100
+      }
+    })
+  };
 
   const checkAuth = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -453,19 +498,6 @@ const AdminDashboardContent = () => {
 
       {/* Main Content */}
       <main className="container mx-auto px-6 py-8">
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <Heart className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Tableau de bord administrateur</h2>
-              <p className="text-slate-600 dark:text-slate-400">
-                Gérez les demandes d'inscription et consultez les statistiques du système.
-              </p>
-            </div>
-          </div>
-        </div>
 
         {/* Onglets principaux */}
         <Tabs defaultValue="requests" className="space-y-6">
@@ -503,197 +535,415 @@ const AdminDashboardContent = () => {
           {/* Onglet des demandes d'inscription */}
           <TabsContent value="requests" className="space-y-6">
             {/* Statistics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="border-0 shadow-xl bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200/50 dark:border-yellow-800/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold text-yellow-700 dark:text-yellow-300 flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    En attente
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
-                    {orphanages.filter(o => o.legal_status === 'pending').length}
-                  </div>
-                  <p className="text-xs text-yellow-600/70 dark:text-yellow-400/70 mt-1">Demandes à traiter</p>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200/50 dark:border-green-800/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold text-green-700 dark:text-green-300 flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4" />
-                    Validés
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-green-600 dark:text-green-400">
-                    {orphanages.filter(o => o.legal_status === 'verified').length}
-                  </div>
-                  <p className="text-xs text-green-600/70 dark:text-green-400/70 mt-1">Centres approuvés</p>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-xl bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border-red-200/50 dark:border-red-800/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold text-red-700 dark:text-red-300 flex items-center gap-2">
-                    <XCircle className="w-4 h-4" />
-                    Rejetés
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-red-600 dark:text-red-400">
-                    {orphanages.filter(o => o.legal_status === 'rejected').length}
-                  </div>
-                  <p className="text-xs text-red-600/70 dark:text-red-400/70 mt-1">Demandes refusées</p>
-                </CardContent>
-              </Card>
-            </div>
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-3 gap-6"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <motion.div variants={cardVariants} whileHover={{ scale: 1.03 }}>
+                <Card className="border-0 shadow-xl bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200/50 dark:border-yellow-800/50">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-semibold text-yellow-700 dark:text-yellow-300 flex items-center gap-2">
+                      <motion.div whileHover={{ rotate: 15 }}>
+                        <Clock className="w-4 h-4" />
+                      </motion.div>
+                      En attente
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <motion.div 
+                      className="text-3xl font-bold text-yellow-600 dark:text-yellow-400"
+                      initial={{ scale: 0.9 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", delay: 0.3 }}
+                    >
+                      {orphanages.filter(o => o.legal_status === 'pending').length}
+                    </motion.div>
+                    <motion.p 
+                      className="text-xs text-yellow-600/70 dark:text-yellow-400/70 mt-1"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.4 }}
+                    >
+                      Demandes à traiter
+                    </motion.p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div variants={cardVariants} whileHover={{ scale: 1.03 }}>
+                <Card className="border-0 shadow-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200/50 dark:border-green-800/50">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-semibold text-green-700 dark:text-green-300 flex items-center gap-2">
+                      <motion.div whileHover={{ rotate: 15 }}>
+                        <CheckCircle className="w-4 h-4" />
+                      </motion.div>
+                      Validés
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <motion.div 
+                      className="text-3xl font-bold text-green-600 dark:text-green-400"
+                      initial={{ scale: 0.9 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", delay: 0.4 }}
+                    >
+                      {orphanages.filter(o => o.legal_status === 'verified').length}
+                    </motion.div>
+                    <motion.p 
+                      className="text-xs text-green-600/70 dark:text-green-400/70 mt-1"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5 }}
+                    >
+                      Centres approuvés
+                    </motion.p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div variants={cardVariants} whileHover={{ scale: 1.03 }}>
+                <Card className="border-0 shadow-xl bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border-red-200/50 dark:border-red-800/50">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-semibold text-red-700 dark:text-red-300 flex items-center gap-2">
+                      <motion.div whileHover={{ rotate: 15 }}>
+                        <XCircle className="w-4 h-4" />
+                      </motion.div>
+                      Rejetés
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <motion.div 
+                      className="text-3xl font-bold text-red-600 dark:text-red-400"
+                      initial={{ scale: 0.9 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", delay: 0.5 }}
+                    >
+                      {orphanages.filter(o => o.legal_status === 'rejected').length}
+                    </motion.div>
+                    <motion.p 
+                      className="text-xs text-red-600/70 dark:text-red-400/70 mt-1"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.6 }}
+                    >
+                      Demandes refusées
+                    </motion.p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </motion.div>
 
             {/* Orphanages Table */}
-            <Card className="border-0 shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50">
-              <CardHeader className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 dark:from-blue-600/20 dark:to-purple-600/20">
-                <CardTitle className="text-slate-800 dark:text-slate-100">Liste des demandes</CardTitle>
-                <CardDescription className="text-slate-600 dark:text-slate-400">
-                  Cliquez sur une demande pour voir les détails et procéder à la validation.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-slate-50/50 dark:bg-slate-800/50">
-                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Nom du centre</TableHead>
-                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Province</TableHead>
-                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Contact</TableHead>
-                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Statut</TableHead>
-                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Date</TableHead>
-                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {orphanages.map((orphanage) => (
-                      <TableRow key={orphanage.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
-                        <TableCell className="font-medium text-slate-800 dark:text-slate-200">{orphanage.name}</TableCell>
-                        <TableCell className="text-slate-600 dark:text-slate-400">{orphanage.province}, {orphanage.city}</TableCell>
-                        <TableCell className="text-slate-600 dark:text-slate-400">{orphanage.contact_person}</TableCell>
-                        <TableCell>{getStatusBadge(orphanage.legal_status)}</TableCell>
-                        <TableCell className="text-slate-600 dark:text-slate-400">{new Date(orphanage.created_at).toLocaleDateString('fr-FR')}</TableCell>
-                        <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedOrphanage(orphanage);
-                              setShowDialog(true);
-                            }}
-                            className="flex items-center gap-1 border-2 hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20"
-                          >
-                            <Eye className="w-3 h-3" />
-                            Voir
-                          </Button>
-                        </TableCell>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card className="border-0 shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <CardHeader className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 dark:from-blue-600/20 dark:to-purple-600/20">
+                    <CardTitle className="text-slate-800 dark:text-slate-100">Liste des demandes</CardTitle>
+                    <CardDescription className="text-slate-600 dark:text-slate-400">
+                      Cliquez sur une demande pour voir les détails et procéder à la validation.
+                    </CardDescription>
+                  </CardHeader>
+                </motion.div>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-slate-50/50 dark:bg-slate-800/50">
+                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Nom du centre</TableHead>
+                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Province</TableHead>
+                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Contact</TableHead>
+                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Statut</TableHead>
+                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Date</TableHead>
+                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+                    </TableHeader>
+                    <TableBody>
+                      {orphanages.map((orphanage, i) => (
+                        <motion.tr 
+                          key={orphanage.id} 
+                          className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors"
+                          variants={tableRowVariants}
+                          custom={i}
+                          initial="hidden"
+                          animate="visible"
+                          whileHover={{ scale: 1.01 }}
+                        >
+                          <TableCell className="font-medium text-slate-800 dark:text-slate-200">{orphanage.name}</TableCell>
+                          <TableCell className="text-slate-600 dark:text-slate-400">{orphanage.province}, {orphanage.city}</TableCell>
+                          <TableCell className="text-slate-600 dark:text-slate-400">{orphanage.contact_person}</TableCell>
+                          <TableCell>{getStatusBadge(orphanage.legal_status)}</TableCell>
+                          <TableCell className="text-slate-600 dark:text-slate-400">{new Date(orphanage.created_at).toLocaleDateString('fr-FR')}</TableCell>
+                          <TableCell>
+                            <motion.div whileHover={{ scale: 1.05 }}>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedOrphanage(orphanage);
+                                  setShowDialog(true);
+                                }}
+                                className="flex items-center gap-1 border-2 hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20"
+                              >
+                                <Eye className="w-3 h-3" />
+                                Voir
+                              </Button>
+                            </motion.div>
+                          </TableCell>
+                        </motion.tr>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </motion.div>
           </TabsContent>
 
           {/* Onglet des partenaires */}
+          
           <TabsContent value="partners" className="space-y-6">
             {/* Statistics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="border-0 shadow-xl bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200/50 dark:border-yellow-800/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold text-yellow-700 dark:text-yellow-300 flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    En attente
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
-                    {partnerRequests.filter(p => p.status === 'pending').length}
-                  </div>
-                  <p className="text-xs text-yellow-600/70 dark:text-yellow-400/70 mt-1">Demandes à traiter</p>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200/50 dark:border-green-800/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold text-green-700 dark:text-green-300 flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4" />
-                    Approuvés
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-green-600 dark:text-green-400">
-                    {partnerRequests.filter(p => p.status === 'approved').length}
-                  </div>
-                  <p className="text-xs text-green-600/70 dark:text-green-400/70 mt-1">Partenaires actifs</p>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-xl bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border-red-200/50 dark:border-red-800/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold text-red-700 dark:text-red-300 flex items-center gap-2">
-                    <XCircle className="w-4 h-4" />
-                    Rejetés
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-red-600 dark:text-red-400">
-                    {partnerRequests.filter(p => p.status === 'rejected').length}
-                  </div>
-                  <p className="text-xs text-red-600/70 dark:text-red-400/70 mt-1">Demandes refusées</p>
-                </CardContent>
-              </Card>
-            </div>
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-3 gap-6"
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.1,
+                    delayChildren: 0.2
+                  }
+                }
+              }}
+              initial="hidden"
+              animate="visible"
+            >
+              {/* Pending Card */}
+              <motion.div 
+                variants={{
+                  hidden: { opacity: 0, y: 20, scale: 0.95 },
+                  visible: {
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    transition: {
+                      type: "spring",
+                      stiffness: 100,
+                      damping: 10
+                    }
+                  }
+                }}
+                whileHover={{ scale: 1.03 }}
+              >
+                <Card className="border-0 shadow-xl bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200/50 dark:border-yellow-800/50">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-semibold text-yellow-700 dark:text-yellow-300 flex items-center gap-2">
+                      <motion.div whileHover={{ rotate: 15 }}>
+                        <Clock className="w-4 h-4" />
+                      </motion.div>
+                      En attente
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <motion.div 
+                      className="text-3xl font-bold text-yellow-600 dark:text-yellow-400"
+                      initial={{ scale: 0.9 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", delay: 0.3 }}
+                    >
+                      {partnerRequests.filter(p => p.status === 'pending').length}
+                    </motion.div>
+                    <motion.p 
+                      className="text-xs text-yellow-600/70 dark:text-yellow-400/70 mt-1"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.4 }}
+                    >
+                      Demandes à traiter
+                    </motion.p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* Approved Card */}
+              <motion.div 
+                variants={{
+                  hidden: { opacity: 0, y: 20, scale: 0.95 },
+                  visible: {
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    transition: {
+                      type: "spring",
+                      stiffness: 100,
+                      damping: 10,
+                      delay: 0.1
+                    }
+                  }
+                }}
+                whileHover={{ scale: 1.03 }}
+              >
+                <Card className="border-0 shadow-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200/50 dark:border-green-800/50">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-semibold text-green-700 dark:text-green-300 flex items-center gap-2">
+                      <motion.div whileHover={{ rotate: 15 }}>
+                        <CheckCircle className="w-4 h-4" />
+                      </motion.div>
+                      Approuvés
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <motion.div 
+                      className="text-3xl font-bold text-green-600 dark:text-green-400"
+                      initial={{ scale: 0.9 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", delay: 0.4 }}
+                    >
+                      {partnerRequests.filter(p => p.status === 'approved').length}
+                    </motion.div>
+                    <motion.p 
+                      className="text-xs text-green-600/70 dark:text-green-400/70 mt-1"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5 }}
+                    >
+                      Partenaires actifs
+                    </motion.p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* Rejected Card */}
+              <motion.div 
+                variants={{
+                  hidden: { opacity: 0, y: 20, scale: 0.95 },
+                  visible: {
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    transition: {
+                      type: "spring",
+                      stiffness: 100,
+                      damping: 10,
+                      delay: 0.2
+                    }
+                  }
+                }}
+                whileHover={{ scale: 1.03 }}
+              >
+                <Card className="border-0 shadow-xl bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border-red-200/50 dark:border-red-800/50">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-semibold text-red-700 dark:text-red-300 flex items-center gap-2">
+                      <motion.div whileHover={{ rotate: 15 }}>
+                        <XCircle className="w-4 h-4" />
+                      </motion.div>
+                      Rejetés
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <motion.div 
+                      className="text-3xl font-bold text-red-600 dark:text-red-400"
+                      initial={{ scale: 0.9 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", delay: 0.5 }}
+                    >
+                      {partnerRequests.filter(p => p.status === 'rejected').length}
+                    </motion.div>
+                    <motion.p 
+                      className="text-xs text-red-600/70 dark:text-red-400/70 mt-1"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.6 }}
+                    >
+                      Demandes refusées
+                    </motion.p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </motion.div>
 
             {/* Partners Table */}
-            <Card className="border-0 shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50">
-              <CardHeader className="bg-gradient-to-r from-purple-600/10 to-pink-600/10 dark:from-purple-600/20 dark:to-pink-600/20">
-                <CardTitle className="text-slate-800 dark:text-slate-100">Liste des demandes partenaires</CardTitle>
-                <CardDescription className="text-slate-600 dark:text-slate-400">
-                  Cliquez sur une demande pour voir les détails et procéder à la validation.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-slate-50/50 dark:bg-slate-800/50">
-                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Organisation</TableHead>
-                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Type</TableHead>
-                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Contact</TableHead>
-                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Statut</TableHead>
-                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Date</TableHead>
-                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {partnerRequests.map((request) => (
-                      <TableRow key={request.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
-                        <TableCell className="font-medium text-slate-800 dark:text-slate-200">{request.organization_name}</TableCell>
-                        <TableCell className="text-slate-600 dark:text-slate-400">{getOrganizationTypeLabel(request.organization_type)}</TableCell>
-                        <TableCell className="text-slate-600 dark:text-slate-400">{request.contact_person}</TableCell>
-                        <TableCell>{getStatusBadge(request.status)}</TableCell>
-                        <TableCell className="text-slate-600 dark:text-slate-400">{new Date(request.created_at).toLocaleDateString('fr-FR')}</TableCell>
-                        <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedPartnerRequest(request);
-                              setShowPartnerDialog(true);
-                            }}
-                            className="flex items-center gap-1 border-2 hover:bg-purple-50 hover:border-purple-300 dark:hover:bg-purple-900/20"
-                          >
-                            <Eye className="w-3 h-3" />
-                            Voir
-                          </Button>
-                        </TableCell>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card className="border-0 shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <CardHeader className="bg-gradient-to-r from-purple-600/10 to-pink-600/10 dark:from-purple-600/20 dark:to-pink-600/20">
+                    <CardTitle className="text-slate-800 dark:text-slate-100">Liste des demandes partenaires</CardTitle>
+                    <CardDescription className="text-slate-600 dark:text-slate-400">
+                      Cliquez sur une demande pour voir les détails et procéder à la validation.
+                    </CardDescription>
+                  </CardHeader>
+                </motion.div>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-slate-50/50 dark:bg-slate-800/50">
+                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Organisation</TableHead>
+                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Type</TableHead>
+                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Contact</TableHead>
+                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Statut</TableHead>
+                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Date</TableHead>
+                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+                    </TableHeader>
+                    <TableBody>
+                      {partnerRequests.map((request, i) => (
+                        <motion.tr 
+                          key={request.id}
+                          className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors"
+                          custom={i}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{
+                            delay: i * 0.05,
+                            type: "spring",
+                            stiffness: 100
+                          }}
+                          whileHover={{ scale: 1.01 }}
+                        >
+                          <TableCell className="font-medium text-slate-800 dark:text-slate-200">{request.organization_name}</TableCell>
+                          <TableCell className="text-slate-600 dark:text-slate-400">{getOrganizationTypeLabel(request.organization_type)}</TableCell>
+                          <TableCell className="text-slate-600 dark:text-slate-400">{request.contact_person}</TableCell>
+                          <TableCell>{getStatusBadge(request.status)}</TableCell>
+                          <TableCell className="text-slate-600 dark:text-slate-400">{new Date(request.created_at).toLocaleDateString('fr-FR')}</TableCell>
+                          <TableCell>
+                            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedPartnerRequest(request);
+                                  setShowPartnerDialog(true);
+                                }}
+                                className="flex items-center gap-1 border-2 hover:bg-purple-50 hover:border-purple-300 dark:hover:bg-purple-900/20"
+                              >
+                                <Eye className="w-3 h-3" />
+                                Voir
+                              </Button>
+                            </motion.div>
+                          </TableCell>
+                        </motion.tr>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </motion.div>
           </TabsContent>
 
           {/* Onglet des analyses et statistiques */}
