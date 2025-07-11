@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Upload, FileText, CheckCircle, X } from "lucide-react";
+import { Upload, FileText, CheckCircle, X, Loader2 } from "lucide-react";
 
 interface DocumentUploadProps {
   texts: any;
@@ -37,34 +37,54 @@ export const DocumentUpload = ({
 
       <div className="space-y-4 sm:space-y-6">
         {!uploadedFile ? (
-          <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-8 sm:p-12 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors bg-slate-50/50 dark:bg-slate-800/50">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
-              <Upload className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 dark:text-blue-400" />
+          <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-8 sm:p-12 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors bg-slate-50/50 dark:bg-slate-800/50 relative">
+            {/* Loader overlay when uploading */}
+            {isUploading && (
+              <div className="absolute inset-0 bg-white/90 dark:bg-slate-900/90 rounded-xl flex flex-col items-center justify-center z-10 backdrop-blur-sm">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                  <Loader2 className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600 dark:text-blue-400 animate-spin" />
+                </div>
+                <p className="text-lg sm:text-xl font-semibold text-blue-700 dark:text-blue-300 mb-2">
+                  {texts.documents.uploading}
+                </p>
+                <p className="text-sm sm:text-base text-blue-600 dark:text-blue-400">
+                  Veuillez patienter pendant le téléchargement...
+                </p>
+                <div className="mt-4 w-32 h-2 bg-blue-100 dark:bg-blue-900/30 rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full animate-pulse"></div>
+                </div>
+              </div>
+            )}
+            
+            <div className={`${isUploading ? 'opacity-30' : 'opacity-100'} transition-opacity`}>
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                <Upload className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 dark:text-blue-400" />
+              </div>
+              <p className="text-base sm:text-lg font-medium text-slate-700 dark:text-slate-300 mb-2 sm:mb-3">
+                {texts.documents.uploadText}
+              </p>
+              <p className="text-slate-500 dark:text-slate-400 mb-4 sm:mb-6 text-sm sm:text-base">
+                {texts.documents.acceptedFormats}
+              </p>
+              <input
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={onFileUpload}
+                className="hidden"
+                id="file-upload"
+                disabled={isUploading}
+              />
+              <Button 
+                variant="outline" 
+                size="lg"
+                onClick={() => document.getElementById('file-upload')?.click()}
+                disabled={isUploading}
+                className="px-6 sm:px-8 py-2 sm:py-3 border-2 text-sm sm:text-base w-full sm:w-auto"
+              >
+                <Upload className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
+                {texts.buttons.upload}
+              </Button>
             </div>
-            <p className="text-base sm:text-lg font-medium text-slate-700 dark:text-slate-300 mb-2 sm:mb-3">
-              {isUploading ? texts.documents.uploading : texts.documents.uploadText}
-            </p>
-            <p className="text-slate-500 dark:text-slate-400 mb-4 sm:mb-6 text-sm sm:text-base">
-              {texts.documents.acceptedFormats}
-            </p>
-            <input
-              type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
-              onChange={onFileUpload}
-              className="hidden"
-              id="file-upload"
-              disabled={isUploading}
-            />
-            <Button 
-              variant="outline" 
-              size="lg"
-              onClick={() => document.getElementById('file-upload')?.click()}
-              disabled={isUploading}
-              className="px-6 sm:px-8 py-2 sm:py-3 border-2 text-sm sm:text-base w-full sm:w-auto"
-            >
-              <Upload className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
-              {isUploading ? texts.documents.uploading : texts.buttons.upload}
-            </Button>
           </div>
         ) : (
           <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border border-green-200 dark:border-green-800 rounded-xl p-4 sm:p-6">
