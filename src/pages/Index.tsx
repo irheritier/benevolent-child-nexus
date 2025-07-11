@@ -44,7 +44,15 @@ const Index = () => {
         .select('boys_count, girls_count, schooling_rate, annual_disease_rate, meals_per_day')
         .eq('legal_status', 'verified');
 
-      let enhancedStats = { ...basicStats };
+      // Start with basic stats, ensuring all required properties exist
+      let enhancedStats: PublicStats = {
+        total_orphanages: basicStats?.total_orphanages || 0,
+        total_children: basicStats?.total_children || 0,
+        total_provinces: basicStats?.total_provinces || 0,
+        well_nourished_children: basicStats?.well_nourished_children || 0,
+        malnourished_children: basicStats?.malnourished_children || 0,
+        verified_orphanages: basicStats?.verified_orphanages || 0,
+      };
 
       if (orphanagesData && orphanagesData.length > 0) {
         // Calculate totals and averages
@@ -55,17 +63,15 @@ const Index = () => {
         const diseaseRates = orphanagesData.filter(org => org.annual_disease_rate !== null).map(org => org.annual_disease_rate || 0);
         const mealsPerDay = orphanagesData.filter(org => org.meals_per_day !== null).map(org => org.meals_per_day || 0);
 
-        enhancedStats = {
-          ...enhancedStats,
-          total_boys: totalBoys,
-          total_girls: totalGirls,
-          avg_schooling_rate: schoolingRates.length > 0 ? schoolingRates.reduce((a, b) => a + b, 0) / schoolingRates.length : 0,
-          avg_disease_rate: diseaseRates.length > 0 ? diseaseRates.reduce((a, b) => a + b, 0) / diseaseRates.length : 0,
-          avg_meals_per_day: mealsPerDay.length > 0 ? mealsPerDay.reduce((a, b) => a + b, 0) / mealsPerDay.length : 0,
-        };
+        // Add the calculated fields
+        enhancedStats.total_boys = totalBoys;
+        enhancedStats.total_girls = totalGirls;
+        enhancedStats.avg_schooling_rate = schoolingRates.length > 0 ? schoolingRates.reduce((a, b) => a + b, 0) / schoolingRates.length : 0;
+        enhancedStats.avg_disease_rate = diseaseRates.length > 0 ? diseaseRates.reduce((a, b) => a + b, 0) / diseaseRates.length : 0;
+        enhancedStats.avg_meals_per_day = mealsPerDay.length > 0 ? mealsPerDay.reduce((a, b) => a + b, 0) / mealsPerDay.length : 0;
       }
 
-      return enhancedStats as PublicStats;
+      return enhancedStats;
     }
   });
 
