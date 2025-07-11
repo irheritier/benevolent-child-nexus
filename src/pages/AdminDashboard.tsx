@@ -1,336 +1,214 @@
-
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '@/integrations/supabase/client';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Users, UserCheck, UserX, Clock, CheckCircle, XCircle } from 'lucide-react';
-import { AdminDashboardHeader } from '@/components/admin/AdminDashboardHeader';
-import DashboardAnalyticsTabs from '@/components/admin/DashboardAnalyticsTabs';
-import NotificationCenter from '@/components/notifications/NotificationCenter';
-
-interface OrphanageRegistration {
-  id: string;
-  name: string;
-  contact_person: string;
-  email: string;
-  phone: string;
-  city: string;
-  province: string;
-  legal_status: 'pending' | 'verified' | 'rejected';
-  created_at: string;
-}
-
-interface PartnerRequest {
-  id: string;
-  organization_name: string;
-  contact_person: string;
-  email: string;
-  phone: string;
-  organization_type: string;
-  purpose: string;
-  status: 'pending' | 'approved' | 'rejected';
-  created_at: string;
-  description: string;
-  rejection_reason: string;
-  reviewed_at: string;
-  reviewed_by: string;
-  updated_at: string;
-}
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { auth } from '@/firebase';
+import { signOut } from 'firebase/auth';
+import { Button } from "@/components/ui/button";
+import { User, Settings, Home, Plus, LogOut } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableFooter,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { enUS } from 'date-fns/locale';
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/use-toast"
+import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Checkbox } from "@/components/ui/checkbox"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Slider } from "@/components/ui/slider"
+import { ModeToggle } from "@/components/ModeToggle";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
+import { AspectRatio } from "@/components/ui/aspect-ratio"
+import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu"
+import { FileVideo, ImagePlus, MessageSquare } from "lucide-react"
+import { CardFooter } from "@radix-ui/react-card";
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 
 const AdminDashboard = () => {
-  const [orphanages, setOrphanages] = useState<OrphanageRegistration[]>([]);
-  const [partnerRequests, setPartnerRequests] = useState<PartnerRequest[]>([]);
+    const navigate = useNavigate();
+    const { currentUser, loading } = useAuth();
+    const [isDarkTheme, setIsDarkTheme] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2
-      }
-    }
-  };
+    useEffect(() => {
+        if (!currentUser && !loading) {
+            navigate('/admin/auth');
+        }
+    }, [currentUser, loading, navigate]);
 
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20, scale: 0.95 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut" as const
-      }
-    }
-  };
-
-  // Fetch orphanages
-  const { data: orphanagesData, isLoading: orphanagesLoading } = useQuery({
-    queryKey: ['admin-orphanages'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('orphanages')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data || [];
-    }
-  });
-
-  // Fetch partner requests
-  const { data: partnerRequestsData, isLoading: partnerRequestsLoading } = useQuery({
-    queryKey: ['admin-partner-requests'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('partner_requests')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data || [];
-    }
-  });
-
-  React.useEffect(() => {
-    if (orphanagesData) {
-      const mappedOrphanages: OrphanageRegistration[] = orphanagesData.map(org => ({
-        id: org.id,
-        name: org.name,
-        contact_person: org.contact_person,
-        email: org.email || '',
-        phone: org.phone || '',
-        city: org.city,
-        province: org.province,
-        legal_status: org.legal_status || 'pending',
-        created_at: org.created_at || ''
-      }));
-      setOrphanages(mappedOrphanages);
-    }
-  }, [orphanagesData]);
-
-  React.useEffect(() => {
-    if (partnerRequestsData) {
-      const mappedPartnerRequests: PartnerRequest[] = partnerRequestsData.map(req => ({
-        id: req.id,
-        organization_name: req.organization_name,
-        contact_person: req.contact_person,
-        email: req.email,
-        phone: req.phone || '',
-        organization_type: req.organization_type,
-        purpose: req.purpose,
-        status: (req.status === 'pending' || req.status === 'approved' || req.status === 'rejected') ? req.status : 'pending',
-        created_at: req.created_at,
-        description: req.description || '',
-        rejection_reason: req.rejection_reason || '',
-        reviewed_at: req.reviewed_at || '',
-        reviewed_by: req.reviewed_by || '',
-        updated_at: req.updated_at
-      }));
-      setPartnerRequests(mappedPartnerRequests);
-    }
-  }, [partnerRequestsData]);
-
-  // Calculate stats
-  const orphanageStats = {
-    pending: orphanages.filter(o => o.legal_status === 'pending').length,
-    verified: orphanages.filter(o => o.legal_status === 'verified').length,
-    rejected: orphanages.filter(o => o.legal_status === 'rejected').length
-  };
-
-  const partnerStats = {
-    pending: partnerRequests.filter(p => p.status === 'pending').length,
-    approved: partnerRequests.filter(p => p.status === 'approved').length,
-    rejected: partnerRequests.filter(p => p.status === 'rejected').length
-  };
-
-  const StatCard = ({ 
-    title, 
-    count, 
-    icon: Icon, 
-    variant = 'default' 
-  }: { 
-    title: string; 
-    count: number; 
-    icon: any; 
-    variant?: 'default' | 'success' | 'warning' | 'destructive';
-  }) => {
-    const variants = {
-      default: 'border-gray-200 bg-white',
-      success: 'border-green-200 bg-green-50',
-      warning: 'border-yellow-200 bg-yellow-50',
-      destructive: 'border-red-200 bg-red-50'
+    const handleSignOut = async () => {
+        try {
+            await signOut(auth);
+            navigate('/admin/auth');
+        } catch (error) {
+            console.error("Failed to sign out", error);
+        }
     };
 
-    const iconColors = {
-      default: 'text-gray-600',
-      success: 'text-green-600',
-      warning: 'text-yellow-600',
-      destructive: 'text-red-600'
-    };
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    if (!currentUser) {
+        return <div>Redirecting to login...</div>;
+    }
 
     return (
-      <motion.div variants={cardVariants}>
-        <Card className={`${variants[variant]} transition-colors hover:shadow-md`}>
-          <CardContent className="flex items-center p-6">
-            <div className="flex items-center space-x-4">
-              <div className={`p-2 rounded-full bg-white ${iconColors[variant]}`}>
-                <Icon className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{count}</p>
-                <p className="text-sm text-gray-600">{title}</p>
-              </div>
+        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+            <header className="bg-white dark:bg-gray-800 shadow">
+                <div className="container mx-auto py-4 px-6 flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                        <Home className="h-6 w-6" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} />
+                        <h1 className="text-xl font-semibold">Admin Dashboard</h1>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                        <NotificationCenter />
+                        <Button variant="outline" size="sm" onClick={() => setIsSettingsOpen(true)}>
+                            <Settings className="h-4 w-4 mr-2" />
+                            Settings
+                        </Button>
+                        <Button variant="destructive" size="sm" onClick={handleSignOut}>
+                            <LogOut className="h-4 w-4 mr-2" />
+                            Logout
+                        </Button>
+                    </div>
+                </div>
+            </header>
+
+            <div className="container mx-auto mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
+                {/* User Profile Card */}
+                <Card className="bg-white dark:bg-gray-700 shadow-md rounded-md">
+                    <CardHeader>
+                        <CardTitle>User Profile</CardTitle>
+                        <CardDescription>Manage your account settings and set preferences.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex flex-col items-center p-6">
+                        <Avatar className="h-20 w-20 rounded-full border-2 border-blue-500 dark:border-blue-400">
+                            <AvatarImage src="https://github.com/shadcn.png" alt="Admin Avatar" />
+                            <AvatarFallback>CN</AvatarFallback>
+                        </Avatar>
+                        <div className="mt-4 text-center">
+                            <p className="text-lg font-semibold">{currentUser.email}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Administrator</p>
+                        </div>
+                    </CardContent>
+                    <CardFooter className="justify-between">
+                        <Button onClick={() => navigate('/admin/users')}>
+                            <User className="h-4 w-4 mr-2" />
+                            Manage Users
+                        </Button>
+                    </CardFooter>
+                </Card>
+
+                {/* Quick Actions Card */}
+                <Card className="bg-white dark:bg-gray-700 shadow-md rounded-md">
+                    <CardHeader>
+                        <CardTitle>Quick Actions</CardTitle>
+                        <CardDescription>Perform common tasks quickly.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                        <div className="grid grid-cols-1 gap-4">
+                            <Button onClick={() => navigate('/admin/orphanages')} className="w-full">
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add Orphanage
+                            </Button>
+                            <Button onClick={() => navigate('/admin/partners')} className="w-full">
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add Partner
+                            </Button>
+                            <Button onClick={() => navigate('/admin/children')} className="w-full">
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add Children
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Calendar Card */}
+                <Card className="bg-white dark:bg-gray-700 shadow-md rounded-md">
+                    <CardHeader>
+                        <CardTitle>Calendar</CardTitle>
+                        <CardDescription>View events and schedule tasks.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid gap-6 p-6">
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                        "w-[240px] justify-start text-left font-normal",
+                                        !selectedDate && "text-muted-foreground"
+                                    )}
+                                >
+                                    <Calendar className="mr-2 h-4 w-4" />
+                                    {selectedDate ? format(selectedDate, "PPP", { locale: enUS }) : <span>Pick a date</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="center" side="bottom">
+                                <Calendar
+                                    mode="single"
+                                    selected={selectedDate}
+                                    onSelect={setSelectedDate}
+                                    disabled={(date) =>
+                                        date > new Date()
+                                    }
+                                    initialFocus
+                                />
+                            </PopoverContent>
+                        </Popover>
+                    </CardContent>
+                </Card>
             </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+
+            {/* Settings Modal */}
+            {isSettingsOpen && (
+                <div className="fixed inset-0 z-50 overflow-auto bg-black/50 dark:bg-black/75 flex items-center justify-center">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-md w-full mx-4">
+                        <h2 className="text-2xl font-semibold mb-6">Settings</h2>
+                        <div className="flex items-center justify-between mb-4">
+                            <Label htmlFor="theme-toggle">Dark Mode</Label>
+                            <ModeToggle />
+                        </div>
+                        <Button variant="secondary" onClick={() => setIsSettingsOpen(false)}>Close</Button>
+                    </div>
+                </div>
+            )}
+        </div>
     );
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <AdminDashboardHeader />
-      
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={containerVariants}
-        >
-          <Tabs defaultValue="registrations" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="registrations">Demandes d'inscription</TabsTrigger>
-              <TabsTrigger value="partners">Partenaires</TabsTrigger>
-              <TabsTrigger value="analytics">Analyses et statistiques</TabsTrigger>
-              <TabsTrigger value="notifications">Notifications</TabsTrigger>
-            </TabsList>
-
-            <AnimatePresence mode="wait">
-              <TabsContent value="registrations" className="space-y-6">
-                <motion.div
-                  key="registrations"
-                  initial="hidden"
-                  animate="visible"
-                  exit="hidden"
-                  variants={containerVariants}
-                >
-                  <motion.div variants={cardVariants}>
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Gestion des inscriptions d'orphelinats</CardTitle>
-                        <CardDescription>
-                          Gérez les demandes d'inscription des orphelinats
-                        </CardDescription>
-                      </CardHeader>
-                    </Card>
-                  </motion.div>
-
-                  <motion.div 
-                    className="grid grid-cols-1 md:grid-cols-3 gap-6"
-                    variants={containerVariants}
-                  >
-                    <StatCard
-                      title="En attente"
-                      count={orphanageStats.pending}
-                      icon={Clock}
-                      variant="warning"
-                    />
-                    <StatCard
-                      title="Validés"
-                      count={orphanageStats.verified}
-                      icon={CheckCircle}
-                      variant="success"
-                    />
-                    <StatCard
-                      title="Rejetés"
-                      count={orphanageStats.rejected}
-                      icon={XCircle}
-                      variant="destructive"
-                    />
-                  </motion.div>
-                </motion.div>
-              </TabsContent>
-
-              <TabsContent value="partners" className="space-y-6">
-                <motion.div
-                  key="partners"
-                  initial="hidden"
-                  animate="visible"
-                  exit="hidden"
-                  variants={containerVariants}
-                >
-                  <motion.div variants={cardVariants}>
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Gestion des partenaires</CardTitle>
-                        <CardDescription>
-                          Gérez les demandes d'accès des partenaires de recherche
-                        </CardDescription>
-                      </CardHeader>
-                    </Card>
-                  </motion.div>
-
-                  <motion.div 
-                    className="grid grid-cols-1 md:grid-cols-3 gap-6"
-                    variants={containerVariants}
-                  >
-                    <StatCard
-                      title="En attente"
-                      count={partnerStats.pending}
-                      icon={Clock}
-                      variant="warning"
-                    />
-                    <StatCard
-                      title="Approuvés"
-                      count={partnerStats.approved}
-                      icon={UserCheck}
-                      variant="success"
-                    />
-                    <StatCard
-                      title="Rejetés"
-                      count={partnerStats.rejected}
-                      icon={UserX}
-                      variant="destructive"
-                    />
-                  </motion.div>
-                </motion.div>
-              </TabsContent>
-
-              <TabsContent value="analytics" className="space-y-6">
-                <motion.div
-                  key="analytics"
-                  initial="hidden"
-                  animate="visible"
-                  exit="hidden"
-                  variants={containerVariants}
-                >
-                  <DashboardAnalyticsTabs />
-                </motion.div>
-              </TabsContent>
-
-              <TabsContent value="notifications" className="space-y-6">
-                <motion.div
-                  key="notifications"
-                  initial="hidden"
-                  animate="visible"
-                  exit="hidden"
-                  variants={containerVariants}
-                >
-                  <NotificationCenter />
-                </motion.div>
-              </TabsContent>
-            </AnimatePresence>
-          </Tabs>
-        </motion.div>
-      </main>
-    </div>
-  );
 };
 
 export default AdminDashboard;

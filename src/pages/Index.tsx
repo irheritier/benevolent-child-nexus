@@ -1,12 +1,12 @@
 
 import { motion } from 'framer-motion';
-import Header from '@/components/landing/Header';
-import HeroSection from '@/components/landing/HeroSection';
+import { Header } from '@/components/landing/Header';
+import { HeroSection } from '@/components/landing/HeroSection';
 import StatisticsSection from '@/components/landing/StatisticsSection';
-import FeaturesSection from '@/components/landing/FeaturesSection';
-import TrustSection from '@/components/landing/TrustSection';
-import CTASection from '@/components/landing/CTASection';
-import Footer from '@/components/landing/Footer';
+import { FeaturesSection } from '@/components/landing/FeaturesSection';
+import { TrustSection } from '@/components/landing/TrustSection';
+import { CTASection } from '@/components/landing/CTASection';
+import { Footer } from '@/components/landing/Footer';
 import { Helmet } from 'react-helmet-async';
 
 const Index = () => {
