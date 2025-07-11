@@ -2,17 +2,9 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { OrphanageFormData } from '@/types/orphanage';
 
-interface RegistrationData {
-  centerName: string;
-  capacity: string;
-  provinceId: string;
-  cityId: string;
-  address: string;
-  contactPerson: string;
-  phone: string;
-  email: string;
-  description: string;
+interface RegistrationData extends OrphanageFormData {
   documentData?: {
     document_url: string;
     document_path: string;
@@ -44,7 +36,7 @@ export const useOrphanageRegistration = () => {
         .eq('id', data.cityId)
         .single();
 
-      // Prepare orphanage data
+      // Prepare orphanage data with new fields
       const orphanageData = {
         name: data.centerName,
         province_id: data.provinceId,
@@ -57,6 +49,12 @@ export const useOrphanageRegistration = () => {
         email: data.email,
         description: data.description,
         child_capacity: data.capacity ? parseInt(data.capacity) : null,
+        children_total: data.children_total ? parseInt(data.children_total) : null,
+        boys_count: data.boys_count ? parseInt(data.boys_count) : null,
+        girls_count: data.girls_count ? parseInt(data.girls_count) : null,
+        schooling_rate: data.schooling_rate ? parseFloat(data.schooling_rate) : null,
+        annual_disease_rate: data.annual_disease_rate ? parseFloat(data.annual_disease_rate) : null,
+        meals_per_day: data.meals_per_day ? parseInt(data.meals_per_day) : null,
         legal_status: 'pending' as const,
         documents: data.documentData ? {
           legal_document: {

@@ -1,6 +1,6 @@
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, MapPin, Heart, Shield, Activity, TrendingUp } from "lucide-react";
+import { Users, MapPin, Heart, Shield, Activity, TrendingUp, GraduationCap, Utensils, User, UserCheck } from "lucide-react";
 
 interface PublicStats {
   total_orphanages: number;
@@ -9,6 +9,11 @@ interface PublicStats {
   well_nourished_children: number;
   malnourished_children: number;
   verified_orphanages: number;
+  total_boys?: number;
+  total_girls?: number;
+  avg_schooling_rate?: number;
+  avg_disease_rate?: number;
+  avg_meals_per_day?: number;
 }
 
 interface StatisticsSectionProps {
@@ -23,10 +28,88 @@ interface StatisticsSectionProps {
     verified: string;
     wellNourished: string;
     malnourished: string;
+    boys?: string;
+    girls?: string;
+    schoolingRate?: string;
+    diseaseRate?: string;
+    mealsPerDay?: string;
   };
 }
 
 export const StatisticsSection = ({ publicStats, statsLoading, impact, impactSubtitle, stats }: StatisticsSectionProps) => {
+  const statsToShow = [
+    {
+      icon: Users,
+      value: publicStats?.total_orphanages || 0,
+      label: stats.centers,
+      gradient: "from-blue-500 to-blue-600",
+      bg: "from-background to-blue-50/50 dark:to-blue-950/20"
+    },
+    {
+      icon: Heart,
+      value: publicStats?.total_children || 0,
+      label: stats.children,
+      gradient: "from-emerald-500 to-emerald-600",
+      bg: "from-background to-emerald-50/50 dark:to-emerald-950/20"
+    },
+    {
+      icon: User,
+      value: publicStats?.total_boys || 0,
+      label: stats.boys || "Garçons",
+      gradient: "from-cyan-500 to-cyan-600",
+      bg: "from-background to-cyan-50/50 dark:to-cyan-950/20"
+    },
+    {
+      icon: UserCheck,
+      value: publicStats?.total_girls || 0,
+      label: stats.girls || "Filles",
+      gradient: "from-pink-500 to-pink-600",
+      bg: "from-background to-pink-50/50 dark:to-pink-950/20"
+    },
+    {
+      icon: MapPin,
+      value: publicStats?.total_provinces || 0,
+      label: stats.provinces,
+      gradient: "from-purple-500 to-purple-600",
+      bg: "from-background to-purple-50/50 dark:to-purple-950/20"
+    },
+    {
+      icon: Shield,
+      value: publicStats?.verified_orphanages || 0,
+      label: stats.verified,
+      gradient: "from-teal-500 to-teal-600",
+      bg: "from-background to-teal-50/50 dark:to-teal-950/20"
+    },
+    {
+      icon: TrendingUp,
+      value: publicStats?.well_nourished_children || 0,
+      label: stats.wellNourished,
+      gradient: "from-green-500 to-green-600",
+      bg: "from-background to-green-50/50 dark:to-green-950/20"
+    },
+    {
+      icon: Activity,
+      value: publicStats?.malnourished_children || 0,
+      label: stats.malnourished,
+      gradient: "from-amber-500 to-amber-600",
+      bg: "from-background to-amber-50/50 dark:to-amber-950/20"
+    },
+    {
+      icon: GraduationCap,
+      value: publicStats?.avg_schooling_rate ? `${Math.round(publicStats.avg_schooling_rate)}%` : '0%',
+      label: stats.schoolingRate || "Taux de scolarisation",
+      gradient: "from-indigo-500 to-indigo-600",
+      bg: "from-background to-indigo-50/50 dark:to-indigo-950/20"
+    },
+    {
+      icon: Utensils,
+      value: publicStats?.avg_meals_per_day ? `${publicStats.avg_meals_per_day.toFixed(1)}` : '0',
+      label: stats.mealsPerDay || "Repas/jour (moy.)",
+      gradient: "from-orange-500 to-orange-600",
+      bg: "from-background to-orange-50/50 dark:to-orange-950/20"
+    }
+  ];
+
   return (
     <section className="py-12 sm:py-16 md:py-20 px-4 bg-gradient-to-r from-muted/30 via-background to-muted/30">
       <div className="container mx-auto">
@@ -38,8 +121,8 @@ export const StatisticsSection = ({ publicStats, statsLoading, impact, impactSub
         </div>
         
         {statsLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
-            {[...Array(6)].map((_, i) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
+            {[...Array(10)].map((_, i) => (
               <Card key={i} className="animate-pulse border-0 shadow-lg">
                 <CardContent className="p-3 sm:p-4 md:p-6 text-center">
                   <div className="w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-xl mx-auto mb-3 sm:mb-4"></div>
@@ -50,78 +133,20 @@ export const StatisticsSection = ({ publicStats, statsLoading, impact, impactSub
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
-            <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-gradient-to-br from-background to-blue-50/50 dark:to-blue-950/20 hover:scale-105">
-              <CardContent className="p-3 sm:p-4 md:p-6 text-center">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform shadow-lg">
-                  <Users className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                </div>
-                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1 sm:mb-2">
-                  {publicStats?.total_orphanages || 0}
-                </h3>
-                <p className="text-xs sm:text-sm text-muted-foreground font-medium">{stats.centers}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-gradient-to-br from-background to-emerald-50/50 dark:to-emerald-950/20 hover:scale-105">
-              <CardContent className="p-3 sm:p-4 md:p-6 text-center">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform shadow-lg">
-                  <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                </div>
-                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1 sm:mb-2">
-                  {publicStats?.total_children || 0}
-                </h3>
-                <p className="text-xs sm:text-sm text-muted-foreground font-medium">{stats.children}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-gradient-to-br from-background to-purple-50/50 dark:to-purple-950/20 hover:scale-105">
-              <CardContent className="p-3 sm:p-4 md:p-6 text-center">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform shadow-lg">
-                  <MapPin className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                </div>
-                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1 sm:mb-2">
-                  {publicStats?.total_provinces || 0}
-                </h3>
-                <p className="text-xs sm:text-sm text-muted-foreground font-medium">{stats.provinces}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-gradient-to-br from-background to-teal-50/50 dark:to-teal-950/20 hover:scale-105">
-              <CardContent className="p-3 sm:p-4 md:p-6 text-center">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform shadow-lg">
-                  <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                </div>
-                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1 sm:mb-2">
-                  {publicStats?.verified_orphanages || 0}
-                </h3>
-                <p className="text-xs sm:text-sm text-muted-foreground font-medium">{stats.verified}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-gradient-to-br from-background to-green-50/50 dark:to-green-950/20 hover:scale-105">
-              <CardContent className="p-3 sm:p-4 md:p-6 text-center">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform shadow-lg">
-                  <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                </div>
-                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1 sm:mb-2">
-                  {publicStats?.well_nourished_children || 0}
-                </h3>
-                <p className="text-xs sm:text-sm text-muted-foreground font-medium">{stats.wellNourished}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-gradient-to-br from-background to-amber-50/50 dark:to-amber-950/20 hover:scale-105">
-              <CardContent className="p-3 sm:p-4 md:p-6 text-center">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform shadow-lg">
-                  <Activity className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                </div>
-                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1 sm:mb-2">
-                  {publicStats?.malnourished_children || 0}
-                </h3>
-                <p className="text-xs sm:text-sm text-muted-foreground font-medium">{stats.malnourished}</p>
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
+            {statsToShow.map((stat, index) => (
+              <Card key={index} className={`group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-gradient-to-br ${stat.bg} hover:scale-105`}>
+                <CardContent className="p-3 sm:p-4 md:p-6 text-center">
+                  <div className={`w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br ${stat.gradient} rounded-xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
+                    <stat.icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1 sm:mb-2">
+                    {stat.value}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground font-medium">{stat.label}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         )}
       </div>

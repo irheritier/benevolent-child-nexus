@@ -15,18 +15,7 @@ import { BasicInfoForm } from "@/components/register/BasicInfoForm";
 import { DocumentUpload } from "@/components/register/DocumentUpload";
 import { ConsentForm } from "@/components/register/ConsentForm";
 import { SuccessPage } from "@/components/register/SuccessPage";
-
-interface FormData {
-  centerName: string;
-  capacity: string;
-  provinceId: string;
-  cityId: string;
-  address: string;
-  contactPerson: string;
-  phone: string;
-  email: string;
-  description: string;
-}
+import { OrphanageFormData } from "@/types/orphanage";
 
 const Register = () => {
   const [language, setLanguage] = useState<'fr' | 'en'>('fr');
@@ -41,7 +30,7 @@ const Register = () => {
   const { uploadedFile, isUploading, uploadFile, removeFile, getDocumentData } = useFileUpload();
   const { submitRegistration, isSubmitting } = useOrphanageRegistration();
 
-  const form = useForm<FormData>({
+  const form = useForm<OrphanageFormData>({
     defaultValues: {
       centerName: "",
       capacity: "",
@@ -52,6 +41,12 @@ const Register = () => {
       phone: "",
       email: "",
       description: "",
+      children_total: "",
+      boys_count: "",
+      girls_count: "",
+      schooling_rate: "",
+      annual_disease_rate: "",
+      meals_per_day: "",
     }
   });
 
@@ -199,7 +194,7 @@ const Register = () => {
     ];
 
     for (const { field, message } of requiredFields) {
-      if (!values[field as keyof FormData] || values[field as keyof FormData].trim() === '') {
+      if (!values[field as keyof OrphanageFormData] || values[field as keyof OrphanageFormData].trim() === '') {
         toast({
           title: "Erreur de validation",
           description: message,
@@ -266,8 +261,13 @@ const Register = () => {
     const formData = form.getValues();
     const documentData = getDocumentData();
 
+    const childrenTotal = parseInt(formData.children_total) || 0;
+    const boysCount = parseInt(formData.boys_count) || 0;
+    const girlsCount = Math.max(0, childrenTotal - boysCount);
+
     const registrationData = {
       ...formData,
+      girls_count: girlsCount.toString(),
       documentData
     };
 
@@ -278,7 +278,6 @@ const Register = () => {
     }
   };
 
-  // Show success page if submitted
   if (isSubmitted) {
     return <SuccessPage language={language} setLanguage={setLanguage} texts={t} />;
   }
@@ -304,7 +303,6 @@ const Register = () => {
       <div className="flex-1">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
           <div className="max-w-4xl lg:max-w-5xl mx-auto">
-            {/* Enhanced Header */}
             <div className="text-center mb-8 sm:mb-12 lg:mb-16">
               <div className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-800/50 dark:to-purple-800/50 text-blue-800 dark:text-blue-200 rounded-full text-xs sm:text-sm font-semibold mb-4 sm:mb-6 border border-blue-200/50 dark:border-blue-700/50 shadow-lg">
                 <Building2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
@@ -314,10 +312,8 @@ const Register = () => {
               <p className="text-base sm:text-lg lg:text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed px-4">{t.subtitle}</p>
             </div>
 
-            {/* Enhanced Progress Steps */}
             <RegistrationSteps currentStep={currentStep} texts={t} />
 
-            {/* Enhanced Form Card */}
             <Card className="shadow-2xl border-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
               <CardHeader className="pb-6 sm:pb-8 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 rounded-t-lg">
                 <CardTitle className="text-xl sm:text-2xl text-center text-slate-800 dark:text-slate-100">
@@ -372,7 +368,6 @@ const Register = () => {
                   />
                 )}
 
-                {/* Enhanced Navigation Buttons */}
                 <div className="flex flex-col sm:flex-row justify-between pt-6 sm:pt-8 border-t border-slate-200 dark:border-slate-700 gap-4 sm:gap-0">
                   <div>
                     {currentStep > 1 && (

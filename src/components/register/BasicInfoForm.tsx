@@ -4,21 +4,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-interface FormData {
-  centerName: string;
-  capacity: string;
-  provinceId: string;
-  cityId: string;
-  address: string;
-  contactPerson: string;
-  phone: string;
-  email: string;
-  description: string;
-}
+import { OrphanageFormData, schoolingRateOptions, annualDiseaseRateOptions, mealsPerDayOptions } from "@/types/orphanage";
+import { useEffect } from "react";
 
 interface BasicInfoFormProps {
-  form: UseFormReturn<FormData>;
+  form: UseFormReturn<OrphanageFormData>;
   texts: any;
   provinces: any[];
   cities: any[];
@@ -34,6 +24,17 @@ export const BasicInfoForm = ({
   selectedProvinceId, 
   onProvinceChange 
 }: BasicInfoFormProps) => {
+  const childrenTotal = form.watch("children_total");
+  const boysCount = form.watch("boys_count");
+
+  // Calculate girls_count automatically
+  useEffect(() => {
+    const total = parseInt(childrenTotal) || 0;
+    const boys = parseInt(boysCount) || 0;
+    const girls = Math.max(0, total - boys);
+    form.setValue("girls_count", girls.toString());
+  }, [childrenTotal, boysCount, form]);
+
   return (
     <Form {...form}>
       <div className="space-y-6 sm:space-y-8">
@@ -154,6 +155,166 @@ export const BasicInfoForm = ({
             </FormItem>
           )}
         />
+
+        {/* Nouvelle section pour les informations sur les enfants */}
+        <div className="border-t pt-6">
+          <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4">Informations sur les enfants accueillis</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+            <FormField
+              control={form.control}
+              name="children_total"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
+                    Nombre total d'enfants
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="boys_count"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
+                    Nombre de garçons
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="girls_count"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
+                    Nombre de filles (calculé)
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      readOnly
+                      className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-sm sm:text-base cursor-not-allowed"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Section pour les taux et repas */}
+        <div className="border-t pt-6">
+          <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4">Informations complémentaires</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+            <FormField
+              control={form.control}
+              name="schooling_rate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
+                    Taux de scolarisation
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base">
+                        <SelectValue placeholder="Sélectionnez un taux" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {schoolingRateOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="annual_disease_rate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
+                    Taux annuel de maladies
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base">
+                        <SelectValue placeholder="Sélectionnez un taux" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {annualDiseaseRateOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="meals_per_day"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
+                    Repas par jour
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base">
+                        <SelectValue placeholder="Sélectionnez le nombre" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {mealsPerDayOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <FormField

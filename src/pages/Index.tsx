@@ -18,26 +18,68 @@ interface PublicStats {
   well_nourished_children: number;
   malnourished_children: number;
   verified_orphanages: number;
+  total_boys?: number;
+  total_girls?: number;
+  avg_schooling_rate?: number;
+  avg_disease_rate?: number;
+  avg_meals_per_day?: number;
 }
 
 const Index = () => {
   const { language, setLanguage } = useLanguage();
 
-  // Fetch public statistics
+  // Fetch public statistics with enhanced data
   const { data: publicStats, isLoading: statsLoading } = useQuery({
-    queryKey: ['public-stats'],
+    queryKey: ['public-stats-enhanced'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Fetch basic public stats
+      const { data: basicStats } = await supabase
         .from('public_stats')
         .select('*')
         .single();
-      
-      if (error) throw error;
-      return data as PublicStats;
+
+      // Fetch additional aggregated data
+      const { data: orphanagesData } = await supabase
+        .from('orphanages')
+        .select('boys_count, girls_count, schooling_rate, annual_disease_rate, meals_per_day')
+        .eq('legal_status', 'verified');
+
+      let enhancedStats = { ...basicStats };
+
+      if (orphanagesData && orphanagesData.length > 0) {
+        // Calculate totals and averages
+        const totalBoys = orphanagesData.reduce((sum, org) => sum + (org.boys_count || 0), 0);
+        const totalGirls = orphanagesData.reduce((sum, org) => sum + (org.girls_count || 0), 0);
+        
+        const schoolingRates = orphanagesData.filter(org => org.schooling_rate !== null).map(org => org.schooling_rate || 0);
+        const diseaseRates = orphanagesData.filter(org => org.annual_disease_rate !== null).map(org => org.annual_disease_rate || 0);
+        const mealsPerDay = orphanagesData.filter(org => org.meals_per_day !== null).map(org => org.meals_per_day || 0);
+
+        enhancedStats = {
+          ...enhancedStats,
+          total_boys: totalBoys,
+          total_girls: totalGirls,
+          avg_schooling_rate: schoolingRates.length > 0 ? schoolingRates.reduce((a, b) => a + b, 0) / schoolingRates.length : 0,
+          avg_disease_rate: diseaseRates.length > 0 ? diseaseRates.reduce((a, b) => a + b, 0) / diseaseRates.length : 0,
+          avg_meals_per_day: mealsPerDay.length > 0 ? mealsPerDay.reduce((a, b) => a + b, 0) / mealsPerDay.length : 0,
+        };
+      }
+
+      return enhancedStats as PublicStats;
     }
   });
 
   const t = texts[language];
+
+  // Enhanced stats object with new labels
+  const enhancedStatsLabels = {
+    ...t.stats,
+    boys: "Garçons",
+    girls: "Filles",
+    schoolingRate: "Taux de scolarisation",
+    diseaseRate: "Taux de maladies",
+    mealsPerDay: "Repas/jour (moy.)",
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 dark:to-primary/10">
@@ -60,7 +102,7 @@ const Index = () => {
         statsLoading={statsLoading}
         impact={t.impact}
         impactSubtitle={t.impactSubtitle}
-        stats={t.stats}
+        stats={enhancedStatsLabels}
       />
       
       <FeaturesSection features={t.features} />
