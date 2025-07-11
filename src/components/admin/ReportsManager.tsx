@@ -1,273 +1,253 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { FileText, Download, Calendar, Users, Activity } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useToast } from '@/hooks/use-toast';
+import { FileText, Download, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { generatePDFReport } from '@/utils/pdfGenerator';
+import { cn } from '@/lib/utils';
 
-interface Report {
-  id: string;
-  title: string;
-  type: string;
-  status: 'generated' | 'pending' | 'error';
-  createdAt: string;
-  size: string;
-}
+type ReportType = 'general' | 'orphanages' | 'children' | 'nutrition' | 'provinces';
 
 const ReportsManager = () => {
-  const [reports, setReports] = useState<Report[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [selectedReport, setSelectedReport] = useState<ReportType>('general');
+  const [dateFrom, setDateFrom] = useState<Date>();
+  const [dateTo, setDateTo] = useState<Date>();
+  const [isGenerating, setIsGenerating] = useState(false);
+  const { toast } = useToast();
 
-  useEffect(() => {
-    // Simulate loading reports
-    setTimeout(() => {
-      setReports([
-        {
-          id: '1',
-          title: 'Rapport mensuel - Janvier 2024',
-          type: 'monthly',
-          status: 'generated',
-          createdAt: '2024-02-01',
-          size: '2.5 MB'
-        },
-        {
-          id: '2', 
-          title: 'Statistiques nutritionnelles - Q1 2024',
-          type: 'nutrition',
-          status: 'generated',
-          createdAt: '2024-01-15',
-          size: '1.8 MB'
-        },
-        {
-          id: '3',
-          title: 'Rapport de santé - Décembre 2023',
-          type: 'health',
-          status: 'pending',
-          createdAt: '2024-01-10',
-          size: '-'
-        }
-      ]);
-      setIsLoading(false);
-    }, 1000);
-  }, []);
+  const reportTypes = [
+    { value: 'general', label: 'Rapport général', description: 'Vue d\'ensemble complète du système' },
+    { value: 'orphanages', label: 'Rapport orphelinats', description: 'Statistiques des centres d\'accueil' },
+    { value: 'children', label: 'Rapport enfants', description: 'Données sur les enfants hébergés' },
+    { value: 'nutrition', label: 'Rapport nutritionnel', description: 'État nutritionnel des enfants' },
+    { value: 'provinces', label: 'Rapport provincial', description: 'Répartition par province' }
+  ];
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'generated': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'error': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+  const handleGenerateReport = async () => {
+    if (!selectedReport) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez sélectionner un type de rapport.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      await generatePDFReport({
+        type: selectedReport,
+        dateFrom,
+        dateTo,
+        title: reportTypes.find(r => r.value === selectedReport)?.label || 'Rapport'
+      });
+
+      toast({
+        title: "Rapport généré",
+        description: "Le rapport PDF a été téléchargé avec succès.",
+      });
+    } catch (error) {
+      console.error('Erreur lors de la génération du rapport:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de générer le rapport PDF.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
     }
   };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'generated': return 'Généré';
-      case 'pending': return 'En cours';
-      case 'error': return 'Erreur';
-      default: return 'Inconnu';
-    }
-  };
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'monthly': return <Calendar className="w-4 h-4" />;
-      case 'nutrition': return <Activity className="w-4 h-4" />;
-      case 'health': return <Users className="w-4 h-4" />;
-      default: return <FileText className="w-4 h-4" />;
-    }
-  };
-
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2
-      }
-    }
-  };
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20, scale: 0.95 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      scale: 1,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut" as const
-      }
-    }
-  };
-
-  const reportItemVariants = {
-    hidden: { opacity: 0, x: -20 },
-    visible: { 
-      opacity: 1, 
-      x: 0,
-      transition: {
-        duration: 0.4,
-        ease: "easeOut" as const
-      }
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <motion.div 
-        className="space-y-6"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <motion.div variants={cardVariants}>
-          <Card>
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="animate-pulse">
-                    <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </motion.div>
-    );
-  }
 
   return (
-    <motion.div 
-      className="space-y-6"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      {/* Generate New Report Section */}
-      <motion.div variants={cardVariants} whileHover={{ scale: 1.01 }}>
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              Générer un nouveau rapport
-            </CardTitle>
-            <CardDescription>
-              Créez des rapports personnalisés sur différents aspects du système
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <motion.div 
-              className="grid grid-cols-1 md:grid-cols-3 gap-4"
-              variants={containerVariants}
-            >
-              <motion.div variants={reportItemVariants}>
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Button 
-                    className="w-full h-20 flex flex-col gap-2" 
-                    variant="outline"
-                  >
-                    <Calendar className="w-6 h-6" />
-                    <span className="text-sm">Rapport mensuel</span>
-                  </Button>
-                </motion.div>
-              </motion.div>
-              <motion.div variants={reportItemVariants}>
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Button 
-                    className="w-full h-20 flex flex-col gap-2" 
-                    variant="outline"
-                  >
-                    <Activity className="w-6 h-6" />
-                    <span className="text-sm">Rapport nutritionnel</span>
-                  </Button>
-                </motion.div>
-              </motion.div>
-              <motion.div variants={reportItemVariants}>
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Button 
-                    className="w-full h-20 flex flex-col gap-2" 
-                    variant="outline"
-                  >
-                    <Users className="w-6 h-6" />
-                    <span className="text-sm">Rapport de santé</span>
-                  </Button>
-                </motion.div>
-              </motion.div>
-            </motion.div>
-          </CardContent>
-        </Card>
-      </motion.div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Génération de rapports</h2>
+          <p className="text-muted-foreground">
+            Créez et téléchargez des rapports PDF détaillés
+          </p>
+        </div>
+      </div>
 
-      {/* Reports List */}
-      <motion.div variants={cardVariants} whileHover={{ scale: 1.01 }}>
-        <Card className="hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <CardTitle>Rapports générés</CardTitle>
-            <CardDescription>
-              Historique des rapports créés et disponibles au téléchargement
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <motion.div className="space-y-4" variants={containerVariants}>
-              {reports.map((report, index) => (
-                <motion.div
-                  key={report.id}
-                  variants={reportItemVariants}
-                  whileHover={{ scale: 1.01, backgroundColor: "rgba(0,0,0,0.02)" }}
-                  className="flex items-center justify-between p-4 border rounded-lg transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <motion.div
-                      whileHover={{ rotate: 10 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                    >
-                      {getTypeIcon(report.type)}
-                    </motion.div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            Configuration du rapport
+          </CardTitle>
+          <CardDescription>
+            Sélectionnez le type de rapport et la période désirée
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Sélection du type de rapport */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Type de rapport</label>
+            <Select value={selectedReport} onValueChange={(value: ReportType) => setSelectedReport(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Choisir un type de rapport" />
+              </SelectTrigger>
+              <SelectContent>
+                {reportTypes.map((report) => (
+                  <SelectItem key={report.value} value={report.value}>
                     <div>
-                      <h4 className="font-medium">{report.title}</h4>
-                      <p className="text-sm text-gray-500">
-                        Créé le {new Date(report.createdAt).toLocaleDateString('fr-FR')} • {report.size}
-                      </p>
+                      <div className="font-medium">{report.label}</div>
+                      <div className="text-xs text-muted-foreground">{report.description}</div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Badge className={getStatusColor(report.status)}>
-                      {getStatusText(report.status)}
-                    </Badge>
-                    {report.status === 'generated' && (
-                      <motion.div
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        <Button size="sm" variant="outline">
-                          <Download className="w-4 h-4 mr-2" />
-                          Télécharger
-                        </Button>
-                      </motion.div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Sélection de la période */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Date de début</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !dateFrom && "text-muted-foreground"
                     )}
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-          </CardContent>
-        </Card>
-      </motion.div>
-    </motion.div>
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateFrom ? format(dateFrom, "PPP", { locale: fr }) : "Sélectionner une date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={dateFrom}
+                    onSelect={setDateFrom}
+                    locale={fr}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Date de fin</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !dateTo && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateTo ? format(dateTo, "PPP", { locale: fr }) : "Sélectionner une date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={dateTo}
+                    onSelect={setDateTo}
+                    locale={fr}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+
+          {/* Bouton de génération */}
+          <div className="flex justify-end">
+            <Button 
+              onClick={handleGenerateReport}
+              disabled={isGenerating || !selectedReport}
+              className="flex items-center gap-2"
+            >
+              {isGenerating ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
+              {isGenerating ? "Génération..." : "Générer le rapport"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Rapports prédéfinis */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Rapports rapides</CardTitle>
+          <CardDescription>
+            Générez rapidement des rapports couramment utilisés
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 flex flex-col items-start space-y-2"
+              onClick={() => {
+                setSelectedReport('general');
+                setDateFrom(new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1));
+                setDateTo(new Date());
+                handleGenerateReport();
+              }}
+              disabled={isGenerating}
+            >
+              <FileText className="w-5 h-5 text-blue-500" />
+              <div className="text-left">
+                <div className="font-medium">Rapport mensuel</div>
+                <div className="text-xs text-muted-foreground">Données du mois dernier</div>
+              </div>
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 flex flex-col items-start space-y-2"
+              onClick={() => {
+                setSelectedReport('nutrition');
+                setDateFrom(new Date(new Date().getFullYear(), new Date().getMonth() - 3, 1));
+                setDateTo(new Date());
+                handleGenerateReport();
+              }}
+              disabled={isGenerating}
+            >
+              <FileText className="w-5 h-5 text-green-500" />
+              <div className="text-left">
+                <div className="font-medium">Suivi nutritionnel</div>
+                <div className="text-xs text-muted-foreground">3 derniers mois</div>
+              </div>
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 flex flex-col items-start space-y-2"
+              onClick={() => {
+                setSelectedReport('provinces');
+                setDateFrom(new Date(new Date().getFullYear(), 0, 1));
+                setDateTo(new Date());
+                handleGenerateReport();
+              }}
+              disabled={isGenerating}
+            >
+              <FileText className="w-5 h-5 text-purple-500" />
+              <div className="text-left">
+                <div className="font-medium">Rapport annuel</div>
+                <div className="text-xs text-muted-foreground">Année en cours</div>
+              </div>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

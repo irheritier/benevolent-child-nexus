@@ -1,17 +1,107 @@
 
-import { motion } from 'framer-motion';
-import Header from '@/components/landing/Header';
-import HeroSection from '@/components/landing/HeroSection';
-import StatisticsSection from '@/components/landing/StatisticsSection';
-import FeaturesSection from '@/components/landing/FeaturesSection';
-import TrustSection from '@/components/landing/TrustSection';
-import CTASection from '@/components/landing/CTASection';
-import Footer from '@/components/landing/Footer';
-import { Helmet } from 'react-helmet-async';
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { Header } from "@/components/landing/Header";
+import { HeroSection } from "@/components/landing/HeroSection";
+import { StatisticsSection } from "@/components/landing/StatisticsSection";
+import { FeaturesSection } from "@/components/landing/FeaturesSection";
+import { TrustSection } from "@/components/landing/TrustSection";
+import { CTASection } from "@/components/landing/CTASection";
+import { Footer } from "@/components/landing/Footer";
+import { useLanguage } from "@/hooks/useLanguage";
+import { texts } from "@/data/translations";
+import { motion } from "framer-motion";
+
+interface PublicStats {
+  total_orphanages: number;
+  total_children: number;
+  total_provinces: number;
+  well_nourished_children: number;
+  malnourished_children: number;
+  verified_orphanages: number;
+  total_boys?: number;
+  total_girls?: number;
+  avg_schooling_rate?: number;
+  avg_disease_rate?: number;
+  avg_meals_per_day?: number;
+}
 
 const Index = () => {
-  // Animation variants for page sections
-  const pageVariants = {
+  const { language, setLanguage } = useLanguage();
+
+  // Fetch public statistics with enhanced data
+  const { data: publicStats, isLoading: statsLoading } = useQuery({
+    queryKey: ['public-stats-enhanced'],
+    queryFn: async () => {
+      // Fetch basic public stats
+      const { data: basicStats } = await supabase
+        .from('public_stats')
+        .select('*')
+        .single();
+
+      // Fetch additional aggregated data
+      const { data: orphanagesData } = await supabase
+        .from('orphanages')
+        .select('boys_count, girls_count, schooling_rate, annual_disease_rate, meals_per_day')
+        .eq('legal_status', 'verified');
+
+      // Start with basic stats, ensuring all required properties exist
+      let enhancedStats: PublicStats = {
+        total_orphanages: basicStats?.total_orphanages || 0,
+        total_children: basicStats?.total_children || 0,
+        total_provinces: basicStats?.total_provinces || 0,
+        well_nourished_children: basicStats?.well_nourished_children || 0,
+        malnourished_children: basicStats?.malnourished_children || 0,
+        verified_orphanages: basicStats?.verified_orphanages || 0,
+      };
+
+      if (orphanagesData && orphanagesData.length > 0) {
+        // Calculate totals and averages
+        const totalBoys = orphanagesData.reduce((sum, org) => sum + (org.boys_count || 0), 0);
+        const totalGirls = orphanagesData.reduce((sum, org) => sum + (org.girls_count || 0), 0);
+        
+        const schoolingRates = orphanagesData.filter(org => org.schooling_rate !== null).map(org => org.schooling_rate || 0);
+        const diseaseRates = orphanagesData.filter(org => org.annual_disease_rate !== null).map(org => org.annual_disease_rate || 0);
+        const mealsPerDay = orphanagesData.filter(org => org.meals_per_day !== null).map(org => org.meals_per_day || 0);
+
+        // Add the calculated fields
+        enhancedStats.total_boys = totalBoys;
+        enhancedStats.total_girls = totalGirls;
+        enhancedStats.avg_schooling_rate = schoolingRates.length > 0 ? schoolingRates.reduce((a, b) => a + b, 0) / schoolingRates.length : 0;
+        enhancedStats.avg_disease_rate = diseaseRates.length > 0 ? diseaseRates.reduce((a, b) => a + b, 0) / diseaseRates.length : 0;
+        enhancedStats.avg_meals_per_day = mealsPerDay.length > 0 ? mealsPerDay.reduce((a, b) => a + b, 0) / mealsPerDay.length : 0;
+      }
+
+      return enhancedStats;
+    }
+  });
+
+  const t = texts[language];
+
+  // Enhanced stats object with new labels
+  const enhancedStatsLabels = {
+    ...t.stats,
+    boys: "Garçons",
+    girls: "Filles",
+    schoolingRate: "Taux de scolarisation",
+    diseaseRate: "Taux de maladies",
+    mealsPerDay: "Repas/jour (moy.)",
+  };
+
+  // Animation variants for staggered sections
+  const sectionVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.8,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -22,189 +112,83 @@ const Index = () => {
     }
   };
 
-  const sectionVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: "easeOut" as const
-      }
-    }
-  };
-
-  const headerVariants = {
-    hidden: { opacity: 0, y: -30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut" as const
-      }
-    }
-  };
-
-  const heroVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: "easeOut" as const
-      }
-    }
-  };
-
-  const statsVariants = {
-    hidden: { opacity: 0, y: 40 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: "easeOut" as const
-      }
-    }
-  };
-
-  const featuresVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: "easeOut" as const
-      }
-    }
-  };
-
-  const trustVariants = {
-    hidden: { opacity: 0, scale: 0.95 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: {
-        duration: 0.8,
-        ease: "easeOut" as const
-      }
-    }
-  };
-
-  const ctaVariants = {
-    hidden: { opacity: 0, y: 60 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: "easeOut" as const
-      }
-    }
-  };
-
-  const footerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut" as const
-      }
-    }
-  };
-
   return (
-    <>
-      <Helmet>
-        <title>FCS - Find Children to Save | Plateforme de protection de l'enfance en RDC</title>
-        <meta 
-          name="description" 
-          content="Plateforme digitale pour la protection et le suivi des enfants orphelins et vulnérables en République Démocratique du Congo. Transparence, efficacité et impact mesurable." 
+    <motion.div 
+      className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 dark:to-primary/10"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <Header 
+        language={language} 
+        setLanguage={setLanguage} 
+        adminLoginText={t.cta.adminLogin} 
+      />
+      
+      <motion.div variants={sectionVariants}>
+        <HeroSection 
+          title={t.title}
+          subtitle={t.subtitle}
+          heroDescription={t.heroDescription}
+          registerText={t.cta.register}
+          exploreMapText={t.cta.exploreMap}
         />
-        <meta name="keywords" content="orphelinat, RDC, enfants, protection, suivi, transparence" />
-        <meta name="author" content="FCS - Find Children to Save" />
-        <meta property="og:title" content="FCS - Find Children to Save" />
-        <meta property="og:description" content="Plateforme digitale pour la protection des enfants orphelins en RDC" />
-        <meta property="og:type" content="website" />
-        <link rel="canonical" href="https://findchildrentosave.com" />
-      </Helmet>
-
-      <motion.div
-        className="min-h-screen bg-white dark:bg-gray-900"
-        variants={pageVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        {/* Header avec animation d'entrée depuis le haut */}
-        <motion.div variants={headerVariants}>
-          <Header />
-        </motion.div>
-
-        {/* Hero Section avec animation fade-in + slide-up */}
-        <motion.div
-          variants={heroVariants}
-          whileInView="visible"
-          initial="hidden"
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          <HeroSection />
-        </motion.div>
-
-        {/* Statistics Section avec animation retardée */}
-        <motion.div
-          variants={statsVariants}
-          whileInView="visible"
-          initial="hidden"
-          viewport={{ once: true, amount: 0.2 }}
-        >
-          <StatisticsSection />
-        </motion.div>
-
-        {/* Features Section avec animation slide-up */}
-        <motion.div
-          variants={featuresVariants}
-          whileInView="visible"
-          initial="hidden"
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          <FeaturesSection />
-        </motion.div>
-
-        {/* Trust Section avec animation scale + fade */}
-        <motion.div
-          variants={trustVariants}
-          whileInView="visible"
-          initial="hidden"
-          viewport={{ once: true, amount: 0.4 }}
-        >
-          <TrustSection />
-        </motion.div>
-
-        {/* CTA Section avec animation dynamique */}
-        <motion.div
-          variants={ctaVariants}
-          whileInView="visible"
-          initial="hidden"
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          <CTASection />
-        </motion.div>
-
-        {/* Footer avec animation finale */}
-        <motion.div
-          variants={footerVariants}
-          whileInView="visible"
-          initial="hidden"
-          viewport={{ once: true, amount: 0.1 }}
-        >
-          <Footer />
-        </motion.div>
       </motion.div>
-    </>
+      
+      <motion.div 
+        variants={sectionVariants}
+        whileInView="visible"
+        initial="hidden"
+        viewport={{ once: true, amount: 0.5 }}
+      >
+        <StatisticsSection 
+          publicStats={publicStats}
+          statsLoading={statsLoading}
+          impact={t.impact}
+          impactSubtitle={t.impactSubtitle}
+          stats={enhancedStatsLabels}
+        />
+      </motion.div>
+      
+      <motion.div 
+        variants={sectionVariants}
+        whileInView="visible"
+        initial="hidden"
+        viewport={{ once: true, amount: 0.5 }}
+      >
+        <FeaturesSection features={t.features} />
+      </motion.div>
+      
+      <motion.div 
+        variants={sectionVariants}
+        whileInView="visible"
+        initial="hidden"
+        viewport={{ once: true, amount: 0.5 }}
+      >
+        <TrustSection trust={t.trust} />
+      </motion.div>
+      
+      <motion.div 
+        variants={sectionVariants}
+        whileInView="visible"
+        initial="hidden"
+        viewport={{ once: true, amount: 0.5 }}
+      >
+        <CTASection 
+          registerText={t.cta.register}
+          exploreMapText={t.cta.exploreMap}
+        />
+      </motion.div>
+      
+      <motion.div 
+        variants={sectionVariants}
+        whileInView="visible"
+        initial="hidden"
+        viewport={{ once: true, amount: 0.5 }}
+      >
+        <Footer footer={t.footer} />
+      </motion.div>
+    </motion.div>
   );
 };
 

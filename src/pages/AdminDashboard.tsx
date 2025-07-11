@@ -3,95 +3,125 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Users, UserCheck, UserX, Building, CheckCircle, XCircle, Clock, BarChart, Bell } from 'lucide-react';
-import { AdminDashboardHeader } from '@/components/admin/AdminDashboardHeader';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Eye, CheckCircle, XCircle, Clock, Mail, Phone, MapPin, FileText, Download, BarChart, Bell, Users, Building2, Heart } from 'lucide-react';
 import AdminStatsDashboard from '@/components/admin/AdminStatsDashboard';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { NotificationProvider } from '@/contexts/NotificationContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useNotificationAlerts } from '@/hooks/useNotificationAlerts';
+import { AdminDashboardHeader } from '@/components/admin/AdminDashboardHeader';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
-interface OrphanageRequest {
+interface Orphanage {
   id: string;
   name: string;
-  contact_person: string;
-  email: string;
-  phone: string;
-  city: string;
   province: string;
+  city: string;
+  contact_person: string;
+  phone: string;
+  email: string;
+  description: string;
   legal_status: 'pending' | 'verified' | 'rejected';
+  child_capacity: number;
+  address: string;
+  documents: any;
   created_at: string;
 }
 
 interface PartnerRequest {
   id: string;
   organization_name: string;
+  organization_type: string;
   contact_person: string;
   email: string;
   phone: string;
-  organization_type: string;
-  status: 'pending' | 'approved' | 'rejected';
+  description: string;
+  purpose: string;
+  status: string;
   created_at: string;
-}
-
-interface Stats {
-  pendingOrphanages: number;
-  verifiedOrphanages: number;
-  rejectedOrphanages: number;
-  pendingPartners: number;
-  approvedPartners: number;
-  rejectedPartners: number;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+  rejection_reason: string | null;
 }
 
 const AdminDashboardContent = () => {
-  const [userEmail, setUserEmail] = useState<string>('');
-  const [orphanageRequests, setOrphanageRequests] = useState<OrphanageRequest[]>([]);
+  const [orphanages, setOrphanages] = useState<Orphanage[]>([]);
   const [partnerRequests, setPartnerRequests] = useState<PartnerRequest[]>([]);
-  const [stats, setStats] = useState<Stats>({
-    pendingOrphanages: 0,
-    verifiedOrphanages: 0,
-    rejectedOrphanages: 0,
-    pendingPartners: 0,
-    approvedPartners: 0,
-    rejectedPartners: 0,
-  });
+  const [selectedOrphanage, setSelectedOrphanage] = useState<Orphanage | null>(null);
+  const [selectedPartnerRequest, setSelectedPartnerRequest] = useState<PartnerRequest | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isValidating, setIsValidating] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
+  const [showPartnerDialog, setShowPartnerDialog] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [partnerPassword, setPartnerPassword] = useState('');
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Utiliser le hook pour les alertes automatiques
+  useNotificationAlerts();
+
   useEffect(() => {
-    checkAuthAndLoadData();
+    checkAuth();
+    fetchOrphanages();
+    fetchPartnerRequests();
   }, []);
 
-  const checkAuthAndLoadData = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate('/admin/auth');
-        return;
-      }
+  const checkAuth = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      navigate('/admin/auth');
+      return;
+    }
 
-      const { data: userData } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', session.user.id)
-        .single();
+    // Vérifier le rôle admin
+    const { data: userData } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single();
 
-      if (userData?.role !== 'admin') {
-        navigate('/admin/auth');
-        return;
-      }
-
-      setUserEmail(session.user.email || '');
-      await loadDashboardData();
-    } catch (error) {
-      console.error('Error loading dashboard:', error);
+    if (userData?.role !== 'admin') {
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les données du tableau de bord.",
+        title: "Accès refusé",
+        description: "Vous n'avez pas les droits d'administrateur.",
+        variant: "destructive",
+      });
+      navigate('/admin/auth');
+    }
+  };
+
+  const fetchOrphanages = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('orphanages')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les demandes.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setOrphanages(data || []);
+    } catch (error) {
+      toast({
+        title: "Erreur inattendue",
+        description: "Une erreur est survenue lors du chargement des données.",
         variant: "destructive",
       });
     } finally {
@@ -99,481 +129,851 @@ const AdminDashboardContent = () => {
     }
   };
 
-  const loadDashboardData = async () => {
+  const fetchPartnerRequests = async () => {
     try {
-      // Load orphanage requests
-      const { data: orphanages } = await supabase
-        .from('orphanages')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      // Load partner requests
-      const { data: partners } = await supabase
+      const { data, error } = await supabase
         .from('partner_requests')
         .select('*')
         .order('created_at', { ascending: false });
 
-      setOrphanageRequests(orphanages || []);
-      
-      // Type-safe mapping for partner requests
-      const typedPartners: PartnerRequest[] = (partners || []).map(partner => ({
-        ...partner,
-        status: partner.status as 'pending' | 'approved' | 'rejected'
-      }));
-      
-      setPartnerRequests(typedPartners);
+      if (error) {
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les demandes partenaires.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      // Calculate stats
-      const orphanageStats = (orphanages || []).reduce((acc, org) => {
-        if (org.legal_status === 'pending') acc.pendingOrphanages++;
-        else if (org.legal_status === 'verified') acc.verifiedOrphanages++;
-        else if (org.legal_status === 'rejected') acc.rejectedOrphanages++;
-        return acc;
-      }, { pendingOrphanages: 0, verifiedOrphanages: 0, rejectedOrphanages: 0 });
-
-      const partnerStats = typedPartners.reduce((acc, partner) => {
-        if (partner.status === 'pending') acc.pendingPartners++;
-        else if (partner.status === 'approved') acc.approvedPartners++;
-        else if (partner.status === 'rejected') acc.rejectedPartners++;
-        return acc;
-      }, { pendingPartners: 0, approvedPartners: 0, rejectedPartners: 0 });
-
-      setStats({ ...orphanageStats, ...partnerStats });
+      setPartnerRequests(data || []);
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      toast({
+        title: "Erreur inattendue",
+        description: "Une erreur est survenue lors du chargement des demandes partenaires.",
+        variant: "destructive",
+      });
     }
   };
 
-  // Animation variants
-  const pageVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2
+  const handleValidateOrphanage = async () => {
+    if (!selectedOrphanage) return;
+
+    setIsValidating(true);
+    try {
+      // Générer un mot de passe temporaire
+      const tempPassword = Math.random().toString(36).slice(-12);
+
+      // Créer le compte utilisateur
+      const { data: accountData, error: accountError } = await supabase.rpc('create_user_account', {
+        user_email: selectedOrphanage.email,
+        user_password: tempPassword,
+        user_role: 'orphelinat',
+        orphanage_id_param: selectedOrphanage.id
+      });
+
+      if (accountError) {
+        toast({
+          title: "Erreur de création de compte",
+          description: accountError.message,
+          variant: "destructive",
+        });
+        return;
       }
+
+      // Mettre à jour le statut de l'orphelinat
+      const { error: updateError } = await supabase
+        .from('orphanages')
+        .update({ legal_status: 'verified' })
+        .eq('id', selectedOrphanage.id);
+
+      if (updateError) {
+        toast({
+          title: "Erreur de mise à jour",
+          description: updateError.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Demande validée avec succès",
+        description: `Le compte a été créé pour ${selectedOrphanage.name}. Email: ${selectedOrphanage.email}, Mot de passe temporaire: ${tempPassword}`,
+      });
+
+      // Rafraîchir la liste
+      fetchOrphanages();
+      setShowDialog(false);
+      setSelectedOrphanage(null);
+
+    } catch (error) {
+      toast({
+        title: "Erreur inattendue",
+        description: "Une erreur est survenue lors de la validation.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsValidating(false);
     }
   };
 
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20, scale: 0.95 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      scale: 1,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut" as const
+  const handleRejectOrphanage = async () => {
+    if (!selectedOrphanage) return;
+
+    setIsValidating(true);
+    try {
+      const { error } = await supabase
+        .from('orphanages')
+        .update({ legal_status: 'rejected' })
+        .eq('id', selectedOrphanage.id);
+
+      if (error) {
+        toast({
+          title: "Erreur",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
       }
+
+      toast({
+        title: "Demande rejetée",
+        description: `La demande de ${selectedOrphanage.name} a été rejetée.`,
+      });
+
+      fetchOrphanages();
+      setShowDialog(false);
+      setSelectedOrphanage(null);
+    } catch (error) {
+      toast({
+        title: "Erreur inattendue",
+        description: "Une erreur est survenue lors du rejet.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsValidating(false);
     }
   };
 
-  const statsCardVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: { 
-      opacity: 1, 
-      scale: 1,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut" as const,
-        type: "spring" as const,
-        stiffness: 100
-      }
+  const handleApprovePartnerRequest = async () => {
+    if (!selectedPartnerRequest || !partnerPassword.trim()) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez saisir un mot de passe pour le compte partenaire.",
+        variant: "destructive",
+      });
+      return;
     }
+
+    setIsValidating(true);
+    try {
+      // Créer le compte utilisateur
+      const { data: newUser, error: createError } = await supabase.rpc('create_user_account', {
+        user_email: selectedPartnerRequest.email,
+        user_password: partnerPassword,
+        user_role: 'partner'
+      });
+
+      if (createError) throw createError;
+
+      // Mettre à jour le statut de la demande
+      const { error: updateError } = await supabase
+        .from('partner_requests')
+        .update({
+          status: 'approved',
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: (await supabase.auth.getSession()).data.session?.user.id
+        })
+        .eq('id', selectedPartnerRequest.id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Demande approuvée",
+        description: `Le compte partenaire a été créé pour ${selectedPartnerRequest.email}. Mot de passe: ${partnerPassword}`,
+      });
+
+      fetchPartnerRequests();
+      setShowPartnerDialog(false);
+      setSelectedPartnerRequest(null);
+      setPartnerPassword('');
+    } catch (error) {
+      console.error('Error approving request:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'approuver la demande.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  const handleRejectPartnerRequest = async () => {
+    if (!selectedPartnerRequest || !rejectionReason.trim()) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez saisir une raison de rejet.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsValidating(true);
+    try {
+      const { error } = await supabase
+        .from('partner_requests')
+        .update({
+          status: 'rejected',
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: (await supabase.auth.getSession()).data.session?.user.id,
+          rejection_reason: rejectionReason
+        })
+        .eq('id', selectedPartnerRequest.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Demande rejetée",
+        description: "La demande a été rejetée avec succès.",
+      });
+
+      fetchPartnerRequests();
+      setShowPartnerDialog(false);
+      setSelectedPartnerRequest(null);
+      setRejectionReason('');
+    } catch (error) {
+      console.error('Error rejecting request:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de rejeter la demande.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/admin/auth');
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="secondary" className="flex items-center gap-1"><Clock className="w-3 h-3" />En attente</Badge>;
+      case 'verified':
+      case 'approved':
+        return <Badge variant="default" className="flex items-center gap-1 bg-green-100 text-green-800"><CheckCircle className="w-3 h-3" />Validé</Badge>;
+      case 'rejected':
+        return <Badge variant="destructive" className="flex items-center gap-1"><XCircle className="w-3 h-3" />Rejeté</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const getOrganizationTypeLabel = (type: string) => {
+    const types: { [key: string]: string } = {
+      'ong': 'ONG',
+      'universite': 'Université',
+      'institut_recherche': 'Institut de recherche',
+      'organisme_gouvernemental': 'Organisme gouvernemental',
+      'organisation_internationale': 'Organisation internationale',
+      'autre': 'Autre'
+    };
+    return types[type] || type;
+  };
+
+  const handleDownloadDocument = async (documentData: any) => {
+    if (!documentData?.legal_document?.url) {
+      toast({
+        title: "Aucun document",
+        description: "Aucun document n'est disponible pour le téléchargement.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(documentData.legal_document.url);
+      if (!response.ok) throw new Error('Erreur de téléchargement');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = documentData.legal_document.file_name || 'document';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "Document téléchargé",
+        description: `Le document ${documentData.legal_document.file_name} a été téléchargé.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur de téléchargement",
+        description: "Impossible de télécharger le document.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePreviewDocument = (documentData: any) => {
+    if (!documentData?.legal_document?.url) {
+      toast({
+        title: "Aucun document",
+        description: "Aucun document n'est disponible pour la prévisualisation.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    window.open(documentData.legal_document.url, '_blank');
   };
 
   if (isLoading) {
     return (
-      <motion.div 
-        className="min-h-screen bg-gray-50 flex items-center justify-center"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="text-center space-y-4">
-          <motion.div 
-            className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          ></motion.div>
-          <motion.h3 
-            className="text-xl font-semibold text-gray-800"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            Chargement du tableau de bord administrateur...
-          </motion.h3>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-indigo-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-slate-600 dark:text-slate-400 font-medium">Chargement des données...</p>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
   return (
-    <motion.div 
-      className="min-h-screen bg-gray-50"
-      variants={pageVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      <AdminDashboardHeader userEmail={userEmail} />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-indigo-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      {/* Header */}
+      <AdminDashboardHeader />
 
+      {/* Main Content */}
       <main className="container mx-auto px-6 py-8">
-        <motion.div variants={cardVariants}>
-          <Tabs defaultValue="requests" className="space-y-8">
-            <TabsList className="grid w-full grid-cols-4 h-12 bg-white shadow-sm">
-              <TabsTrigger value="requests" className="flex items-center gap-2">
-                <Building className="w-4 h-4" />
-                Demandes d'inscription
-              </TabsTrigger>
-              <TabsTrigger value="partners" className="flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                Partenaires
-              </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex items-center gap-2">
-                <BarChart className="w-4 h-4" />
-                Analyses et statistiques
-              </TabsTrigger>
-              <TabsTrigger value="notifications" className="flex items-center gap-2">
-                <Bell className="w-4 h-4" />
-                Notifications
-              </TabsTrigger>
-            </TabsList>
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <Heart className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Tableau de bord administrateur</h2>
+              <p className="text-slate-600 dark:text-slate-400">
+                Gérez les demandes d'inscription et consultez les statistiques du système.
+              </p>
+            </div>
+          </div>
+        </div>
 
-            <AnimatePresence mode="wait">
-              {/* Orphanage Requests Tab */}
-              <TabsContent value="requests" className="space-y-6">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  {/* Stats Cards for Orphanages */}
-                  <motion.div 
-                    className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
-                    variants={pageVariants}
-                  >
-                    <motion.div variants={statsCardVariants} whileHover={{ scale: 1.02 }}>
-                      <Card className="hover:shadow-lg transition-shadow duration-300">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                          <CardTitle className="text-sm font-medium">En attente</CardTitle>
-                          <motion.div
-                            whileHover={{ rotate: 15 }}
-                            transition={{ type: "spring", stiffness: 300 }}
-                          >
-                            <Clock className="h-4 w-4 text-muted-foreground" />
-                          </motion.div>
-                        </CardHeader>
-                        <CardContent>
-                          <motion.div 
-                            className="text-2xl font-bold text-orange-600"
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.3, type: "spring" }}
-                          >
-                            {stats.pendingOrphanages}
-                          </motion.div>
-                          <p className="text-xs text-muted-foreground">
-                            Demandes à examiner
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
+        {/* Onglets principaux */}
+        <Tabs defaultValue="requests" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 shadow-lg">
+            <TabsTrigger 
+              value="requests" 
+              className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              <Heart className="w-4 h-4" />
+              Demandes d'inscription
+            </TabsTrigger>
+            <TabsTrigger 
+              value="partners" 
+              className="flex items-center gap-2 data-[state=active]:bg-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              <Users className="w-4 h-4" />
+              Partenaires
+            </TabsTrigger>
+            <TabsTrigger 
+              value="analytics" 
+              className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              <BarChart className="w-4 h-4" />
+              Analyses et statistiques
+            </TabsTrigger>
+            <TabsTrigger 
+              value="notifications" 
+              className="flex items-center gap-2 data-[state=active]:bg-orange-600 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              <Bell className="w-4 h-4" />
+              Notifications
+            </TabsTrigger>
+          </TabsList>
 
-                    <motion.div variants={statsCardVariants} whileHover={{ scale: 1.02 }}>
-                      <Card className="hover:shadow-lg transition-shadow duration-300">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                          <CardTitle className="text-sm font-medium">Validés</CardTitle>
-                          <motion.div
-                            whileHover={{ rotate: 15 }}
-                            transition={{ type: "spring", stiffness: 300 }}
-                          >
-                            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                          </motion.div>
-                        </CardHeader>
-                        <CardContent>
-                          <motion.div 
-                            className="text-2xl font-bold text-green-600"
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.4, type: "spring" }}
-                          >
-                            {stats.verifiedOrphanages}
-                          </motion.div>
-                          <p className="text-xs text-muted-foreground">
-                            Orphelinats approuvés
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
+          {/* Onglet des demandes d'inscription */}
+          <TabsContent value="requests" className="space-y-6">
+            {/* Statistics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="border-0 shadow-xl bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200/50 dark:border-yellow-800/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold text-yellow-700 dark:text-yellow-300 flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    En attente
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
+                    {orphanages.filter(o => o.legal_status === 'pending').length}
+                  </div>
+                  <p className="text-xs text-yellow-600/70 dark:text-yellow-400/70 mt-1">Demandes à traiter</p>
+                </CardContent>
+              </Card>
+              <Card className="border-0 shadow-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200/50 dark:border-green-800/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold text-green-700 dark:text-green-300 flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4" />
+                    Validés
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                    {orphanages.filter(o => o.legal_status === 'verified').length}
+                  </div>
+                  <p className="text-xs text-green-600/70 dark:text-green-400/70 mt-1">Centres approuvés</p>
+                </CardContent>
+              </Card>
+              <Card className="border-0 shadow-xl bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border-red-200/50 dark:border-red-800/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold text-red-700 dark:text-red-300 flex items-center gap-2">
+                    <XCircle className="w-4 h-4" />
+                    Rejetés
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-red-600 dark:text-red-400">
+                    {orphanages.filter(o => o.legal_status === 'rejected').length}
+                  </div>
+                  <p className="text-xs text-red-600/70 dark:text-red-400/70 mt-1">Demandes refusées</p>
+                </CardContent>
+              </Card>
+            </div>
 
-                    <motion.div variants={statsCardVariants} whileHover={{ scale: 1.02 }}>
-                      <Card className="hover:shadow-lg transition-shadow duration-300">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                          <CardTitle className="text-sm font-medium">Rejetés</CardTitle>
-                          <motion.div
-                            whileHover={{ rotate: 15 }}
-                            transition={{ type: "spring", stiffness: 300 }}
+            {/* Orphanages Table */}
+            <Card className="border-0 shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50">
+              <CardHeader className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 dark:from-blue-600/20 dark:to-purple-600/20">
+                <CardTitle className="text-slate-800 dark:text-slate-100">Liste des demandes</CardTitle>
+                <CardDescription className="text-slate-600 dark:text-slate-400">
+                  Cliquez sur une demande pour voir les détails et procéder à la validation.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-slate-50/50 dark:bg-slate-800/50">
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Nom du centre</TableHead>
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Province</TableHead>
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Contact</TableHead>
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Statut</TableHead>
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Date</TableHead>
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {orphanages.map((orphanage) => (
+                      <TableRow key={orphanage.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                        <TableCell className="font-medium text-slate-800 dark:text-slate-200">{orphanage.name}</TableCell>
+                        <TableCell className="text-slate-600 dark:text-slate-400">{orphanage.province}, {orphanage.city}</TableCell>
+                        <TableCell className="text-slate-600 dark:text-slate-400">{orphanage.contact_person}</TableCell>
+                        <TableCell>{getStatusBadge(orphanage.legal_status)}</TableCell>
+                        <TableCell className="text-slate-600 dark:text-slate-400">{new Date(orphanage.created_at).toLocaleDateString('fr-FR')}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedOrphanage(orphanage);
+                              setShowDialog(true);
+                            }}
+                            className="flex items-center gap-1 border-2 hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20"
                           >
-                            <XCircle className="h-4 w-4 text-muted-foreground" />
-                          </motion.div>
-                        </CardHeader>
-                        <CardContent>
-                          <motion.div 
-                            className="text-2xl font-bold text-red-600"
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.5, type: "spring" }}
-                          >
-                            {stats.rejectedOrphanages}
-                          </motion.div>
-                          <p className="text-xs text-muted-foreground">
-                            Demandes refusées
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  </motion.div>
+                            <Eye className="w-3 h-3" />
+                            Voir
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-                  {/* Orphanage Requests List */}
-                  <motion.div variants={cardVariants}>
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Demandes d'inscription des orphelinats</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <motion.div 
-                          className="space-y-4"
-                          variants={pageVariants}
-                        >
-                          {orphanageRequests.slice(0, 10).map((request, index) => (
-                            <motion.div
-                              key={request.id}
-                              variants={cardVariants}
-                              whileHover={{ scale: 1.01, backgroundColor: "rgba(0,0,0,0.02)" }}
-                              className="flex items-center justify-between p-4 border rounded-lg transition-colors"
-                            >
-                              <div>
-                                <h4 className="font-medium">{request.name}</h4>
-                                <p className="text-sm text-gray-500">
-                                  {request.contact_person} • {request.city}, {request.province}
-                                </p>
-                                <p className="text-xs text-gray-400">
-                                  {new Date(request.created_at).toLocaleDateString('fr-FR')}
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Badge 
-                                  variant={request.legal_status === 'pending' ? 'secondary' : 
-                                          request.legal_status === 'verified' ? 'default' : 'destructive'}
-                                >
-                                  {request.legal_status === 'pending' ? 'En attente' :
-                                   request.legal_status === 'verified' ? 'Validé' : 'Rejeté'}
-                                </Badge>
-                                {request.legal_status === 'pending' && (
-                                  <motion.div
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                  >
-                                    <Button size="sm">Examiner</Button>
-                                  </motion.div>
-                                )}
-                              </div>
-                            </motion.div>
-                          ))}
-                        </motion.div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                </motion.div>
-              </TabsContent>
+          {/* Onglet des partenaires */}
+          <TabsContent value="partners" className="space-y-6">
+            {/* Statistics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="border-0 shadow-xl bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200/50 dark:border-yellow-800/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold text-yellow-700 dark:text-yellow-300 flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    En attente
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
+                    {partnerRequests.filter(p => p.status === 'pending').length}
+                  </div>
+                  <p className="text-xs text-yellow-600/70 dark:text-yellow-400/70 mt-1">Demandes à traiter</p>
+                </CardContent>
+              </Card>
+              <Card className="border-0 shadow-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200/50 dark:border-green-800/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold text-green-700 dark:text-green-300 flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4" />
+                    Approuvés
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                    {partnerRequests.filter(p => p.status === 'approved').length}
+                  </div>
+                  <p className="text-xs text-green-600/70 dark:text-green-400/70 mt-1">Partenaires actifs</p>
+                </CardContent>
+              </Card>
+              <Card className="border-0 shadow-xl bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border-red-200/50 dark:border-red-800/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold text-red-700 dark:text-red-300 flex items-center gap-2">
+                    <XCircle className="w-4 h-4" />
+                    Rejetés
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-red-600 dark:text-red-400">
+                    {partnerRequests.filter(p => p.status === 'rejected').length}
+                  </div>
+                  <p className="text-xs text-red-600/70 dark:text-red-400/70 mt-1">Demandes refusées</p>
+                </CardContent>
+              </Card>
+            </div>
 
-              {/* Partners Tab */}
-              <TabsContent value="partners" className="space-y-6">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  {/* Stats Cards for Partners */}
-                  <motion.div 
-                    className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
-                    variants={pageVariants}
-                  >
-                    <motion.div variants={statsCardVariants} whileHover={{ scale: 1.02 }}>
-                      <Card className="hover:shadow-lg transition-shadow duration-300">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                          <CardTitle className="text-sm font-medium">En attente</CardTitle>
-                          <motion.div
-                            whileHover={{ rotate: 15 }}
-                            transition={{ type: "spring", stiffness: 300 }}
+            {/* Partners Table */}
+            <Card className="border-0 shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50">
+              <CardHeader className="bg-gradient-to-r from-purple-600/10 to-pink-600/10 dark:from-purple-600/20 dark:to-pink-600/20">
+                <CardTitle className="text-slate-800 dark:text-slate-100">Liste des demandes partenaires</CardTitle>
+                <CardDescription className="text-slate-600 dark:text-slate-400">
+                  Cliquez sur une demande pour voir les détails et procéder à la validation.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-slate-50/50 dark:bg-slate-800/50">
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Organisation</TableHead>
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Type</TableHead>
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Contact</TableHead>
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Statut</TableHead>
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Date</TableHead>
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {partnerRequests.map((request) => (
+                      <TableRow key={request.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                        <TableCell className="font-medium text-slate-800 dark:text-slate-200">{request.organization_name}</TableCell>
+                        <TableCell className="text-slate-600 dark:text-slate-400">{getOrganizationTypeLabel(request.organization_type)}</TableCell>
+                        <TableCell className="text-slate-600 dark:text-slate-400">{request.contact_person}</TableCell>
+                        <TableCell>{getStatusBadge(request.status)}</TableCell>
+                        <TableCell className="text-slate-600 dark:text-slate-400">{new Date(request.created_at).toLocaleDateString('fr-FR')}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedPartnerRequest(request);
+                              setShowPartnerDialog(true);
+                            }}
+                            className="flex items-center gap-1 border-2 hover:bg-purple-50 hover:border-purple-300 dark:hover:bg-purple-900/20"
                           >
-                            <Clock className="h-4 w-4 text-muted-foreground" />
-                          </motion.div>
-                        </CardHeader>
-                        <CardContent>
-                          <motion.div 
-                            className="text-2xl font-bold text-orange-600"
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.3, type: "spring" }}
-                          >
-                            {stats.pendingPartners}
-                          </motion.div>
-                          <p className="text-xs text-muted-foreground">
-                            Demandes de partenariat
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
+                            <Eye className="w-3 h-3" />
+                            Voir
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-                    <motion.div variants={statsCardVariants} whileHover={{ scale: 1.02 }}>
-                      <Card className="hover:shadow-lg transition-shadow duration-300">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                          <CardTitle className="text-sm font-medium">Approuvés</CardTitle>
-                          <motion.div
-                            whileHover={{ rotate: 15 }}
-                            transition={{ type: "spring", stiffness: 300 }}
-                          >
-                            <UserCheck className="h-4 w-4 text-muted-foreground" />
-                          </motion.div>
-                        </CardHeader>
-                        <CardContent>
-                          <motion.div 
-                            className="text-2xl font-bold text-green-600"
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.4, type: "spring" }}
-                          >
-                            {stats.approvedPartners}
-                          </motion.div>
-                          <p className="text-xs text-muted-foreground">
-                            Partenaires actifs
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
+          {/* Onglet des analyses et statistiques */}
+          <TabsContent value="analytics">
+            <AdminStatsDashboard />
+          </TabsContent>
 
-                    <motion.div variants={statsCardVariants} whileHover={{ scale: 1.02 }}>
-                      <Card className="hover:shadow-lg transition-shadow duration-300">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                          <CardTitle className="text-sm font-medium">Rejetés</CardTitle>
-                          <motion.div
-                            whileHover={{ rotate: 15 }}
-                            transition={{ type: "spring", stiffness: 300 }}
-                          >
-                            <UserX className="h-4 w-4 text-muted-foreground" />
-                          </motion.div>
-                        </CardHeader>
-                        <CardContent>
-                          <motion.div 
-                            className="text-2xl font-bold text-red-600"
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.5, type: "spring" }}
-                          >
-                            {stats.rejectedPartners}
-                          </motion.div>
-                          <p className="text-xs text-muted-foreground">
-                            Demandes refusées
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  </motion.div>
-
-                  {/* Partner Requests List */}
-                  <motion.div variants={cardVariants}>
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Demandes de partenariat</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <motion.div 
-                          className="space-y-4"
-                          variants={pageVariants}
-                        >
-                          {partnerRequests.slice(0, 10).map((request, index) => (
-                            <motion.div
-                              key={request.id}
-                              variants={cardVariants}
-                              whileHover={{ scale: 1.01, backgroundColor: "rgba(0,0,0,0.02)" }}
-                              className="flex items-center justify-between p-4 border rounded-lg transition-colors"
-                            >
-                              <div>
-                                <h4 className="font-medium">{request.organization_name}</h4>
-                                <p className="text-sm text-gray-500">
-                                  {request.contact_person} • {request.organization_type}
-                                </p>
-                                <p className="text-xs text-gray-400">
-                                  {new Date(request.created_at).toLocaleDateString('fr-FR')}
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Badge 
-                                  variant={request.status === 'pending' ? 'secondary' : 
-                                          request.status === 'approved' ? 'default' : 'destructive'}
-                                >
-                                  {request.status === 'pending' ? 'En attente' :
-                                   request.status === 'approved' ? 'Approuvé' : 'Rejeté'}
-                                </Badge>
-                                {request.status === 'pending' && (
-                                  <motion.div
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                  >
-                                    <Button size="sm">Examiner</Button>
-                                  </motion.div>
-                                )}
-                              </div>
-                            </motion.div>
-                          ))}
-                        </motion.div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                </motion.div>
-              </TabsContent>
-
-              {/* Analytics Tab */}
-              <TabsContent value="analytics" className="space-y-6">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <AdminStatsDashboard />
-                </motion.div>
-              </TabsContent>
-
-              {/* Notifications Tab */}
-              <TabsContent value="notifications" className="space-y-6">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <NotificationCenter />
-                </motion.div>
-              </TabsContent>
-            </AnimatePresence>
-          </Tabs>
-        </motion.div>
+          {/* Onglet des notifications */}
+          <TabsContent value="notifications">
+            <NotificationCenter />
+          </TabsContent>
+        </Tabs>
       </main>
-    </motion.div>
+
+      {/* Details Dialog for Orphanages */}
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Heart className="w-5 h-5" />
+              {selectedOrphanage?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Détails de la demande d'inscription
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedOrphanage && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    Localisation
+                  </h4>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedOrphanage.province}, {selectedOrphanage.city}
+                  </p>
+                  {selectedOrphanage.address && (
+                    <p className="text-sm text-muted-foreground">{selectedOrphanage.address}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Capacité</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedOrphanage.child_capacity || 'Non spécifiée'} enfants
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-medium flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  Contact
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  {selectedOrphanage.contact_person}
+                </p>
+                <p className="text-sm text-muted-foreground">{selectedOrphanage.email}</p>
+                {selectedOrphanage.phone && (
+                  <p className="text-sm text-muted-foreground flex items-center gap-2">
+                    <Phone className="w-3 h-3" />
+                    {selectedOrphanage.phone}
+                  </p>
+                )}
+              </div>
+
+              {selectedOrphanage.description && (
+                <div className="space-y-2">
+                  <h4 className="font-medium">Description</h4>
+                  <p className="text-sm text-muted-foreground">{selectedOrphanage.description}</p>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <h4 className="font-medium flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  Documents
+                </h4>
+                {selectedOrphanage.documents?.legal_document ? (
+                  <div className="space-y-3">
+                    <div className="p-3 bg-muted rounded-md">
+                      <p className="text-sm font-medium">Document légal fourni</p>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        {selectedOrphanage.documents.legal_document.file_name}
+                      </p>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePreviewDocument(selectedOrphanage.documents)}
+                          className="flex items-center gap-1"
+                        >
+                          <Eye className="w-3 h-3" />
+                          Prévisualiser
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDownloadDocument(selectedOrphanage.documents)}
+                          className="flex items-center gap-1"
+                        >
+                          <Download className="w-3 h-3" />
+                          Télécharger
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Aucun document fourni</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-medium">Statut actuel</h4>
+                {getStatusBadge(selectedOrphanage.legal_status)}
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2">
+            {selectedOrphanage?.legal_status === 'pending' && (
+              <>
+                <Button
+                  variant="destructive"
+                  onClick={handleRejectOrphanage}
+                  disabled={isValidating}
+                  className="flex items-center gap-2"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Rejeter
+                </Button>
+                <Button
+                  onClick={handleValidateOrphanage}
+                  disabled={isValidating}
+                  className="flex items-center gap-2"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  {isValidating ? "Validation..." : "Valider"}
+                </Button>
+              </>
+            )}
+            <Button variant="outline" onClick={() => setShowDialog(false)}>
+              Fermer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Details Dialog for Partner Requests */}
+      <Dialog open={showPartnerDialog} onOpenChange={setShowPartnerDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Building2 className="w-5 h-5" />
+              {selectedPartnerRequest?.organization_name}
+            </DialogTitle>
+            <DialogDescription>
+              Détails de la demande d'accès partenaire
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedPartnerRequest && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium">Type d'organisation</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {getOrganizationTypeLabel(selectedPartnerRequest.organization_type)}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Objectif</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedPartnerRequest.purpose}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-medium flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  Contact
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  {selectedPartnerRequest.contact_person}
+                </p>
+                <p className="text-sm text-muted-foreground">{selectedPartnerRequest.email}</p>
+                {selectedPartnerRequest.phone && (
+                  <p className="text-sm text-muted-foreground flex items-center gap-2">
+                    <Phone className="w-3 h-3" />
+                    {selectedPartnerRequest.phone}
+                  </p>
+                )}
+              </div>
+
+              {selectedPartnerRequest.description && (
+                <div className="space-y-2">
+                  <h4 className="font-medium">Description du projet</h4>
+                  <p className="text-sm text-muted-foreground">{selectedPartnerRequest.description}</p>
+                </div>
+              )}
+
+              {selectedPartnerRequest.status === 'rejected' && selectedPartnerRequest.rejection_reason && (
+                <div className="space-y-2">
+                  <h4 className="font-medium">Raison du rejet</h4>
+                  <p className="text-sm text-red-600">{selectedPartnerRequest.rejection_reason}</p>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <h4 className="font-medium">Statut actuel</h4>
+                {getStatusBadge(selectedPartnerRequest.status)}
+              </div>
+
+              {selectedPartnerRequest.status === 'pending' && (
+                <div className="space-y-4 border-t pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="partner-password">Mot de passe pour le compte partenaire</Label>
+                    <Input
+                      id="partner-password"
+                      type="password"
+                      value={partnerPassword}
+                      onChange={(e) => setPartnerPassword(e.target.value)}
+                      placeholder="Saisissez un mot de passe sécurisé"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="rejection-reason">Raison de rejet (optionnel)</Label>
+                    <Textarea
+                      id="rejection-reason"
+                      value={rejectionReason}
+                      onChange={(e) => setRejectionReason(e.target.value)}
+                      placeholder="Expliquez pourquoi cette demande est rejetée..."
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter className="gap-2">
+            {selectedPartnerRequest?.status === 'pending' && (
+              <>
+                <Button
+                  variant="destructive"
+                  onClick={handleRejectPartnerRequest}
+                  disabled={isValidating}
+                  className="flex items-center gap-2"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Rejeter
+                </Button>
+                <Button
+                  onClick={handleApprovePartnerRequest}
+                  disabled={isValidating}
+                  className="flex items-center gap-2"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  {isValidating ? "Approbation..." : "Approuver"}
+                </Button>
+              </>
+            )}
+            <Button variant="outline" onClick={() => setShowPartnerDialog(false)}>
+              Fermer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 
 const AdminDashboard = () => {
   return (
-    <NotificationProvider>
-      <AdminDashboardContent />
-    </NotificationProvider>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <NotificationProvider>
+        <AdminDashboardContent />
+      </NotificationProvider>
+    </ThemeProvider>
   );
 };
 
