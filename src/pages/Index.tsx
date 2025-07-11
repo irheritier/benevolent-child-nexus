@@ -1,4 +1,3 @@
-
 import { motion } from 'framer-motion';
 import { Header } from '@/components/landing/Header';
 import { HeroSection } from '@/components/landing/HeroSection';
@@ -8,11 +7,11 @@ import { TrustSection } from '@/components/landing/TrustSection';
 import { CTASection } from '@/components/landing/CTASection';
 import { Footer } from '@/components/landing/Footer';
 import { Helmet } from 'react-helmet-async';
-import { translations } from '@/data/translations';
+import { texts } from '@/data/translations';
 
 const Index = () => {
   const currentLanguage = 'fr'; // Default to French
-  const t = translations[currentLanguage];
+  const t = texts[currentLanguage];
 
   // Animation variants for page sections
   const pageVariants = {
@@ -148,7 +147,7 @@ const Index = () => {
           <Header 
             language={currentLanguage}
             setLanguage={() => {}}
-            adminLoginText={t.header.adminLogin}
+            adminLoginText={t.cta.adminLogin}
           />
         </motion.div>
 
@@ -160,11 +159,11 @@ const Index = () => {
           viewport={{ once: true, amount: 0.3 }}
         >
           <HeroSection 
-            title={t.hero.title}
-            subtitle={t.hero.subtitle}
-            heroDescription={t.hero.description}
-            registerText={t.hero.registerButton}
-            exploreMapText={t.hero.exploreButton}
+            title={t.title}
+            subtitle={t.subtitle}
+            heroDescription={t.heroDescription}
+            registerText={t.cta.register}
+            exploreMapText={t.cta.exploreMap}
           />
         </motion.div>
 
@@ -206,8 +205,8 @@ const Index = () => {
           viewport={{ once: true, amount: 0.3 }}
         >
           <CTASection 
-            registerText={t.hero.registerButton}
-            exploreMapText={t.hero.exploreButton}
+            registerText={t.cta.register}
+            exploreMapText={t.cta.exploreMap}
           />
         </motion.div>
 
