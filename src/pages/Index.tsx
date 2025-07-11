@@ -10,6 +10,7 @@ import { CTASection } from "@/components/landing/CTASection";
 import { Footer } from "@/components/landing/Footer";
 import { useLanguage } from "@/hooks/useLanguage";
 import { texts } from "@/data/translations";
+import { motion } from "framer-motion";
 
 interface PublicStats {
   total_orphanages: number;
@@ -87,41 +88,107 @@ const Index = () => {
     mealsPerDay: "Repas/jour (moy.)",
   };
 
+  // Animation variants for staggered sections
+  const sectionVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.8,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.3,
+        delayChildren: 0.2
+      }
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 dark:to-primary/10">
+    <motion.div 
+      className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 dark:to-primary/10"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       <Header 
         language={language} 
         setLanguage={setLanguage} 
         adminLoginText={t.cta.adminLogin} 
       />
       
-      <HeroSection 
-        title={t.title}
-        subtitle={t.subtitle}
-        heroDescription={t.heroDescription}
-        registerText={t.cta.register}
-        exploreMapText={t.cta.exploreMap}
-      />
+      <motion.div variants={sectionVariants}>
+        <HeroSection 
+          title={t.title}
+          subtitle={t.subtitle}
+          heroDescription={t.heroDescription}
+          registerText={t.cta.register}
+          exploreMapText={t.cta.exploreMap}
+        />
+      </motion.div>
       
-      <StatisticsSection 
-        publicStats={publicStats}
-        statsLoading={statsLoading}
-        impact={t.impact}
-        impactSubtitle={t.impactSubtitle}
-        stats={enhancedStatsLabels}
-      />
+      <motion.div 
+        variants={sectionVariants}
+        whileInView="visible"
+        initial="hidden"
+        viewport={{ once: true, amount: 0.5 }}
+      >
+        <StatisticsSection 
+          publicStats={publicStats}
+          statsLoading={statsLoading}
+          impact={t.impact}
+          impactSubtitle={t.impactSubtitle}
+          stats={enhancedStatsLabels}
+        />
+      </motion.div>
       
-      <FeaturesSection features={t.features} />
+      <motion.div 
+        variants={sectionVariants}
+        whileInView="visible"
+        initial="hidden"
+        viewport={{ once: true, amount: 0.5 }}
+      >
+        <FeaturesSection features={t.features} />
+      </motion.div>
       
-      <TrustSection trust={t.trust} />
+      <motion.div 
+        variants={sectionVariants}
+        whileInView="visible"
+        initial="hidden"
+        viewport={{ once: true, amount: 0.5 }}
+      >
+        <TrustSection trust={t.trust} />
+      </motion.div>
       
-      <CTASection 
-        registerText={t.cta.register}
-        exploreMapText={t.cta.exploreMap}
-      />
+      <motion.div 
+        variants={sectionVariants}
+        whileInView="visible"
+        initial="hidden"
+        viewport={{ once: true, amount: 0.5 }}
+      >
+        <CTASection 
+          registerText={t.cta.register}
+          exploreMapText={t.cta.exploreMap}
+        />
+      </motion.div>
       
-      <Footer footer={t.footer} />
-    </div>
+      <motion.div 
+        variants={sectionVariants}
+        whileInView="visible"
+        initial="hidden"
+        viewport={{ once: true, amount: 0.5 }}
+      >
+        <Footer footer={t.footer} />
+      </motion.div>
+    </motion.div>
   );
 };
 

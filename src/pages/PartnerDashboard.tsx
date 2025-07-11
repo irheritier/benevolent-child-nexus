@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,6 +14,7 @@ import { NotificationProvider } from '@/contexts/NotificationContext';
 import DashboardAnalyticsTabs from '@/components/admin/DashboardAnalyticsTabs';
 import DashboardStatsCards from '@/components/admin/DashboardStatsCards';
 import HealthDashboard from '@/components/admin/HealthDashboard';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface DashboardStats {
   totalOrphanages: number;
@@ -96,33 +96,107 @@ const PartnerDashboardContent = () => {
     }
   };
 
+  // Animation variants
+  const pageVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const headerVariants = {
+    hidden: { opacity: 0, y: -50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.8,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut"
+      }
+    }
+  };
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
+      <motion.div 
+        className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="text-center space-y-4">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <motion.div 
+            className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          ></motion.div>
           <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-200">Chargement du tableau de bord</h3>
-            <p className="text-slate-600 dark:text-slate-400">Accès aux données partenaires en cours...</p>
+            <motion.h3 
+              className="text-xl font-semibold text-slate-800 dark:text-slate-200"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              Chargement du tableau de bord
+            </motion.h3>
+            <motion.p 
+              className="text-slate-600 dark:text-slate-400"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              Accès aux données partenaires en cours...
+            </motion.p>
           </div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <motion.div 
+      className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900"
+      variants={pageVariants}
+      initial="hidden"
+      animate="visible"
+    >
       {/* Header moderne */}
-      <header className="border-b bg-white/90 backdrop-blur-lg supports-[backdrop-filter]:bg-white/70 dark:bg-slate-900/90 dark:supports-[backdrop-filter]:bg-slate-900/70 sticky top-0 z-50 shadow-lg border-primary/10 dark:border-slate-700/50">
+      <motion.header 
+        className="border-b bg-white/90 backdrop-blur-lg supports-[backdrop-filter]:bg-white/70 dark:bg-slate-900/90 dark:supports-[backdrop-filter]:bg-slate-900/70 sticky top-0 z-50 shadow-lg border-primary/10 dark:border-slate-700/50"
+        variants={headerVariants}
+      >
         <div className="container mx-auto px-6 py-5 flex items-center justify-between">
-          <div 
+          <motion.div 
             className="flex items-center space-x-4 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => navigate('/')}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             <div className="relative">
-              <div className="w-14 h-14 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 rounded-2xl flex items-center justify-center shadow-xl transform hover:scale-105 transition-transform duration-300">
+              <motion.div 
+                className="w-14 h-14 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 rounded-2xl flex items-center justify-center shadow-xl transform hover:scale-105 transition-transform duration-300"
+                whileHover={{ rotate: 5 }}
+              >
                 <Heart className="w-8 h-8 text-white" />
-              </div>
+              </motion.div>
               <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
                 <Shield className="w-3 h-3 text-white" />
               </div>
@@ -135,7 +209,7 @@ const PartnerDashboardContent = () => {
                 Portail Partenaire
               </p>
             </div>
-          </div>
+          </motion.div>
           
           <div className="flex items-center gap-6">
             <Badge variant="outline" className="hidden md:flex bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 px-4 py-2 rounded-xl font-medium">
@@ -144,134 +218,187 @@ const PartnerDashboardContent = () => {
             </Badge>
             <ThemeToggle />
             <NotificationBell />
-            <Button 
-              variant="outline" 
-              onClick={handleLogout} 
-              className="flex items-center gap-2 border-2 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 hover:border-red-300 dark:hover:border-red-700 font-semibold px-6 rounded-xl"
-            >
-              <LogOut className="w-4 h-4" />
-              Déconnexion
-            </Button>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button 
+                variant="outline" 
+                onClick={handleLogout} 
+                className="flex items-center gap-2 border-2 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 hover:border-red-300 dark:hover:border-red-700 font-semibold px-6 rounded-xl"
+              >
+                <LogOut className="w-4 h-4" />
+                Déconnexion
+              </Button>
+            </motion.div>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Main Content */}
       <main className="container mx-auto px-6 py-12">
         {/* Section d'en-tête avec animations */}
-        <div className="mb-12 text-center space-y-6">
+        <motion.div 
+          className="mb-12 text-center space-y-6"
+          variants={cardVariants}
+        >
           <div className="space-y-4">
-            <h2 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent animate-fade-in">
+            <motion.h2 
+              className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent animate-fade-in"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
               Tableau de bord partenaire
-            </h2>
-            <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
+            </motion.h2>
+            <motion.p 
+              className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            >
               Accédez aux statistiques complètes, analyses détaillées et notifications en temps réel 
               concernant les orphelinats et centres d'accueil de la République Démocratique du Congo.
-            </p>
+            </motion.p>
           </div>
           
           {/* Indicateurs visuels */}
-          <div className="flex justify-center items-center gap-8 mt-8">
+          <motion.div 
+            className="flex justify-center items-center gap-8 mt-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+          >
             <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+              <motion.div 
+                className="w-3 h-3 bg-green-500 rounded-full animate-pulse"
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              ></motion.div>
               <span className="text-sm font-medium">Données en temps réel</span>
             </div>
             <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
               <Shield className="w-4 h-4" />
               <span className="text-sm font-medium">Accès sécurisé</span>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Onglets avec design amélioré */}
-        <Tabs defaultValue="analytics" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-3 h-16 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 rounded-2xl p-2 shadow-lg">
-            <TabsTrigger 
-              value="analytics" 
-              className="flex items-center gap-3 h-12 rounded-xl font-semibold text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
-            >
-              <BarChart className="w-5 h-5" />
-              Analyses et statistiques
-            </TabsTrigger>
-            <TabsTrigger 
-              value="health" 
-              className="flex items-center gap-3 h-12 rounded-xl font-semibold text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
-            >
-              <Activity className="w-5 h-5" />
-              Santé
-            </TabsTrigger>
-            <TabsTrigger 
-              value="notifications" 
-              className="flex items-center gap-3 h-12 rounded-xl font-semibold text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
-            >
-              <Bell className="w-5 h-5" />
-              Notifications
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="analytics" className="space-y-8 animate-fade-in">
-            {/* Cartes de statistiques détaillées */}
-            {stats && (
-              <div className="mb-8">
-                <DashboardStatsCards 
-                  stats={{
-                    totalOrphanages: stats.totalOrphanages,
-                    totalChildren: stats.totalChildren,
-                    pendingOrphanages: stats.pendingOrphanages,
-                    verifiedOrphanages: stats.verifiedOrphanages,
-                    wellNourishedChildren: stats.wellNourishedChildren,
-                    malnourishedChildren: stats.malnourishedChildren,
-                    totalProvinces: stats.totalProvinces,
-                  }}
-                  isLoading={isLoading}
-                />
-              </div>
-            )}
+        <motion.div
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <Tabs defaultValue="analytics" className="space-y-8">
+            <TabsList className="grid w-full grid-cols-3 h-16 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 rounded-2xl p-2 shadow-lg">
+              <TabsTrigger 
+                value="analytics" 
+                className="flex items-center gap-3 h-12 rounded-xl font-semibold text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
+              >
+                <BarChart className="w-5 h-5" />
+                Analyses et statistiques
+              </TabsTrigger>
+              <TabsTrigger 
+                value="health" 
+                className="flex items-center gap-3 h-12 rounded-xl font-semibold text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
+              >
+                <Activity className="w-5 h-5" />
+                Santé
+              </TabsTrigger>
+              <TabsTrigger 
+                value="notifications" 
+                className="flex items-center gap-3 h-12 rounded-xl font-semibold text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
+              >
+                <Bell className="w-5 h-5" />
+                Notifications
+              </TabsTrigger>
+            </TabsList>
             
-            {/* Onglets d'analyse détaillés */}
-            <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-0 shadow-2xl rounded-3xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 text-white p-8">
-                <CardTitle className="text-2xl font-bold flex items-center gap-3">
-                  <TrendingUp className="w-7 h-7" />
-                  Analyses avancées et tendances
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-8">
-                <DashboardAnalyticsTabs />
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="health" className="space-y-8 animate-fade-in">
-            <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-0 shadow-2xl rounded-3xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white p-8">
-                <CardTitle className="text-2xl font-bold flex items-center gap-3">
-                  <Activity className="w-7 h-7" />
-                  Surveillance sanitaire
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-8">
-                <HealthDashboard />
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="notifications" className="animate-fade-in">
-            <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-0 shadow-2xl rounded-3xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 text-white p-8">
-                <CardTitle className="text-2xl font-bold flex items-center gap-3">
-                  <Bell className="w-7 h-7" />
-                  Centre de notifications
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-8">
-                <NotificationCenter />
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+            <AnimatePresence mode="wait">
+              <TabsContent value="analytics" className="space-y-8 animate-fade-in">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  {/* Cartes de statistiques détaillées */}
+                  {stats && (
+                    <div className="mb-8">
+                      <DashboardStatsCards 
+                        stats={{
+                          totalOrphanages: stats.totalOrphanages,
+                          totalChildren: stats.totalChildren,
+                          pendingOrphanages: stats.pendingOrphanages,
+                          verifiedOrphanages: stats.verifiedOrphanages,
+                          wellNourishedChildren: stats.wellNourishedChildren,
+                          malnourishedChildren: stats.malnourishedChildren,
+                          totalProvinces: stats.totalProvinces,
+                        }}
+                        isLoading={isLoading}
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Onglets d'analyse détaillés */}
+                  <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-0 shadow-2xl rounded-3xl overflow-hidden">
+                    <CardHeader className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 text-white p-8">
+                      <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                        <TrendingUp className="w-7 h-7" />
+                        Analyses avancées et tendances
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-8">
+                      <DashboardAnalyticsTabs />
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </TabsContent>
+              
+              <TabsContent value="health" className="space-y-8 animate-fade-in">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-0 shadow-2xl rounded-3xl overflow-hidden">
+                    <CardHeader className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white p-8">
+                      <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                        <Activity className="w-7 h-7" />
+                        Surveillance sanitaire
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-8">
+                      <HealthDashboard />
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </TabsContent>
+              
+              <TabsContent value="notifications" className="animate-fade-in">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-0 shadow-2xl rounded-3xl overflow-hidden">
+                    <CardHeader className="bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 text-white p-8">
+                      <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                        <Bell className="w-7 h-7" />
+                        Centre de notifications
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-8">
+                      <NotificationCenter />
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </TabsContent>
+            </AnimatePresence>
+          </Tabs>
+        </motion.div>
       </main>
-    </div>
+    </motion.div>
   );
 };
 

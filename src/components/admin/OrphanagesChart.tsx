@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { motion } from 'framer-motion';
 
 interface OrphanageData {
   month: string;
@@ -103,81 +103,136 @@ const OrphanagesChart = () => {
     },
   };
 
+  // Animation variants
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20, scale: 0.95 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.1
+      }
+    }
+  };
+
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="animate-pulse h-64 bg-gray-200 rounded"></div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="animate-pulse h-64 bg-gray-200 rounded"></div>
-          </CardContent>
-        </Card>
-      </div>
+      <motion.div 
+        className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div variants={cardVariants}>
+          <Card>
+            <CardContent className="p-6">
+              <div className="animate-pulse h-64 bg-gray-200 rounded"></div>
+            </CardContent>
+          </Card>
+        </motion.div>
+        <motion.div variants={cardVariants}>
+          <Card>
+            <CardContent className="p-6">
+              <div className="animate-pulse h-64 bg-gray-200 rounded"></div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <motion.div 
+      className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
       {/* Graphique en barres - Évolution mensuelle */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Évolution mensuelle des inscriptions</CardTitle>
-          <CardDescription>
-            Nombre d'orphelinats par statut et par mois
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="verified" stackId="a" fill={chartConfig.verified.color} />
-                <Bar dataKey="pending" stackId="a" fill={chartConfig.pending.color} />
-                <Bar dataKey="rejected" stackId="a" fill={chartConfig.rejected.color} />
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+      <motion.div variants={cardVariants} whileHover={{ scale: 1.02 }}>
+        <Card className="hover:shadow-lg transition-shadow duration-300">
+          <CardHeader>
+            <CardTitle>Évolution mensuelle des inscriptions</CardTitle>
+            <CardDescription>
+              Nombre d'orphelinats par statut et par mois
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <ChartContainer config={chartConfig}>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="verified" stackId="a" fill={chartConfig.verified.color} />
+                    <Bar dataKey="pending" stackId="a" fill={chartConfig.pending.color} />
+                    <Bar dataKey="rejected" stackId="a" fill={chartConfig.rejected.color} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </motion.div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Graphique en secteurs - Répartition des statuts */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Répartition par statut</CardTitle>
-          <CardDescription>
-            Distribution des orphelinats selon leur statut de validation
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={statusData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {statusData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <ChartTooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-    </div>
+      <motion.div variants={cardVariants} whileHover={{ scale: 1.02 }}>
+        <Card className="hover:shadow-lg transition-shadow duration-300">
+          <CardHeader>
+            <CardTitle>Répartition par statut</CardTitle>
+            <CardDescription>
+              Distribution des orphelinats selon leur statut de validation
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+            >
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={statusData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {statusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <ChartTooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </motion.div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </motion.div>
   );
 };
 

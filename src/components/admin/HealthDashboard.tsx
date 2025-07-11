@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import DiseaseStatsChart from './DiseaseStatsChart';
 import VaccinationStatsChart from './VaccinationStatsChart';
 import HealthAlertsPanel from './HealthAlertsPanel';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface HealthStats {
   totalHealthRecords: number;
@@ -131,107 +132,228 @@ const HealthDashboard = () => {
     }
   };
 
+  // Animation variants
+  const cardVariants = {
+    hidden: { opacity: 0, scale: 0.9, y: 20 },
+    visible: { 
+      opacity: 1, 
+      scale: 1, 
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <motion.div 
+        className="space-y-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
-            <Card key={i}>
-              <CardContent className="p-6">
-                <div className="animate-pulse">
-                  <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                  <div className="h-8 bg-muted rounded w-1/2"></div>
-                </div>
-              </CardContent>
-            </Card>
+            <motion.div key={i} variants={cardVariants}>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="animate-pulse">
+                    <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                    <div className="h-8 bg-muted rounded w-1/2"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <motion.div 
+      className="space-y-6"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
       {/* Cartes de statistiques */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Activity className="h-8 w-8 text-blue-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Dossiers Médicaux
-                </p>
-                <p className="text-2xl font-bold">{healthStats.totalHealthRecords}</p>
+      <motion.div 
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+        variants={containerVariants}
+      >
+        <motion.div variants={cardVariants} whileHover={{ scale: 1.02 }}>
+          <Card className="hover:shadow-lg transition-shadow duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <motion.div
+                  whileHover={{ rotate: 15 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <Activity className="h-8 w-8 text-blue-600" />
+                </motion.div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Dossiers Médicaux
+                  </p>
+                  <motion.p 
+                    className="text-2xl font-bold"
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.3, type: "spring" }}
+                  >
+                    {healthStats.totalHealthRecords}
+                  </motion.p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Heart className="h-8 w-8 text-red-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Maladies Diagnostiquées
-                </p>
-                <p className="text-2xl font-bold">{healthStats.totalDiseases}</p>
+        <motion.div variants={cardVariants} whileHover={{ scale: 1.02 }}>
+          <Card className="hover:shadow-lg transition-shadow duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <motion.div
+                  whileHover={{ rotate: 15 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <Heart className="h-8 w-8 text-red-600" />
+                </motion.div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Maladies Diagnostiquées
+                  </p>
+                  <motion.p 
+                    className="text-2xl font-bold"
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.4, type: "spring" }}
+                  >
+                    {healthStats.totalDiseases}
+                  </motion.p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Shield className="h-8 w-8 text-green-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Enfants Vaccinés
-                </p>
-                <p className="text-2xl font-bold">{healthStats.vaccinatedChildren}</p>
+        <motion.div variants={cardVariants} whileHover={{ scale: 1.02 }}>
+          <Card className="hover:shadow-lg transition-shadow duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <motion.div
+                  whileHover={{ rotate: 15 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <Shield className="h-8 w-8 text-green-600" />
+                </motion.div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Enfants Vaccinés
+                  </p>
+                  <motion.p 
+                    className="text-2xl font-bold"
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.5, type: "spring" }}
+                  >
+                    {healthStats.vaccinatedChildren}
+                  </motion.p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <AlertTriangle className="h-8 w-8 text-orange-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Cas Critiques
-                </p>
-                <p className="text-2xl font-bold">{healthStats.criticalCases}</p>
+        <motion.div variants={cardVariants} whileHover={{ scale: 1.02 }}>
+          <Card className="hover:shadow-lg transition-shadow duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <motion.div
+                  whileHover={{ rotate: 15 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <AlertTriangle className="h-8 w-8 text-orange-600" />
+                </motion.div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Cas Critiques
+                  </p>
+                  <motion.p 
+                    className="text-2xl font-bold"
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.6, type: "spring" }}
+                  >
+                    {healthStats.criticalCases}
+                  </motion.p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
 
       {/* Onglets pour les différents types de graphiques */}
-      <Tabs defaultValue="diseases" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="diseases">Maladies</TabsTrigger>
-          <TabsTrigger value="vaccination">Vaccination</TabsTrigger>
-          <TabsTrigger value="alerts">Alertes</TabsTrigger>
-        </TabsList>
+      <motion.div variants={cardVariants}>
+        <Tabs defaultValue="diseases" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="diseases">Maladies</TabsTrigger>
+            <TabsTrigger value="vaccination">Vaccination</TabsTrigger>
+            <TabsTrigger value="alerts">Alertes</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="diseases" className="space-y-4">
-          <DiseaseStatsChart />
-        </TabsContent>
+          <AnimatePresence mode="wait">
+            <TabsContent value="diseases" className="space-y-4">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+              >
+                <DiseaseStatsChart />
+              </motion.div>
+            </TabsContent>
 
-        <TabsContent value="vaccination" className="space-y-4">
-          <VaccinationStatsChart />
-        </TabsContent>
+            <TabsContent value="vaccination" className="space-y-4">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+              >
+                <VaccinationStatsChart />
+              </motion.div>
+            </TabsContent>
 
-        <TabsContent value="alerts" className="space-y-4">
-          <HealthAlertsPanel />
-        </TabsContent>
-      </Tabs>
-    </div>
+            <TabsContent value="alerts" className="space-y-4">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+              >
+                <HealthAlertsPanel />
+              </motion.div>
+            </TabsContent>
+          </AnimatePresence>
+        </Tabs>
+      </motion.div>
+    </motion.div>
   );
 };
 

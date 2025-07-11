@@ -1,6 +1,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, MapPin, Heart, Shield, Activity, TrendingUp, GraduationCap, Utensils, User, UserCheck } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface PublicStats {
   total_orphanages: number;
@@ -110,44 +111,103 @@ export const StatisticsSection = ({ publicStats, statsLoading, impact, impactSub
     }
   ];
 
+  // Animation variants for stats cards
+  const cardVariants = {
+    hidden: { 
+      opacity: 0, 
+      scale: 0.8,
+      y: 20
+    },
+    visible: { 
+      opacity: 1, 
+      scale: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
   return (
     <section className="py-12 sm:py-16 md:py-20 px-4 bg-gradient-to-r from-muted/30 via-background to-muted/30">
       <div className="container mx-auto">
-        <div className="text-center mb-12 sm:mb-16">
+        <motion.div 
+          className="text-center mb-12 sm:mb-16"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.5 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4 px-4">{impact}</h2>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
             {impactSubtitle}
           </p>
-        </div>
+        </motion.div>
         
         {statsLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
+          <motion.div 
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
             {[...Array(10)].map((_, i) => (
-              <Card key={i} className="animate-pulse border-0 shadow-lg">
-                <CardContent className="p-3 sm:p-4 md:p-6 text-center">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-xl mx-auto mb-3 sm:mb-4"></div>
-                  <div className="h-6 sm:h-8 bg-muted rounded mb-2"></div>
-                  <div className="h-3 sm:h-4 bg-muted rounded"></div>
-                </CardContent>
-              </Card>
+              <motion.div key={i} variants={cardVariants}>
+                <Card className="animate-pulse border-0 shadow-lg">
+                  <CardContent className="p-3 sm:p-4 md:p-6 text-center">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-xl mx-auto mb-3 sm:mb-4"></div>
+                    <div className="h-6 sm:h-8 bg-muted rounded mb-2"></div>
+                    <div className="h-3 sm:h-4 bg-muted rounded"></div>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
+          <motion.div 
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+          >
             {statsToShow.map((stat, index) => (
-              <Card key={index} className={`group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-gradient-to-br ${stat.bg} hover:scale-105`}>
-                <CardContent className="p-3 sm:p-4 md:p-6 text-center">
-                  <div className={`w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br ${stat.gradient} rounded-xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
-                    <stat.icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                  </div>
-                  <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1 sm:mb-2">
-                    {stat.value}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground font-medium">{stat.label}</p>
-                </CardContent>
-              </Card>
+              <motion.div key={index} variants={cardVariants}>
+                <Card className={`group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-gradient-to-br ${stat.bg} hover:scale-105`}>
+                  <CardContent className="p-3 sm:p-4 md:p-6 text-center">
+                    <motion.div 
+                      className={`w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br ${stat.gradient} rounded-xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform shadow-lg`}
+                      whileHover={{ rotate: 5 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
+                      <stat.icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                    </motion.div>
+                    <motion.h3 
+                      className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1 sm:mb-2"
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      {stat.value}
+                    </motion.h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground font-medium">{stat.label}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
       </div>
     </section>
