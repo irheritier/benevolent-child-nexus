@@ -1,11 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { auth } from '@/firebase';
-import { signOut } from 'firebase/auth';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from "@/components/ui/button";
 import { User, Settings, Home, Plus, LogOut } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
@@ -48,31 +47,39 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
-import { ModeToggle } from "@/components/ModeToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu"
-import { FileVideo, ImagePlus, MessageSquare } from "lucide-react"
-import { CardFooter } from "@radix-ui/react-card";
+import { FileVideo, ImagePlus, MessageSquare, Calendar as CalendarIcon } from "lucide-react"
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
-    const { currentUser, loading } = useAuth();
+    const [user, setUser] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
     const [isDarkTheme, setIsDarkTheme] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
     useEffect(() => {
-        if (!currentUser && !loading) {
-            navigate('/admin/auth');
-        }
-    }, [currentUser, loading, navigate]);
+        const getUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            setUser(user);
+            setLoading(false);
+            
+            if (!user) {
+                navigate('/admin/auth');
+            }
+        };
+        
+        getUser();
+    }, [navigate]);
 
     const handleSignOut = async () => {
         try {
-            await signOut(auth);
+            await supabase.auth.signOut();
             navigate('/admin/auth');
         } catch (error) {
             console.error("Failed to sign out", error);
@@ -83,7 +90,7 @@ const AdminDashboard = () => {
         return <div>Loading...</div>;
     }
 
-    if (!currentUser) {
+    if (!user) {
         return <div>Redirecting to login...</div>;
     }
 
@@ -122,7 +129,7 @@ const AdminDashboard = () => {
                             <AvatarFallback>CN</AvatarFallback>
                         </Avatar>
                         <div className="mt-4 text-center">
-                            <p className="text-lg font-semibold">{currentUser.email}</p>
+                            <p className="text-lg font-semibold">{user.email}</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Administrator</p>
                         </div>
                     </CardContent>
@@ -174,7 +181,7 @@ const AdminDashboard = () => {
                                         !selectedDate && "text-muted-foreground"
                                     )}
                                 >
-                                    <Calendar className="mr-2 h-4 w-4" />
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
                                     {selectedDate ? format(selectedDate, "PPP", { locale: enUS }) : <span>Pick a date</span>}
                                 </Button>
                             </PopoverTrigger>
@@ -201,7 +208,7 @@ const AdminDashboard = () => {
                         <h2 className="text-2xl font-semibold mb-6">Settings</h2>
                         <div className="flex items-center justify-between mb-4">
                             <Label htmlFor="theme-toggle">Dark Mode</Label>
-                            <ModeToggle />
+                            <ThemeToggle />
                         </div>
                         <Button variant="secondary" onClick={() => setIsSettingsOpen(false)}>Close</Button>
                     </div>

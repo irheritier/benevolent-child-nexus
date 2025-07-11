@@ -8,8 +8,12 @@ import { TrustSection } from '@/components/landing/TrustSection';
 import { CTASection } from '@/components/landing/CTASection';
 import { Footer } from '@/components/landing/Footer';
 import { Helmet } from 'react-helmet-async';
+import { translations } from '@/data/translations';
 
 const Index = () => {
+  const currentLanguage = 'fr'; // Default to French
+  const t = translations[currentLanguage];
+
   // Animation variants for page sections
   const pageVariants = {
     hidden: { opacity: 0 },
@@ -141,7 +145,11 @@ const Index = () => {
       >
         {/* Header avec animation d'entrée depuis le haut */}
         <motion.div variants={headerVariants}>
-          <Header />
+          <Header 
+            language={currentLanguage}
+            setLanguage={() => {}}
+            adminLoginText={t.header.adminLogin}
+          />
         </motion.div>
 
         {/* Hero Section avec animation fade-in + slide-up */}
@@ -151,7 +159,13 @@ const Index = () => {
           initial="hidden"
           viewport={{ once: true, amount: 0.3 }}
         >
-          <HeroSection />
+          <HeroSection 
+            title={t.hero.title}
+            subtitle={t.hero.subtitle}
+            heroDescription={t.hero.description}
+            registerText={t.hero.registerButton}
+            exploreMapText={t.hero.exploreButton}
+          />
         </motion.div>
 
         {/* Statistics Section avec animation retardée */}
@@ -171,7 +185,7 @@ const Index = () => {
           initial="hidden"
           viewport={{ once: true, amount: 0.3 }}
         >
-          <FeaturesSection />
+          <FeaturesSection features={t.features} />
         </motion.div>
 
         {/* Trust Section avec animation scale + fade */}
@@ -181,7 +195,7 @@ const Index = () => {
           initial="hidden"
           viewport={{ once: true, amount: 0.4 }}
         >
-          <TrustSection />
+          <TrustSection trust={t.trust} />
         </motion.div>
 
         {/* CTA Section avec animation dynamique */}
@@ -191,7 +205,10 @@ const Index = () => {
           initial="hidden"
           viewport={{ once: true, amount: 0.3 }}
         >
-          <CTASection />
+          <CTASection 
+            registerText={t.hero.registerButton}
+            exploreMapText={t.hero.exploreButton}
+          />
         </motion.div>
 
         {/* Footer avec animation finale */}
@@ -201,7 +218,7 @@ const Index = () => {
           initial="hidden"
           viewport={{ once: true, amount: 0.1 }}
         >
-          <Footer />
+          <Footer footer={t.footer} />
         </motion.div>
       </motion.div>
     </>

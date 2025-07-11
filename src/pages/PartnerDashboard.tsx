@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
@@ -167,121 +168,131 @@ const PartnerDashboard = () => {
         </motion.header>
 
         <motion.section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8" variants={itemVariants}>
-          <Card as={motion.div} variants={cardVariants}>
-            <CardHeader>
-              <CardTitle>Total des Enfants Pris en Charge</CardTitle>
-              <CardDescription>Nombre total d'enfants sous votre responsabilité.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <Skeleton className="h-5 w-20" />
-              ) : (
-                <div className="text-3xl font-bold">1,457</div>
-              )}
-              <Progress value={75} className="mt-4"/>
-              <div className="flex justify-between text-muted-foreground mt-2">
-                <span>0%</span>
-                <span>100%</span>
-              </div>
-            </CardContent>
-          </Card>
+          <motion.div variants={cardVariants}>
+            <Card>
+              <CardHeader>
+                <CardTitle>Total des Enfants Pris en Charge</CardTitle>
+                <CardDescription>Nombre total d'enfants sous votre responsabilité.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <Skeleton className="h-5 w-20" />
+                ) : (
+                  <div className="text-3xl font-bold">1,457</div>
+                )}
+                <Progress value={75} className="mt-4"/>
+                <div className="flex justify-between text-muted-foreground mt-2">
+                  <span>0%</span>
+                  <span>100%</span>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          <Card as={motion.div} variants={cardVariants}>
-            <CardHeader>
-              <CardTitle>Nouveaux Enfants ce Mois-ci</CardTitle>
-              <CardDescription>Nombre d'enfants ajoutés ce mois-ci.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <Skeleton className="h-5 w-20" />
-              ) : (
-                <div className="text-3xl font-bold">125</div>
-              )}
-              <Progress value={25} className="mt-4"/>
-              <div className="flex justify-between text-muted-foreground mt-2">
-                <span>0%</span>
-                <span>100%</span>
-              </div>
-            </CardContent>
-          </Card>
+          <motion.div variants={cardVariants}>
+            <Card>
+              <CardHeader>
+                <CardTitle>Nouveaux Enfants ce Mois-ci</CardTitle>
+                <CardDescription>Nombre d'enfants ajoutés ce mois-ci.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <Skeleton className="h-5 w-20" />
+                ) : (
+                  <div className="text-3xl font-bold">125</div>
+                )}
+                <Progress value={25} className="mt-4"/>
+                <div className="flex justify-between text-muted-foreground mt-2">
+                  <span>0%</span>
+                  <span>100%</span>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          <Card as={motion.div} variants={cardVariants}>
-            <CardHeader>
-              <CardTitle>Dons Reçus</CardTitle>
-              <CardDescription>Montant total des dons reçus ce mois-ci.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <Skeleton className="h-5 w-20" />
-              ) : (
-                <div className="text-3xl font-bold">$5,250</div>
-              )}
-              <Progress value={50} className="mt-4"/>
-              <div className="flex justify-between text-muted-foreground mt-2">
-                <span>0%</span>
-                <span>100%</span>
-              </div>
-            </CardContent>
-          </Card>
+          <motion.div variants={cardVariants}>
+            <Card>
+              <CardHeader>
+                <CardTitle>Dons Reçus</CardTitle>
+                <CardDescription>Montant total des dons reçus ce mois-ci.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <Skeleton className="h-5 w-20" />
+                ) : (
+                  <div className="text-3xl font-bold">$5,250</div>
+                )}
+                <Progress value={50} className="mt-4"/>
+                <div className="flex justify-between text-muted-foreground mt-2">
+                  <span>0%</span>
+                  <span>100%</span>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </motion.section>
 
         <motion.section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8" variants={itemVariants}>
-          <Card as={motion.div} variants={chartVariants}>
-            <CardHeader>
-              <CardTitle>Répartition des Enfants</CardTitle>
-              <CardDescription>Par type de vulnérabilité.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <Skeleton className="h-[300px]" />
-              ) : (
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={pieChartData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {pieChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              )}
-            </CardContent>
-          </Card>
+          <motion.div variants={chartVariants}>
+            <Card>
+              <CardHeader>
+                <CardTitle>Répartition des Enfants</CardTitle>
+                <CardDescription>Par type de vulnérabilité.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <Skeleton className="h-[300px]" />
+                ) : (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={pieChartData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {pieChartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          <Card as={motion.div} variants={chartVariants}>
-            <CardHeader>
-              <CardTitle>Tendances des Dons Mensuels</CardTitle>
-              <CardDescription>Évolution des dons au cours des derniers mois.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <Skeleton className="h-[300px]" />
-              ) : (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={barChartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="pv" fill="#8884d8" />
-                    <Bar dataKey="uv" fill="#82ca9d" />
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </CardContent>
-          </Card>
+          <motion.div variants={chartVariants}>
+            <Card>
+              <CardHeader>
+                <CardTitle>Tendances des Dons Mensuels</CardTitle>
+                <CardDescription>Évolution des dons au cours des derniers mois.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <Skeleton className="h-[300px]" />
+                ) : (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={barChartData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="pv" fill="#8884d8" />
+                      <Bar dataKey="uv" fill="#82ca9d" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
         </motion.section>
 
         <motion.section className="mb-8" variants={itemVariants}>
