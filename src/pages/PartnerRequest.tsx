@@ -53,6 +53,11 @@ const PartnerRequest = () => {
     setIsSubmitting(true);
 
     try {
+      // Validation simple côté client
+      if (!formData.email || !formData.organizationName) {
+        throw new Error("L'email et le nom de l'organisation sont obligatoires");
+      }
+
       const { data, error } = await supabase
         .from('partner_requests')
         .insert({
@@ -67,16 +72,19 @@ const PartnerRequest = () => {
         .select()
         .single();
 
-      if (error) throw error;
-
-      // Créer la notification
-      if (data) {
-        await createPartnerRequestNotification(data);
+      if (error) {
+        console.error('Supabase error:', error);
+        throw new Error(
+          error.code === '42501' 
+            ? "Problème de permissions. Veuillez nous contacter directement."
+            : "Erreur technique lors de l'envoi. Veuillez réessayer plus tard."
+        );
       }
 
       toast({
-        title: "Demande envoyée avec succès",
-        description: "Nous examinerons votre demande et vous contacterons bientôt.",
+        title: "Demande reçue !",
+        description: "Nous avons bien reçu votre demande et la traiterons sous 48h.",
+        duration: 5000
       });
 
       // Reset form
@@ -89,17 +97,31 @@ const PartnerRequest = () => {
         description: '',
         purpose: ''
       });
-    } catch (error) {
-      console.error('Error submitting partner request:', error);
+
+    } catch (error: any) {
+      console.error('Submission error:', error);
+      
       toast({
-        title: "Erreur",
-        description: "Impossible d'envoyer la demande. Veuillez réessayer.",
+        title: "Oups, problème !",
+        description: error.message || "Service temporairement indisponible. Veuillez réessayer plus tard.",
         variant: "destructive",
+        duration: 7000
       });
     } finally {
       setIsSubmitting(false);
     }
   };
+
+// Helper pour obtenir l'IP client (optionnel)
+async function getClientIP() {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    return data.ip;
+  } catch {
+    return null;
+  }
+}
 
   const getOrganizationIcon = (type: string) => {
     switch (type) {

@@ -181,7 +181,6 @@ const PartnerDashboardContent = () => {
       {/* Header moderne */}
       <motion.header 
         className="border-b bg-white/90 backdrop-blur-lg supports-[backdrop-filter]:bg-white/70 dark:bg-slate-900/90 dark:supports-[backdrop-filter]:bg-slate-900/70 sticky top-0 z-50 shadow-lg border-primary/10 dark:border-slate-700/50"
-        variants={headerVariants}
       >
         <div className="container mx-auto px-6 py-5 flex items-center justify-between">
           <motion.div 
@@ -237,7 +236,6 @@ const PartnerDashboardContent = () => {
         {/* Section d'en-tête avec animations */}
         <motion.div 
           className="mb-12 text-center space-y-6"
-          variants={cardVariants}
         >
           <div className="space-y-4">
             <motion.h2 
@@ -261,25 +259,25 @@ const PartnerDashboardContent = () => {
           
           {/* Indicateurs visuels */}
           <motion.div 
-            className="flex justify-center items-center gap-8 mt-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-          >
-            <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-              <motion.div 
-                className="w-3 h-3 bg-green-500 rounded-full animate-pulse"
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              ></motion.div>
-              <span className="text-sm font-medium">Données en temps réel</span>
-            </div>
-            <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
-              <Shield className="w-4 h-4" />
-              <span className="text-sm font-medium">Accès sécurisé</span>
-            </div>
+              className="flex justify-center items-center gap-8 mt-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+            >
+              <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                <motion.div 
+                  className="w-3 h-3 bg-green-500 rounded-full animate-pulse"
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                ></motion.div>
+                <span className="text-sm font-medium">Données en temps réel</span>
+              </div>
+              <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                <Shield className="w-4 h-4" />
+                <span className="text-sm font-medium">Accès sécurisé</span>
+              </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
 
         {/* Onglets avec design amélioré */}
         <motion.div

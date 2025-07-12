@@ -27,15 +27,28 @@ interface Orphanage {
   name: string;
   province: string;
   city: string;
+  province_id: string;
+  city_id: string;
+  address?: string;
   contact_person: string;
-  phone: string;
-  email: string;
-  description: string;
-  legal_status: 'pending' | 'verified' | 'rejected';
-  child_capacity: number;
-  address: string;
-  documents: any;
-  created_at: string;
+  phone?: string;
+  email?: string;
+  description?: string;
+  child_capacity?: number;
+  children_total?: number;
+  boys_count?: number;
+  girls_count?: number;
+  schooling_rate?: number;
+  annual_disease_rate?: number;
+  meals_per_day?: number;
+  legal_status?: 'pending' | 'verified' | 'rejected';
+  created_at?: string;
+  updated_at?: string;
+  documents?: any;
+  photo_url?: string;
+  location_gps?: any;
+  dhis2_orgunit_id?: string;
+  created_by?: string;
 }
 
 interface PartnerRequest {
