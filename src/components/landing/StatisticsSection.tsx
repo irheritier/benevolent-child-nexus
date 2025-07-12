@@ -2,6 +2,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, MapPin, Heart, Shield, Activity, TrendingUp, GraduationCap, Utensils, User, UserCheck } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState } from "react";
+import { useCounterAnimation } from "@/hooks/useCounterAnimation";
 
 interface PublicStats {
   total_orphanages: number;
@@ -37,7 +39,62 @@ interface StatisticsSectionProps {
   };
 }
 
+interface StatCardProps {
+  icon: React.ElementType;
+  value: number | string;
+  label: string;
+  gradient: string;
+  bg: string;
+  isVisible: boolean;
+  isPercentage?: boolean;
+  isDecimal?: boolean;
+}
+
+const StatCard = ({ icon: Icon, value, label, gradient, bg, isVisible, isPercentage = false, isDecimal = false }: StatCardProps) => {
+  const numericValue = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.]/g, '')) || 0 : value;
+  const animatedValue = useCounterAnimation({
+    end: numericValue,
+    duration: 2500,
+    isVisible
+  });
+
+  const formatValue = () => {
+    if (isPercentage) {
+      return `${animatedValue}%`;
+    }
+    if (isDecimal) {
+      return animatedValue.toFixed(1);
+    }
+    return animatedValue.toLocaleString();
+  };
+
+  return (
+    <Card className={`group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-gradient-to-br ${bg} hover:scale-105`}>
+      <CardContent className="p-3 sm:p-4 md:p-6 text-center">
+        <motion.div 
+          className={`w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br ${gradient} rounded-xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform shadow-lg`}
+          whileHover={{ rotate: 5 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+        </motion.div>
+        <motion.h3 
+          className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1 sm:mb-2"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          {formatValue()}
+        </motion.h3>
+        <p className="text-xs sm:text-sm text-muted-foreground font-medium">{label}</p>
+      </CardContent>
+    </Card>
+  );
+};
+
 export const StatisticsSection = ({ publicStats, statsLoading, impact, impactSubtitle, stats }: StatisticsSectionProps) => {
+  const [isVisible, setIsVisible] = useState(false);
+
   const statsToShow = [
     {
       icon: Users,
@@ -97,37 +154,21 @@ export const StatisticsSection = ({ publicStats, statsLoading, impact, impactSub
     },
     {
       icon: GraduationCap,
-      value: publicStats?.avg_schooling_rate ? `${Math.round(publicStats.avg_schooling_rate)}%` : '0%',
+      value: Math.round(publicStats?.avg_schooling_rate || 0),
       label: stats.schoolingRate || "Taux de scolarisation",
       gradient: "from-indigo-500 to-indigo-600",
-      bg: "from-background to-indigo-50/50 dark:to-indigo-950/20"
+      bg: "from-background to-indigo-50/50 dark:to-indigo-950/20",
+      isPercentage: true
     },
     {
       icon: Utensils,
-      value: publicStats?.avg_meals_per_day ? `${publicStats.avg_meals_per_day.toFixed(1)}` : '0',
+      value: publicStats?.avg_meals_per_day || 0,
       label: stats.mealsPerDay || "Repas/jour (moy.)",
       gradient: "from-orange-500 to-orange-600",
-      bg: "from-background to-orange-50/50 dark:to-orange-950/20"
+      bg: "from-background to-orange-50/50 dark:to-orange-950/20",
+      isDecimal: true
     }
   ];
-
-  // Animation variants for stats cards
-  const cardVariants = {
-    hidden: { 
-      opacity: 0, 
-      scale: 0.8,
-      y: 20
-    },
-    visible: { 
-      opacity: 1, 
-      scale: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut"
-      }
-    }
-  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -140,6 +181,22 @@ export const StatisticsSection = ({ publicStats, statsLoading, impact, impactSub
     }
   };
 
+  const cardVariants = {
+    hidden: { 
+      opacity: 0, 
+      scale: 0.8,
+      y: 20
+    },
+    visible: { 
+      opacity: 1, 
+      scale: 1,
+      y: 0,
+      transition: {
+        duration: 0.6
+      }
+    }
+  };
+
   return (
     <section className="py-12 sm:py-16 md:py-20 px-4 bg-gradient-to-r from-muted/30 via-background to-muted/30">
       <div className="container mx-auto">
@@ -148,7 +205,7 @@ export const StatisticsSection = ({ publicStats, statsLoading, impact, impactSub
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 0.8 }}
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4 px-4">{impact}</h2>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
@@ -182,29 +239,20 @@ export const StatisticsSection = ({ publicStats, statsLoading, impact, impactSub
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.3 }}
+            onViewportEnter={() => setIsVisible(true)}
           >
             {statsToShow.map((stat, index) => (
               <motion.div key={index} variants={cardVariants}>
-                <Card className={`group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-gradient-to-br ${stat.bg} hover:scale-105`}>
-                  <CardContent className="p-3 sm:p-4 md:p-6 text-center">
-                    <motion.div 
-                      className={`w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br ${stat.gradient} rounded-xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform shadow-lg`}
-                      whileHover={{ rotate: 5 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                    >
-                      <stat.icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                    </motion.div>
-                    <motion.h3 
-                      className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1 sm:mb-2"
-                      initial={{ opacity: 0 }}
-                      whileInView={{ opacity: 1 }}
-                      transition={{ delay: 0.2 }}
-                    >
-                      {stat.value}
-                    </motion.h3>
-                    <p className="text-xs sm:text-sm text-muted-foreground font-medium">{stat.label}</p>
-                  </CardContent>
-                </Card>
+                <StatCard
+                  icon={stat.icon}
+                  value={stat.value}
+                  label={stat.label}
+                  gradient={stat.gradient}
+                  bg={stat.bg}
+                  isVisible={isVisible}
+                  isPercentage={stat.isPercentage}
+                  isDecimal={stat.isDecimal}
+                />
               </motion.div>
             ))}
           </motion.div>
