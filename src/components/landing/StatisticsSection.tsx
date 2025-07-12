@@ -52,10 +52,15 @@ interface StatCardProps {
 
 const StatCard = ({ icon: Icon, value, label, gradient, bg, isVisible, isPercentage = false, isDecimal = false }: StatCardProps) => {
   const numericValue = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.]/g, '')) || 0 : value;
+  
+  // Détermine le step basé sur le type de valeur
+  const step = isDecimal ? 0.1 : 1;
+  
   const animatedValue = useCounterAnimation({
     end: numericValue,
     duration: 2500,
-    isVisible
+    isVisible,
+    step
   });
 
   const formatValue = () => {

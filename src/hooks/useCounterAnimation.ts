@@ -6,13 +6,15 @@ interface UseCounterAnimationProps {
   duration?: number;
   start?: number;
   isVisible?: boolean;
+  step?: number;
 }
 
 export const useCounterAnimation = ({
   end,
   duration = 2000,
   start = 0,
-  isVisible = true
+  isVisible = true,
+  step = 1
 }: UseCounterAnimationProps) => {
   const [count, setCount] = useState(start);
 
@@ -29,7 +31,10 @@ export const useCounterAnimation = ({
       
       // Utiliser une fonction d'easing pour un effet plus naturel
       const easeOutCubic = 1 - Math.pow(1 - percentage, 3);
-      const current = Math.floor(start + (end - start) * easeOutCubic);
+      const rawValue = start + (end - start) * easeOutCubic;
+      
+      // Arrondir à l'incrément spécifié
+      const current = Math.round(rawValue / step) * step;
       
       setCount(current);
 
@@ -45,7 +50,7 @@ export const useCounterAnimation = ({
         cancelAnimationFrame(animationFrame);
       }
     };
-  }, [end, duration, start, isVisible]);
+  }, [end, duration, start, isVisible, step]);
 
   return count;
 };
