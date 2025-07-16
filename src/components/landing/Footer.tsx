@@ -45,7 +45,7 @@ export const Footer = ({ footer }: FooterProps) => {
             <div className="space-y-3 sm:space-y-4">
               <div className="flex items-center gap-3 text-slate-400 text-sm sm:text-base">
                 <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400 flex-shrink-0" />
-                <span></span>
+                <span>contact@fcts.life</span>
               </div>
               <div className="flex items-center gap-3 text-slate-400 text-sm sm:text-base">
                 <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400 flex-shrink-0" />
