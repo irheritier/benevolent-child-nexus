@@ -304,10 +304,10 @@ const Register = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
           <div className="max-w-4xl lg:max-w-5xl mx-auto">
             <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-              <div className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-800/50 dark:to-purple-800/50 text-blue-800 dark:text-blue-200 rounded-full text-xs sm:text-sm font-semibold mb-4 sm:mb-6 border border-blue-200/50 dark:border-blue-700/50 shadow-lg">
+              {/* <div className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-800/50 dark:to-purple-800/50 text-blue-800 dark:text-blue-200 rounded-full text-xs sm:text-sm font-semibold mb-4 sm:mb-6 border border-blue-200/50 dark:border-blue-700/50 shadow-lg">
                 <Building2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
                 <span>Inscription Officielle</span>
-              </div>
+              </div> */}
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-800 dark:text-slate-100 mb-4 sm:mb-6 px-4">{t.title}</h1>
               <p className="text-base sm:text-lg lg:text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed px-4">{t.subtitle}</p>
             </div>
