@@ -55,14 +55,14 @@ export const HeroSection = ({ title, subtitle, heroDescription, registerText, ex
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center mb-8 sm:mb-10 md:mb-12 px-4">
             <Link to="/register" className="group w-full sm:w-auto">
               <Button size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 md:px-10 py-4 sm:py-5 md:py-6 h-12 sm:h-14 md:h-16 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 dark:from-blue-500 dark:to-purple-500 dark:hover:from-blue-600 dark:hover:to-purple-600 shadow-xl sm:shadow-2xl hover:shadow-2xl sm:hover:shadow-3xl transition-all duration-300 rounded-xl sm:rounded-2xl border-0 font-semibold">
-                <UserPlus className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 group-hover:scale-110 transition-transform" />
+                {/* <UserPlus className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 group-hover:scale-110 transition-transform" /> */}
                 <span className="text-sm sm:text-base md:text-lg">{registerText}</span>
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 sm:ml-3 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
             <Link to="/partner/request" className="w-full sm:w-auto">
               <Button variant="outline" size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 md:px-10 py-4 sm:py-5 md:py-6 h-12 sm:h-14 md:h-16 border-2 border-slate-300 hover:border-blue-400 hover:bg-blue-50 dark:border-slate-600 dark:hover:border-blue-500 dark:hover:bg-blue-950/30 rounded-xl sm:rounded-2xl font-semibold text-slate-700 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-400 transition-all duration-300">
-                <MapPin className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
+                {/* <MapPin className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" /> */}
                 <span className="text-sm sm:text-base md:text-lg">Demander l'accès partenaire</span>
               </Button>
             </Link>
