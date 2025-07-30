@@ -76,12 +76,12 @@ export const HeroSection = ({ title, subtitle, heroDescription, registerText, ex
                   <Star key={i} className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
                 ))}
               </div>
-              <span className="font-medium text-xs sm:text-sm">Certifié ISO 27001</span>
+              {/* <span className="font-medium text-xs sm:text-sm">Certifié ISO 27001</span> */}
             </div>
-            <div className="hidden sm:block w-px h-4 sm:h-6 bg-slate-300 dark:bg-slate-600"></div>
+            {/* <div className="hidden sm:block w-px h-4 sm:h-6 bg-slate-300 dark:bg-slate-600"></div> */}
             <span className="font-medium text-xs sm:text-sm text-center">Conforme RGPD</span>
-            <div className="hidden sm:block w-px h-4 sm:h-6 bg-slate-300 dark:bg-slate-600"></div>
-            <span className="font-medium text-xs sm:text-sm text-center">Partenaire Ministère de la Santé</span>
+            {/* <div className="hidden sm:block w-px h-4 sm:h-6 bg-slate-300 dark:bg-slate-600"></div> */}
+            {/* <span className="font-medium text-xs sm:text-sm text-center">Partenaire Ministère de la Santé</span> */}
           </div>
         </div>
       </div>
