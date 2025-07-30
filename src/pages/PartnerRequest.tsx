@@ -151,11 +151,11 @@ async function getClientIP() {
       <div className="container mx-auto px-6 py-12">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <div className="flex justify-center mb-6">
+          {/* <div className="flex justify-center mb-6">
             <div className="w-20 h-20 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl">
               <Users className="w-10 h-10 text-white" />
             </div>
-          </div>
+          </div> */}
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-4">
             Devenir Partenaire
           </h1>
