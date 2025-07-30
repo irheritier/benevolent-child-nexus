@@ -20,22 +20,15 @@ export const Footer = ({ footer }: FooterProps) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 md:gap-12 mb-8 sm:mb-12">
           {/* Brand section - Responsive */}
           <div className="md:col-span-2 lg:col-span-2">
-            <div className="flex items-center space-x-3 sm:space-x-4 mb-6 sm:mb-8">
-              <div className="relative">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-2xl">
-                  <Heart className="w-6 h-6 sm:w-9 sm:h-9 text-white" />
-                </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 sm:w-6 sm:h-6 bg-green-400 rounded-full flex items-center justify-center">
-                  <Shield className="w-2 h-2 sm:w-4 sm:h-4 text-white" />
-                </div>
-              </div>
-              <div>
-                <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                  FCTS
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-400 font-semibold tracking-wide">Find The Children To Save</p>
-                <p className="text-xs text-slate-500 mt-1">Protection • Suivi • Dignité</p>
-              </div>
+            <div className="flex items-center mb-6 sm:mb-8">
+              <img 
+                src="/lovable-uploads/feae4376-f2cd-46a4-a3ec-d82ff5875eab.png" 
+                alt="FCTS - Find The Children To Save"
+                className="h-12 sm:h-16 md:h-20 w-auto object-contain mb-2"
+              />
+            </div>
+            <div className="mb-4">
+              <p className="text-xs text-slate-400 mt-1">Protection • Suivi • Dignité</p>
             </div>
             <p className="text-slate-300 leading-relaxed mb-6 sm:mb-8 text-sm sm:text-base lg:text-lg max-w-md">
               {footer.aboutText}

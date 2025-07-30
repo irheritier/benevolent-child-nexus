@@ -40,25 +40,14 @@ export const Header = ({ language, setLanguage, adminLoginText }: HeaderProps) =
         <div className="flex items-center justify-between">
           {/* Logo - Responsive */}
           <div 
-            className="flex items-center space-x-2 sm:space-x-4 cursor-pointer hover:opacity-80 transition-opacity"
+            className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => navigate('/')}
           >
-            <div className="relative">
-              <div className="w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-600 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-xl transform hover:scale-105 transition-transform duration-300">
-                <Heart className="w-5 h-5 sm:w-8 sm:h-8 text-white" />
-              </div>
-              <div className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-3 h-3 sm:w-5 sm:h-5 bg-green-500 rounded-full flex items-center justify-center">
-                <Shield className="w-2 h-2 sm:w-3 sm:h-3 text-white" />
-              </div>
-            </div>
-            <div>
-              <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
-                FCTS
-              </h1>
-              <p className="text-[8px] sm:text-xs text-slate-600 dark:text-slate-400 font-semibold tracking-wide uppercase">
-                Find The Children To Save
-              </p>
-            </div>
+            <img 
+              src="/lovable-uploads/feae4376-f2cd-46a4-a3ec-d82ff5875eab.png" 
+              alt="FCTS - Find The Children To Save"
+              className="h-8 sm:h-12 md:h-14 w-auto object-contain"
+            />
           </div>
           
           {/* Desktop Navigation */}
