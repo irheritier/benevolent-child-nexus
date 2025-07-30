@@ -21,3 +21,6 @@ export const WhatsAppButton = ({ groupUrl }: WhatsAppButtonProps) => {
     </Button>
   );
 };
+
+// Export par défaut pour la compatibilité
+export default WhatsAppButton;
