@@ -13,7 +13,7 @@ interface HeroSectionProps {
 
 export const HeroSection = ({ title, subtitle, heroDescription, registerText, exploreMapText }: HeroSectionProps) => {
   return (
-    <section className="relative h-[calc(100vh-120px)] sm:h-[calc(100vh-100px)] md:h-[calc(100vh-90px)] lg:h-[calc(100vh-80px)] flex items-center px-4 overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-blue-950 dark:via-slate-900 dark:to-purple-950">
+    <section className="relative h-screen flex items-center px-4 overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-blue-950 dark:via-slate-900 dark:to-purple-950">
       {/* Background decorative elements - Responsive */}
       <div className="absolute inset-0">
         <div className="absolute top-10 sm:top-20 left-5 sm:left-10 w-32 h-32 sm:w-48 sm:h-48 md:w-72 md:h-72 bg-blue-200/30 dark:bg-blue-400/20 rounded-full blur-2xl sm:blur-3xl"></div>
