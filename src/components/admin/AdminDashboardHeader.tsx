@@ -21,7 +21,19 @@ export const AdminDashboardHeader = () => {
           className="flex items-center space-x-4 cursor-pointer hover:opacity-80 transition-opacity"
           onClick={() => navigate('/')}
         >
-          <div className="relative">
+
+          <div 
+            className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => navigate('/')}
+          >
+            <img 
+              src="/lovable-uploads/feae4376-f2cd-46a4-a3ec-d82ff5875eab.png" 
+              alt="FCTS - Find The Children To Save"
+              className="h-8 sm:h-12 md:h-14 w-auto object-contain"
+            />
+          </div>
+
+          {/* <div className="relative">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl transform hover:scale-105 transition-transform duration-300">
               <Heart className="w-7 h-7 text-white" />
             </div>
@@ -36,7 +48,8 @@ export const AdminDashboardHeader = () => {
             <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold tracking-wide uppercase">
               Administration
             </p>
-          </div>
+          </div> */}
+
         </div>
         <div className="flex items-center gap-4">
           <ThemeToggle />

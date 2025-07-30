@@ -167,12 +167,6 @@ const OrphanageAuth = () => {
             <CardHeader className="space-y-6 text-center pb-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white relative">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 to-purple-600/90"></div>
               <div className="relative z-10">
-                <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mx-auto shadow-lg backdrop-blur-sm">
-                  <Heart className="w-10 h-10 text-white" />
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-400 rounded-full flex items-center justify-center">
-                    <Shield className="w-3 h-3 text-white" />
-                  </div>
-                </div>
                 <div className="space-y-2">
                   <CardTitle className="text-3xl font-bold text-white">{t.welcome}</CardTitle>
                   <CardDescription className="text-blue-100 text-base">
@@ -269,8 +263,8 @@ const OrphanageAuth = () => {
 
       <Footer footer={{
         aboutText: language === 'fr' 
-          ? "FCS facilite le recensement et le suivi des enfants vulnérables dans les centres d'accueil à travers la RDC."
-          : "FCS facilitates the census and monitoring of vulnerable children in care centers across the DRC.",
+          ? "FCTS facilite le recensement et le suivi des enfants vulnérables dans les centres d'accueil à travers la RDC."
+          : "FCTS facilitates the census and monitoring of vulnerable children in care centers across the DRC.",
         links: language === 'fr' ? "Liens utiles" : "Useful Links",
         privacy: language === 'fr' ? "Politique de confidentialité" : "Privacy Policy",
         terms: language === 'fr' ? "Conditions d'utilisation" : "Terms of Service",

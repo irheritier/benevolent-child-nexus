@@ -180,7 +180,17 @@ const AdminAuthContent = () => {
       <header onClick={() => navigate('/')} className="relative z-10 bg-white/80 backdrop-blur-md border-b border-slate-200/50 dark:bg-slate-900/80 dark:border-slate-700/50 cursor-pointer ">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="relative">
+          <div 
+            className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => navigate('/')}
+          >
+            <img 
+              src="/lovable-uploads/feae4376-f2cd-46a4-a3ec-d82ff5875eab.png" 
+              alt="FCTS - Find The Children To Save"
+              className="h-8 sm:h-12 md:h-14 w-auto object-contain"
+            />
+          </div>
+            {/* <div className="relative">
               <div className="w-12 h-12 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl">
                 <Heart className="w-7 h-7 text-white" />
               </div>
@@ -195,7 +205,7 @@ const AdminAuthContent = () => {
               <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold tracking-wide uppercase">
                 Portail Administrateur
               </p>
-            </div>
+            </div> */}
           </div>
           <ThemeToggle />
         </div>
@@ -212,7 +222,7 @@ const AdminAuthContent = () => {
               Administration Sécurisée
             </h2>
             <p className="text-slate-600 dark:text-slate-400">
-              Accédez au portail d'administration FCS
+              Accédez au portail d'administration FCTS
             </p>
           </div>
 

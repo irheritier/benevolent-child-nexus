@@ -27,9 +27,6 @@ export const Footer = ({ footer }: FooterProps) => {
                 className="h-12 sm:h-16 md:h-20 w-auto object-contain mb-2"
               />
             </div>
-            <div className="mb-4">
-              <p className="text-xs text-slate-400 mt-1">Protection • Suivi • Dignité</p>
-            </div>
             <p className="text-slate-300 leading-relaxed mb-6 sm:mb-8 text-sm sm:text-base lg:text-lg max-w-md">
               {footer.aboutText}
             </p>

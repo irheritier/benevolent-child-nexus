@@ -189,7 +189,17 @@ const PartnerDashboardContent = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <div className="relative">
+          <div 
+            className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => navigate('/')}
+          >
+            <img 
+              src="/lovable-uploads/feae4376-f2cd-46a4-a3ec-d82ff5875eab.png" 
+              alt="FCTS - Find The Children To Save"
+              className="h-8 sm:h-12 md:h-14 w-auto object-contain"
+            />
+          </div>
+            {/* <div className="relative">
               <motion.div 
                 className="w-14 h-14 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 rounded-2xl flex items-center justify-center shadow-xl transform hover:scale-105 transition-transform duration-300"
                 whileHover={{ rotate: 5 }}
@@ -207,7 +217,7 @@ const PartnerDashboardContent = () => {
               <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold tracking-wide uppercase">
                 Portail Partenaire
               </p>
-            </div>
+            </div> */}
           </motion.div>
           
           <div className="flex items-center gap-6">

@@ -54,7 +54,7 @@ export const ConsentForm = ({ texts, consentChecked, onConsentChange }: ConsentF
           <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
         </div>
         <h3 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 mb-2 sm:mb-3">
-          Prêt à rejoindre FCS ?
+          Prêt à rejoindre FCTS ?
         </h3>
         <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base">
           Votre demande sera examinée par notre équipe dans les 48 heures.

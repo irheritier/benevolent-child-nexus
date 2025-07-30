@@ -53,7 +53,7 @@ const Register = () => {
   const texts = {
     fr: {
       title: "Inscription Centre d'Accueil",
-      subtitle: "Rejoignez le réseau FCS pour protéger et suivre les enfants vulnérables",
+      subtitle: "Rejoignez le réseau FCTS pour protéger et suivre les enfants vulnérables",
       backHome: "Retour à l'accueil",
       adminLoginText: "Connexion Admin",
       steps: {
@@ -116,7 +116,7 @@ const Register = () => {
     },
     en: {
       title: "Care Center Registration",
-      subtitle: "Join the FCS network to protect and monitor vulnerable children",
+      subtitle: "Join the FCTS network to protect and monitor vulnerable children",
       backHome: "Back to home",
       adminLoginText: "Admin Login",
       steps: {
