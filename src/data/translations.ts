@@ -68,7 +68,7 @@ export const texts = {
       malnourished: "Children Requiring Follow-up"
     },
     cta: {
-      register: "Create Care Center Account",
+      register: "Register your Center",
       adminLogin: "Administrator Login",
       exploreMap: "Explore Interactive Map"
     },
