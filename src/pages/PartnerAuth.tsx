@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Header } from '@/components/landing/Header';
 import { Footer } from '@/components/landing/Footer';
 import { useLanguage } from '@/hooks/useLanguage';
+import { WhatsAppButton } from '@/components/ui/WhatsAppButton';
 
 const PartnerAuth = () => {
   const [email, setEmail] = useState('');
@@ -284,6 +285,8 @@ const PartnerAuth = () => {
           ? "En collaboration avec les institutions gouvernementales et les organisations internationales."
           : "In collaboration with government institutions and international organizations."
       }} />
+      
+      <WhatsAppButton groupUrl="https://chat.whatsapp.com/JeoMIRb9t1146BW3VTNCrZ?mode=ac_t" />
     </div>
   );
 };

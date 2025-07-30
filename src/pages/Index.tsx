@@ -9,6 +9,7 @@ import { TrustSection } from "@/components/landing/TrustSection";
 import { CTASection } from "@/components/landing/CTASection";
 import { Footer } from "@/components/landing/Footer";
 import { useLanguage } from "@/hooks/useLanguage";
+import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { texts } from "@/data/translations";
 import { motion } from "framer-motion";
 import { Variants } from "framer-motion";
@@ -188,6 +189,8 @@ const Index = () => {
       >
         <Footer footer={t.footer} />
       </motion.div>
+      
+      <WhatsAppButton groupUrl="https://chat.whatsapp.com/JeoMIRb9t1146BW3VTNCrZ?mode=ac_t" />
     </motion.div>
   );
 };

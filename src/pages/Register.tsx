@@ -10,6 +10,7 @@ import { useFileUpload } from "@/hooks/useFileUpload";
 import { useOrphanageRegistration } from "@/hooks/useOrphanageRegistration";
 import { Footer } from "@/components/landing/Footer";
 import { Header } from "@/components/landing/Header";
+import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { RegistrationSteps } from "@/components/register/RegistrationSteps";
 import { BasicInfoForm } from "@/components/register/BasicInfoForm";
 import { DocumentUpload } from "@/components/register/DocumentUpload";
@@ -412,6 +413,8 @@ const Register = () => {
       </div>
 
       <Footer footer={footerTexts} />
+      
+      <WhatsAppButton groupUrl="https://chat.whatsapp.com/JeoMIRb9t1146BW3VTNCrZ?mode=ac_t" />
     </div>
   );
 };

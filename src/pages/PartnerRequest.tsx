@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Send, Users, Shield, Globe, Building2, GraduationCap, Search } from 'lucide-react';
 import { Header } from '@/components/landing/Header';
 import { useLanguage } from '@/hooks/useLanguage';
+import { WhatsAppButton } from '@/components/ui/WhatsAppButton';
 
 const PartnerRequest = () => {
   const [formData, setFormData] = useState({
@@ -370,6 +371,8 @@ async function getClientIP() {
           </p>
         </div>
       </div>
+      
+      <WhatsAppButton groupUrl="https://chat.whatsapp.com/JeoMIRb9t1146BW3VTNCrZ?mode=ac_t" />
     </div>
   );
 };
