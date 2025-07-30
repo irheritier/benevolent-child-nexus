@@ -17,7 +17,7 @@ export const texts = {
       malnourished: "Enfants nécessitant un suivi"
     },
     cta: {
-      register: "Créer un compte centre d'accueil",
+      register: "Enregistrer votre centre",
       adminLogin: "Connexion administrateur",
       exploreMap: "Explorer la carte interactive"
     },
