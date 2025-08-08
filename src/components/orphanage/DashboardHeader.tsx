@@ -68,7 +68,7 @@ const DashboardHeader = ({ user, orphanage, onLogout }: DashboardHeaderProps) =>
       <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-5 flex items-center justify-between">
         <div 
           className="flex items-center space-x-3 sm:space-x-4 cursor-pointer hover:opacity-80 transition-opacity"
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/orphelinat/dashboard')}
         >
           {/* <div className="relative">
             <div className="w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-600 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-xl transform hover:scale-105 transition-transform duration-300">
