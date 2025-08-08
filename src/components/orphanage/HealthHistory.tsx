@@ -139,12 +139,12 @@ const HealthHistory = ({ childId, childName, onAddRecord }: HealthHistoryProps) 
     <>
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Stethoscope className="w-5 h-5" />
-              Historique médical - {childName}
+              <span className="break-words">Historique médical - {childName}</span>
             </CardTitle>
-            <Button onClick={onAddRecord} size="sm">
+            <Button onClick={onAddRecord} size="sm" className="w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               Nouveau dossier
             </Button>
@@ -170,10 +170,10 @@ const HealthHistory = ({ childId, childName, onAddRecord }: HealthHistoryProps) 
                   key={record.id}
                   className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
                 >
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-muted-foreground" />
-                      <span className="font-medium">
+                      <span className="font-medium text-sm sm:text-base">
                         {format(new Date(record.date), 'PPP', { locale: fr })}
                       </span>
                     </div>
@@ -181,6 +181,7 @@ const HealthHistory = ({ childId, childName, onAddRecord }: HealthHistoryProps) 
                       variant="outline"
                       size="sm"
                       onClick={() => setSelectedRecord(record)}
+                      className="w-full sm:w-auto"
                     >
                       <Eye className="w-4 h-4 mr-2" />
                       Voir détails
@@ -188,10 +189,12 @@ const HealthHistory = ({ childId, childName, onAddRecord }: HealthHistoryProps) 
                   </div>
                   
                   <div className="space-y-3">
-                    {/* Statut vaccinal */}
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Vaccination:</span>
+                     {/* Statut vaccinal */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <div className="flex items-center gap-2">
+                        <Shield className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">Vaccination:</span>
+                      </div>
                       {getVaccinationStatusBadge(record)}
                     </div>
 
@@ -202,14 +205,14 @@ const HealthHistory = ({ childId, childName, onAddRecord }: HealthHistoryProps) 
                           <Activity className="w-4 h-4 text-muted-foreground" />
                           <span className="text-sm font-medium">Maladies diagnostiquées:</span>
                         </div>
-                        <div className="flex flex-wrap gap-2 ml-6">
-                          {record.child_diseases.map((childDisease) => (
-                            <div key={childDisease.id} className="flex items-center gap-1">
-                              <span className="text-sm">{childDisease.diseases.name}</span>
-                              {getSeverityBadge(childDisease.severity)}
-                            </div>
-                          ))}
-                        </div>
+                         <div className="flex flex-wrap gap-2 ml-0 sm:ml-6">
+                           {record.child_diseases.map((childDisease) => (
+                             <div key={childDisease.id} className="flex flex-col sm:flex-row sm:items-center gap-1 w-full sm:w-auto">
+                               <span className="text-sm font-medium">{childDisease.diseases.name}</span>
+                               {getSeverityBadge(childDisease.severity)}
+                             </div>
+                           ))}
+                         </div>
                       </div>
                     )}
 
