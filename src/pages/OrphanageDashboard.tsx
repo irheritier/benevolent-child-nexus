@@ -693,8 +693,8 @@ const OrphanageDashboard = () => {
 
       {/* Dialog pour ajouter un enfant */}
       <Dialog open={showAddChild} onOpenChange={setShowAddChild}>
-        {/* <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mx-4 sm:mx-auto">
-          <DialogHeader>
+        <DialogContent className=" max-h-[90vh] overflow-y-auto mx-4 sm:mx-auto">
+          {/*<DialogHeader>
             <DialogTitle className="text-lg sm:text-xl">Ajouter un nouvel enfant</DialogTitle>
           </DialogHeader> */}
           <AddChildForm
@@ -702,7 +702,7 @@ const OrphanageDashboard = () => {
             onSuccess={handleAddChildSuccess}
             onCancel={() => setShowAddChild(false)}
           />
-        {/* </DialogContent> */}
+        </DialogContent>
       </Dialog>
 
       {/* Dialog pour modifier un enfant */}

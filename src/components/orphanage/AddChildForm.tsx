@@ -57,10 +57,10 @@ const AddChildForm = ({ orphanageId, onSuccess, onCancel }: AddChildFormProps) =
             <ChildFormFields control={form.control} />
 
             <div className="flex justify-end space-x-4">
-              <Button type="button" variant="outline" onClick={onCancel}>
+              <Button className=" w-1/2 " type="button" variant="outline" onClick={onCancel}>
                 Annuler
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button className=" w-1/2 " type="submit" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
                     <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2" />
