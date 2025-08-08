@@ -90,12 +90,12 @@ const NutritionHistory = ({ childId, childName, onAddRecord }: NutritionHistoryP
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Scale className="w-5 h-5" />
-            Suivi nutritionnel - {childName}
+            <span className="break-words">Suivi nutritionnel - {childName}</span>
           </CardTitle>
-          <Button onClick={onAddRecord} size="sm">
+          <Button onClick={onAddRecord} size="sm" className="w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
             Nouvelle mesure
           </Button>
@@ -118,18 +118,18 @@ const NutritionHistory = ({ childId, childName, onAddRecord }: NutritionHistoryP
           <div className="space-y-4">
             {/* Résumé des dernières mesures */}
             {records.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted rounded-lg">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-muted rounded-lg">
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">Dernier poids</label>
-                  <p className="text-lg font-semibold">{records[0].weight_kg} kg</p>
+                  <p className="text-base sm:text-lg font-semibold">{records[0].weight_kg} kg</p>
                 </div>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">Dernière taille</label>
-                  <p className="text-lg font-semibold">{records[0].height_cm} cm</p>
+                  <p className="text-base sm:text-lg font-semibold">{records[0].height_cm} cm</p>
                 </div>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">IMC actuel</label>
-                  <p className="text-lg font-semibold">{records[0].bmi?.toFixed(1) || 'N/A'}</p>
+                  <p className="text-base sm:text-lg font-semibold">{records[0].bmi?.toFixed(1) || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">Statut</label>
@@ -144,31 +144,37 @@ const NutritionHistory = ({ childId, childName, onAddRecord }: NutritionHistoryP
             <div className="space-y-3">
               <h4 className="font-medium">Historique des mesures</h4>
               {records.map((record, index) => (
-                <div key={record.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-4">
+                <div key={record.id} className="border rounded-lg p-3 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
-                      <p className="font-medium">
+                      <p className="font-medium text-sm sm:text-base">
                         {format(new Date(record.date), 'PPP', { locale: fr })}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         {format(new Date(record.created_at), 'PPp', { locale: fr })}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm">
-                        {record.weight_kg} kg
-                      </span>
-                      {getWeightTrend(record.weight_kg, index)}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {record.height_cm} cm
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      IMC: {record.bmi?.toFixed(1) || 'N/A'}
+                    <div className="order-first sm:order-last">
+                      {getNutritionStatusBadge(record.nutrition_status)}
                     </div>
                   </div>
-                  <div>
-                    {getNutritionStatusBadge(record.nutrition_status)}
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">Poids:</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm">{record.weight_kg} kg</span>
+                        {getWeightTrend(record.weight_kg, index)}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">Taille:</span>
+                      <span className="text-sm text-muted-foreground">{record.height_cm} cm</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">IMC:</span>
+                      <span className="text-sm text-muted-foreground">{record.bmi?.toFixed(1) || 'N/A'}</span>
+                    </div>
                   </div>
                 </div>
               ))}
