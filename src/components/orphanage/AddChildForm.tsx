@@ -41,13 +41,13 @@ const AddChildForm = ({ orphanageId, onSuccess, onCancel }: AddChildFormProps) =
               <UserPlus className="w-5 h-5" />
               Ajouter un enfant
             </CardTitle>
-            <CardDescription>
+            {/* <CardDescription>
               Enregistrer un nouvel enfant dans votre centre d'accueil
-            </CardDescription>
+            </CardDescription> */}
           </div>
-          <Button variant="ghost" size="sm" onClick={onCancel}>
+          {/* <Button variant="ghost" size="sm" onClick={onCancel}>
             <X className="w-4 h-4" />
-          </Button>
+          </Button> */}
         </div>
       </CardHeader>
 
@@ -68,7 +68,7 @@ const AddChildForm = ({ orphanageId, onSuccess, onCancel }: AddChildFormProps) =
                   </>
                 ) : (
                   <>
-                    <UserPlus className="w-4 h-4 mr-2" />
+                    {/* <UserPlus className="w-4 h-4 mr-2" /> */}
                     Ajouter l'enfant
                   </>
                 )}
