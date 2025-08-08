@@ -20,6 +20,9 @@ import { useNotificationAlerts } from '@/hooks/useNotificationAlerts';
 import { AdminDashboardHeader } from '@/components/admin/AdminDashboardHeader';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { motion, Variants } from 'framer-motion';
+import { AdminDataTable } from '@/components/admin/AdminDataTable';
+import { createOrphanageColumns } from '@/components/admin/OrphanageTableColumns';
+import { createPartnerColumns } from '@/components/admin/PartnerTableColumns';
 
 
 interface Orphanage {
@@ -649,75 +652,16 @@ const AdminDashboardContent = () => {
             </motion.div>
 
             {/* Orphanages Table */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <Card className="border-0 shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50">
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <CardHeader className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 dark:from-blue-600/20 dark:to-purple-600/20">
-                    <CardTitle className="text-slate-800 dark:text-slate-100">Liste des demandes</CardTitle>
-                    <CardDescription className="text-slate-600 dark:text-slate-400">
-                      Cliquez sur une demande pour voir les détails et procéder à la validation.
-                    </CardDescription>
-                  </CardHeader>
-                </motion.div>
-                <CardContent className="p-0">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-slate-50/50 dark:bg-slate-800/50">
-                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Nom du centre</TableHead>
-                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Province</TableHead>
-                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Contact</TableHead>
-                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Statut</TableHead>
-                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Date</TableHead>
-                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {orphanages.map((orphanage, i) => (
-                        <motion.tr 
-                          key={orphanage.id} 
-                          className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors"
-                          variants={tableRowVariants}
-                          custom={i}
-                          initial="hidden"
-                          animate="visible"
-                          whileHover={{ scale: 1.01 }}
-                        >
-                          <TableCell className="font-medium text-slate-800 dark:text-slate-200">{orphanage.name}</TableCell>
-                          <TableCell className="text-slate-600 dark:text-slate-400">{orphanage.province}, {orphanage.city}</TableCell>
-                          <TableCell className="text-slate-600 dark:text-slate-400">{orphanage.contact_person}</TableCell>
-                          <TableCell>{getStatusBadge(orphanage.legal_status)}</TableCell>
-                          <TableCell className="text-slate-600 dark:text-slate-400">{new Date(orphanage.created_at).toLocaleDateString('fr-FR')}</TableCell>
-                          <TableCell>
-                            <motion.div whileHover={{ scale: 1.05 }}>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedOrphanage(orphanage);
-                                  setShowDialog(true);
-                                }}
-                                className="flex items-center gap-1 border-2 hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20"
-                              >
-                                <Eye className="w-3 h-3" />
-                                Voir
-                              </Button>
-                            </motion.div>
-                          </TableCell>
-                        </motion.tr>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </motion.div>
+            <AdminDataTable
+              columns={createOrphanageColumns((orphanage) => {
+                setSelectedOrphanage(orphanage);
+                setShowDialog(true);
+              })}
+              data={orphanages}
+              title="Liste des demandes d'inscription"
+              description="Cliquez sur une demande pour voir les détails et procéder à la validation."
+              searchPlaceholder="Rechercher un centre d'accueil..."
+            />
           </TabsContent>
 
           {/* Onglet des partenaires */}
@@ -884,79 +828,16 @@ const AdminDashboardContent = () => {
             </motion.div>
 
             {/* Partners Table */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <Card className="border-0 shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50">
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <CardHeader className="bg-gradient-to-r from-purple-600/10 to-pink-600/10 dark:from-purple-600/20 dark:to-pink-600/20">
-                    <CardTitle className="text-slate-800 dark:text-slate-100">Liste des demandes partenaires</CardTitle>
-                    <CardDescription className="text-slate-600 dark:text-slate-400">
-                      Cliquez sur une demande pour voir les détails et procéder à la validation.
-                    </CardDescription>
-                  </CardHeader>
-                </motion.div>
-                <CardContent className="p-0">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-slate-50/50 dark:bg-slate-800/50">
-                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Organisation</TableHead>
-                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Type</TableHead>
-                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Contact</TableHead>
-                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Statut</TableHead>
-                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Date</TableHead>
-                        <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {partnerRequests.map((request, i) => (
-                        <motion.tr 
-                          key={request.id}
-                          className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors"
-                          custom={i}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{
-                            delay: i * 0.05,
-                            type: "spring",
-                            stiffness: 100
-                          }}
-                          whileHover={{ scale: 1.01 }}
-                        >
-                          <TableCell className="font-medium text-slate-800 dark:text-slate-200">{request.organization_name}</TableCell>
-                          <TableCell className="text-slate-600 dark:text-slate-400">{getOrganizationTypeLabel(request.organization_type)}</TableCell>
-                          <TableCell className="text-slate-600 dark:text-slate-400">{request.contact_person}</TableCell>
-                          <TableCell>{getStatusBadge(request.status)}</TableCell>
-                          <TableCell className="text-slate-600 dark:text-slate-400">{new Date(request.created_at).toLocaleDateString('fr-FR')}</TableCell>
-                          <TableCell>
-                            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedPartnerRequest(request);
-                                  setShowPartnerDialog(true);
-                                }}
-                                className="flex items-center gap-1 border-2 hover:bg-purple-50 hover:border-purple-300 dark:hover:bg-purple-900/20"
-                              >
-                                <Eye className="w-3 h-3" />
-                                Voir
-                              </Button>
-                            </motion.div>
-                          </TableCell>
-                        </motion.tr>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </motion.div>
+            <AdminDataTable
+              columns={createPartnerColumns((partner) => {
+                setSelectedPartnerRequest(partner);
+                setShowPartnerDialog(true);
+              })}
+              data={partnerRequests}
+              title="Liste des demandes partenaires"
+              description="Cliquez sur une demande pour voir les détails et procéder à la validation."
+              searchPlaceholder="Rechercher une organisation..."
+            />
           </TabsContent>
 
           {/* Onglet des analyses et statistiques */}
