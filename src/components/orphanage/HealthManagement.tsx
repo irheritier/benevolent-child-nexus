@@ -100,10 +100,10 @@ const HealthManagement = ({ children }: HealthManagementProps) => {
 
       {/* Add Health Record Dialog */}
       <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          {/* <DialogHeader>
             <DialogTitle>Nouveau dossier médical</DialogTitle>
-          </DialogHeader>
+          </DialogHeader> */}
           {selectedChild && (
             <HealthRecordForm
               childId={selectedChild.id}
