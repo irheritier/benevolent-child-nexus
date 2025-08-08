@@ -68,7 +68,7 @@ const DashboardHeader = ({ user, orphanage, onLogout }: DashboardHeaderProps) =>
       <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-5 flex items-center justify-between">
         <div 
           className="flex items-center space-x-3 sm:space-x-4 cursor-pointer hover:opacity-80 transition-opacity"
-          onClick={() => navigate('/orphelinat/dashboard')}
+          onClick={() => navigate('/')}
         >
           {/* <div className="relative">
             <div className="w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-600 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-xl transform hover:scale-105 transition-transform duration-300">
@@ -82,9 +82,9 @@ const DashboardHeader = ({ user, orphanage, onLogout }: DashboardHeaderProps) =>
             <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent truncate">
               {orphanage.name}
             </h1>
-            <p className="text-xs font-semibold tracking-wide uppercase text-slate-600 dark:text-slate-400 truncate">
+            {/* <p className="text-xs font-semibold tracking-wide uppercase text-slate-600 dark:text-slate-400 truncate">
               {orphanage.city}, {orphanage.province}
-            </p>
+            </p> */}
           </div>
         </div>
         
