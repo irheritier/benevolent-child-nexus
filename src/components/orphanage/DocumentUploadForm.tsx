@@ -116,8 +116,8 @@ const DocumentUploadForm = ({ orphanageId, onSuccess, onCancel }: DocumentUpload
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Upload className="w-5 h-5" />
+        <CardTitle className="flex items-center justify-center gap-2">
+          {/* <Upload className="w-5 h-5" /> */}
           Ajouter un document
         </CardTitle>
       </CardHeader>
@@ -250,15 +250,16 @@ const DocumentUploadForm = ({ orphanageId, onSuccess, onCancel }: DocumentUpload
               <Button
                 type="submit"
                 disabled={isSubmitting || isUploading || !uploadedFile}
-                className="flex-1"
+                className="w-1/2"
               >
-                {isSubmitting ? "Ajout en cours..." : "Ajouter le document"}
+                {isSubmitting ? "Ajout en cours..." : "Ajouter"}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={onCancel}
                 disabled={isSubmitting}
+                className="w-1/2"
               >
                 Annuler
               </Button>

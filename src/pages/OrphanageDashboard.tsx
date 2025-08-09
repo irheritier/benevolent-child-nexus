@@ -693,7 +693,7 @@ const OrphanageDashboard = () => {
 
       {/* Dialog pour ajouter un enfant */}
       <Dialog open={showAddChild} onOpenChange={setShowAddChild}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] overflow-y-auto  ">
           {/*<DialogHeader>
             <DialogTitle className="text-lg sm:text-xl">Ajouter un nouvel enfant</DialogTitle>
           </DialogHeader> */}

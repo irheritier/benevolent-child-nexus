@@ -248,10 +248,10 @@ const HealthHistory = ({ childId, childName, onAddRecord }: HealthHistoryProps) 
 
       {/* Detail Dialog */}
       <Dialog open={!!selectedRecord} onOpenChange={(open) => !open && setSelectedRecord(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-10">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto p-10">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Stethoscope className="w-5 h-5" />
+            <DialogTitle className="flex items-center justify-center gap-2">
+              {/* <Stethoscope className="w-5 h-5" /> */}
               Dossier médical du {selectedRecord && format(new Date(selectedRecord.date), 'PPP', { locale: fr })}
             </DialogTitle>
           </DialogHeader>

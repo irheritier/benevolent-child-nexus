@@ -117,9 +117,9 @@ const NutritionRecordForm = ({ childId, childName, onSuccess, onCancel }: Nutrit
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Scale className="w-5 h-5" />
-          Nouvelles données nutritionnelles - {childName}
+        <CardTitle className="flex items-center justify-center text-center gap-2">
+          {/* <Scale className="w-5 h-5" /> */}
+          Nouvelles données nutritionnelles<br /> {childName}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -217,7 +217,7 @@ const NutritionRecordForm = ({ childId, childName, onSuccess, onCancel }: Nutrit
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1"
+              className="w-1/2"
             >
               {isSubmitting ? "Enregistrement..." : "Enregistrer"}
             </Button>
@@ -226,6 +226,7 @@ const NutritionRecordForm = ({ childId, childName, onSuccess, onCancel }: Nutrit
               variant="outline"
               onClick={onCancel}
               disabled={isSubmitting}
+              className="w-1/2"
             >
               Annuler
             </Button>

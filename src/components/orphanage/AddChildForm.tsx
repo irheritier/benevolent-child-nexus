@@ -35,10 +35,10 @@ const AddChildForm = ({ orphanageId, onSuccess, onCancel }: AddChildFormProps) =
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-center">
           <div>
             <CardTitle className="flex items-center gap-2">
-              <UserPlus className="w-5 h-5" />
+              {/* <UserPlus className="w-5 h-5" /> */}
               Ajouter un enfant
             </CardTitle>
             {/* <CardDescription>

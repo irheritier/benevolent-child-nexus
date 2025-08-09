@@ -111,9 +111,9 @@ const HealthRecordForm = ({ childId, childName, onSuccess, onCancel }: HealthRec
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Stethoscope className="w-5 h-5" />
-          Nouveau dossier médical - {childName}
+        <CardTitle className="flex items-center justify-center gap-2 text-center">
+          {/* <Stethoscope className="w-5 h-5" /> */}
+          Nouveau dossier médical <br /> {childName}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -218,7 +218,7 @@ const HealthRecordForm = ({ childId, childName, onSuccess, onCancel }: HealthRec
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1"
+              className="w-1/2"
             >
               {isSubmitting ? "Enregistrement..." : "Enregistrer"}
             </Button>
@@ -227,6 +227,7 @@ const HealthRecordForm = ({ childId, childName, onSuccess, onCancel }: HealthRec
               variant="outline"
               onClick={onCancel}
               disabled={isSubmitting}
+              className="w-1/2"
             >
               Annuler
             </Button>
