@@ -143,9 +143,9 @@ const DocumentsManagement = ({ orphanageId, orphanageName, children }: Documents
       {/* Dialog pour ajouter un document */}
       <Dialog open={showAddDocument} onOpenChange={setShowAddDocument}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+          {/* <DialogHeader>
             <DialogTitle>Ajouter un document légal</DialogTitle>
-          </DialogHeader>
+          </DialogHeader> */}
           <DocumentUploadForm
             orphanageId={orphanageId}
             onSuccess={handleAddDocumentSuccess}

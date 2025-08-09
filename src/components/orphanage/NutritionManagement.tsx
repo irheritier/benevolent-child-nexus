@@ -100,9 +100,9 @@ const NutritionManagement = ({ children }: NutritionManagementProps) => {
       {/* Add Nutrition Record Dialog */}
       <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+          {/* <DialogHeader>
             <DialogTitle>Nouvelles données nutritionnelles</DialogTitle>
-          </DialogHeader>
+          </DialogHeader> */}
           {selectedChild && (
             <NutritionRecordForm
               childId={selectedChild.id}
