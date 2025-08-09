@@ -377,7 +377,7 @@ const OrphanageDashboard = () => {
                     <motion.div variants={fadeIn}>
                       <div>
                         <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">Nom du centre</label>
-                        <p className="font-bold text-lg sm:text-xl text-slate-800 dark:text-slate-200 break-words">{orphanage.name}</p>
+                        <p className="font-bold md:text-lg sm:text-xl text-slate-800 dark:text-slate-200 break-words">{orphanage.name}</p>
                       </div>
                     </motion.div>
                     
