@@ -133,12 +133,12 @@ const DocumentsHistory = ({ orphanageId, orphanageName, onAddDocument, refreshTr
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <FileText className="w-5 h-5" />
-            Documents légaux - {orphanageName}
+            <span className="truncate">Documents légaux - {orphanageName}</span>
           </CardTitle>
-          <Button onClick={onAddDocument} size="sm">
+          <Button onClick={onAddDocument} size="sm" className="w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
             Ajouter un document
           </Button>
@@ -161,28 +161,28 @@ const DocumentsHistory = ({ orphanageId, orphanageName, onAddDocument, refreshTr
           <div className="space-y-4">
             {documents.map((doc) => (
               <div key={doc.id} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                   <div className="flex items-center gap-3">
                     <FileText className="w-5 h-5 text-muted-foreground" />
-                    <div>
-                      <h4 className="font-medium">{doc.title}</h4>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-medium truncate">{doc.title}</h4>
                       <p className="text-sm text-muted-foreground">
-                        Ajouté le {format(new Date(doc.created_at), 'PPP', { locale: fr })}
+                        Ajouté le {format(new Date(doc.created_at), 'dd/MM/yyyy', { locale: fr })}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     {getDocumentTypeBadge(doc.document_type)}
                     {doc.expiry_date && isExpired(doc.expiry_date) && (
                       <Badge className="bg-red-100 text-red-800 border-red-200">
                         <AlertTriangle className="w-3 h-3 mr-1" />
-                        Expiré
+                        <span className="hidden sm:inline">Expiré</span>
                       </Badge>
                     )}
                     {doc.expiry_date && isExpiringSoon(doc.expiry_date) && !isExpired(doc.expiry_date) && (
                       <Badge className="bg-orange-100 text-orange-800 border-orange-200">
                         <AlertTriangle className="w-3 h-3 mr-1" />
-                        Expire bientôt
+                        <span className="hidden sm:inline">Expire bientôt</span>
                       </Badge>
                     )}
                   </div>
@@ -192,22 +192,23 @@ const DocumentsHistory = ({ orphanageId, orphanageName, onAddDocument, refreshTr
                   <p className="text-sm text-muted-foreground mb-3">{doc.description}</p>
                 )}
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span>{doc.file_name}</span>
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground">
+                    <span className="truncate">{doc.file_name}</span>
                     <span>{formatFileSize(doc.file_size)}</span>
                     {doc.expiry_date && (
                       <div className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
-                        <span>Expire le {format(new Date(doc.expiry_date), 'PPP', { locale: fr })}</span>
+                        <span>Expire le {format(new Date(doc.expiry_date), 'dd/MM/yyyy', { locale: fr })}</span>
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => window.open(doc.file_url, '_blank')}
+                      className="flex-1 sm:flex-none"
                     >
                       <Eye className="w-4 h-4 mr-1" />
                       Voir
@@ -221,9 +222,11 @@ const DocumentsHistory = ({ orphanageId, orphanageName, onAddDocument, refreshTr
                         link.download = doc.file_name;
                         link.click();
                       }}
+                      className="flex-1 sm:flex-none"
                     >
                       <Download className="w-4 h-4 mr-1" />
-                      Télécharger
+                      <span className="hidden sm:inline">Télécharger</span>
+                      <span className="sm:hidden">DL</span>
                     </Button>
                     <Button
                       variant="outline"
