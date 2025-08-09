@@ -79,7 +79,7 @@ const HealthManagement = ({ children }: HealthManagementProps) => {
             {!selectedChildId && children.length > 0 && (
               <div className="text-center py-8">
                 <Stethoscope className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">Sélectionnez un enfant</h3>
+                <h3 className="md:text-lg font-medium mb-2">Sélectionnez un enfant</h3>
                 <p className="text-muted-foreground">
                   Choisissez un enfant dans la liste pour voir son historique médical.
                 </p>

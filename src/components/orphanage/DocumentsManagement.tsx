@@ -96,7 +96,7 @@ const DocumentsManagement = ({ orphanageId, orphanageName, children }: Documents
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{orphanageName}</div>
+            <div className="md:text-2xl font-bold">{orphanageName}</div>
             <p className="text-xs text-muted-foreground mt-1">
               {children.length} enfant(s) hébergé(s)
             </p>
@@ -110,7 +110,7 @@ const DocumentsManagement = ({ orphanageId, orphanageName, children }: Documents
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Gestion centralisée</div>
+            <div className=" md:text-2xl font-bold">Gestion centralisée</div>
             <p className="text-xs text-muted-foreground mt-1">
               Agrément, statuts, autorisations
             </p>
@@ -124,7 +124,7 @@ const DocumentsManagement = ({ orphanageId, orphanageName, children }: Documents
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Protégée</div>
+            <div className="md:text-2xl font-bold">Protégée</div>
             <p className="text-xs text-muted-foreground mt-1">
               Stockage sécurisé et confidentiel
             </p>

@@ -568,7 +568,7 @@ const OrphanageDashboard = () => {
                         whileHover={{ x: 5 }}
                         transition={{ type: "spring", stiffness: 300 }}
                       >
-                        <CardTitle className="text-lg sm:text-xl font-bold">Suivi médical et nutritionnel</CardTitle>
+                        <CardTitle className="md:text-lg sm:text-xl font-bold">Suivi médical et nutritionnel</CardTitle>
                       </motion.div>
                       <motion.div
                         initial={{ opacity: 0 }}
@@ -613,7 +613,7 @@ const OrphanageDashboard = () => {
                         whileHover={{ x: 5 }}
                         transition={{ type: "spring", stiffness: 300 }}
                       >
-                        <CardTitle className="text-lg sm:text-xl font-bold">Suivi nutritionnel</CardTitle>
+                        <CardTitle className="md:text-lg sm:text-xl font-bold">Suivi nutritionnel</CardTitle>
                       </motion.div>
                       <motion.div
                         initial={{ opacity: 0 }}
