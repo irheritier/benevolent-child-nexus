@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "imports": {
+      "./schema.json": "./schema.json"
+    }
+  }
+}

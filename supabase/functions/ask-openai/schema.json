@@ -1,0 +1,118 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Database Schema for Vulnerable Children System",
+  "description": "Schéma JSON pour l'analyse des données des orphelinats et enfants vulnérables en RDC /* GPT-4: Prioriser les indicateurs de santé et localisation géographique. */",
+  "tables": {
+    "children": {
+      "description": "Enregistrements des enfants pris en charge /* GPT-4: Utiliser estimated_age si birth_date est NULL. */",
+      "columns": {
+        "id": { 
+          "type": "uuid", 
+          "description": "Identifiant unique de l'enfant /* GPT-4: Toujours utiliser pour les JOIN avec d'autres tables. */" 
+        },
+        "orphanage_id": { 
+          "type": "uuid", 
+          "description": "Référence à l'orphelinat d'accueil /* GPT-4: JOIN obligatoire avec la table orphanages pour les analyses géographiques. */" 
+        },
+        "parent_status": { 
+          "type": "enum", 
+          "values": ["both_deceased", "mother_only", "father_only", "abandoned", "other"],
+          "description": "Statut parental /* GPT-4: 'abandoned' = nécessite un suivi psychosocial urgent. */" 
+        }
+      }
+    },
+    "orphanages": {
+      "description": "Centres d'accueil pour enfants vulnérables /* GPT-4: Vérifier legal_status='verified' pour les stats officielles. */",
+      "columns": {
+        "province": { 
+          "type": "text", 
+          "description": "Province (ex: Kinshasa) /* GPT-4: Toujours filtrer par province avant ville pour de meilleures performances. */" 
+        },
+        "child_capacity": { 
+          "type": "integer", 
+          "description": "Capacité d'accueil maximale /* GPT-4: Comparer avec children_total pour calculer le taux d'occupation. */" 
+        }
+      }
+    },
+    "child_diseases": {
+      "description": "Maladies diagnostiquées chez les enfants /* GPT-4: JOIN obligatoire avec diseases pour les noms complets. */",
+      "columns": {
+        "severity": { 
+          "type": "enum", 
+          "values": ["mild", "moderate", "severe"],
+          "description": "Gravité du diagnostic /* GPT-4: 'severe' = alerte médicale prioritaire. */" 
+        }
+      }
+    },
+    "diseases": {
+      "description": "Référentiel des maladies connues /* GPT-4: Filtrer par is_active=true pour les analyses courantes. */",
+      "columns": {
+        "name": { 
+          "type": "text", 
+          "description": "Nom de la maladie (ex: Paludisme) /* GPT-4: Utiliser LIKE '%palud%' pour inclure les variantes orthographiques. */" 
+        }
+      }
+    },
+    "health_records": {
+      "description": "Dossiers médicaux des enfants /* GPT-4: vaccination_status est un JSONB - utiliser jsonb_path_query. */",
+      "columns": {
+        "vaccination_status": { 
+          "type": "jsonb", 
+          "description": "Format: {'vaccines': ['BCG'], 'last_updated': '2023-01-01'} /* GPT-4: Exemple de requête pour vérifier le BCG: jsonb_path_exists(vaccination_status, '$.vaccines[*] ? (@ == \"BCG\")') */" 
+        }
+      }
+    },
+    "nutrition_records": {
+      "description": "Suivi nutritionnel des enfants /* GPT-4: nutrition_status='severe_malnutrition' déclenche une alerte nutritionnelle. */",
+      "columns": {
+        "nutrition_status": { 
+          "type": "enum", 
+          "values": ["normal", "moderate_malnutrition", "severe_malnutrition", "overweight"],
+          "description": "Statut nutritionnel /* GPT-4: Prioriser les cas 'severe_malnutrition' dans les rapports. */" 
+        }
+      }
+    },
+    "cities": {
+      "description": "Référentiel géographique des villes /* GPT-4: is_capital=true pour les analyses régionales clés. */",
+      "columns": {
+        "is_capital": { 
+          "type": "boolean", 
+          "description": "Si c'est une capitale provinciale /* GPT-4: Kinshasa est toujours is_capital=true. */" 
+        }
+      }
+    }
+  },
+  "relationships": [
+    {
+      "from": "children.orphanage_id",
+      "to": "orphanages.id",
+      "description": "Un enfant est lié à un orphelinat /* GPT-4: JOIN implicite pour toutes les requêtes géographiques. */"
+    },
+    {
+      "from": "child_diseases.disease_id",
+      "to": "diseases.id",
+      "description": "Lien maladie-diagnostic /* GPT-4: Toujours inclure diseases.name dans les résultats. */"
+    }
+  ],
+  "key_metrics": {
+    "orphanages": [
+      "children_total /* GPT-4: Comparer avec child_capacity pour détecter les surcharges. */",
+      "schooling_rate"
+    ],
+    "health": [
+      "vaccination_status /* GPT-4: Vérifier la présence des vaccins: BCG, Polio, Rougeole. */",
+      "chronic_conditions"
+    ]
+  },
+  "gpt_instructions": {
+    "general_rules": [
+      "/* GPT-4: Ne jamais suggérer de DELETE/UPDATE/MODIFY. */",
+      "/* GPT-4: Pour les dates, utiliser CURRENT_DATE - INTERVAL '1 year' pour les analyses temporelles. */",
+      "/* GPT-4: Toujours limiter les résultats à 100 lignes sauf demande contraire. */"
+    ],
+    "examples": {
+      "requete_enfant_maladie": "SELECT c.full_name, d.name FROM children c JOIN child_diseases cd ON c.id = cd.child_id JOIN diseases d ON cd.disease_id = d.id WHERE cd.severity = 'severe'",
+      "requete_vaccination": "SELECT COUNT(*) FROM health_records WHERE jsonb_path_exists(vaccination_status, '$.vaccines[*] ? (@ == \"BCG\")')"
+    }
+  }
+}
