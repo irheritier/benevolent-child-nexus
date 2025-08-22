@@ -12,9 +12,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Eye, CheckCircle, XCircle, Clock, Mail, Phone, MapPin, FileText, Download, BarChart, Bell, Users, Building2, Heart } from 'lucide-react';
+import { Eye, CheckCircle, XCircle, Clock, Mail, Phone, MapPin, FileText, Download, BarChart, Bell, Users, Building2, Heart, MessageSquare } from 'lucide-react';
 import AdminStatsDashboard from '@/components/admin/AdminStatsDashboard';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
+import AdminChatbot from '@/components/admin/AdminChatbot';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { useNotificationAlerts } from '@/hooks/useNotificationAlerts';
 import { AdminDashboardHeader } from '@/components/admin/AdminDashboardHeader';
@@ -517,7 +518,7 @@ const AdminDashboardContent = () => {
 
         {/* Onglets principaux */}
         <Tabs defaultValue="requests" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 shadow-lg">
+          <TabsList className="grid w-full grid-cols-5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 shadow-lg">
             <TabsTrigger 
               value="requests" 
               className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg"
@@ -545,6 +546,13 @@ const AdminDashboardContent = () => {
             >
               <Bell className="w-4 h-4" />
               Notifications
+            </TabsTrigger>
+            <TabsTrigger 
+              value="ai-chat" 
+              className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg"
+            >
+              <MessageSquare className="w-4 h-4" />
+              AI Chat
             </TabsTrigger>
           </TabsList>
 
@@ -848,6 +856,11 @@ const AdminDashboardContent = () => {
           {/* Onglet des notifications */}
           <TabsContent value="notifications">
             <NotificationCenter />
+          </TabsContent>
+
+          {/* Onglet AI Chat */}
+          <TabsContent value="ai-chat">
+            <AdminChatbot />
           </TabsContent>
         </Tabs>
       </main>
