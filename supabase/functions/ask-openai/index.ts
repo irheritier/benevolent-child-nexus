@@ -29,7 +29,6 @@ async function executeSafeQuery(query: string) {
     throw new Error(`Requête non autorisée: contient ${forbiddenKeywords.join(', ')}`)
   }
 
-  // Nettoyer le query des \n et espaces multiples
   // Nettoyer le query des \n, espaces multiples et point-virgule final
   const cleanQuery = query.replace(/\\n/g, ' ').replace(/\s+/g, ' ').replace(/;$/g, '').trim();
 
@@ -81,20 +80,21 @@ async function generateSQL(prompt: string) {
 // Génération de réponse humaine
 async function generateHumanResponse(question: string, sql: string, data: any) {
   try {
+
     const prompt = `
-Transforme cette réponse technique en une réponse naturelle pour un humain.
+      Transforme cette réponse technique en une réponse naturelle pour un humain.
 
-Question: "${question}"
-Requête SQL: ${sql}
-Résultats: ${JSON.stringify(data)}
+      Question: "${question}"
+      Requête SQL: ${sql}
+      Résultats: ${JSON.stringify(data)}
 
-Règles:
-1. Sois concis (1-2 phrases maximum)
-2. Utilise un langage naturel
-3. Mets en valeur les chiffres importants
-4. Adapte le ton à la question
+      Règles:
+      1. Sois concis (1-2 phrases maximum)
+      2. Utilise un langage naturel
+      3. Mets en valeur les chiffres importants
+      4. Adapte le ton à la question
 
-Réponse:
+      Réponse:
     `
 
     const response = await openai.chat.completions.create({
@@ -112,16 +112,19 @@ Réponse:
 }
 
 serve(async (req) => {
-  // Gestion CORS
+  // Gestion CORS améliorée
+
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-client-info, *', // Permet tous les headers
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Max-Age': '86400', // 24 hours
+  };
+
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { 
-      headers: { 
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST',
-        'Access-Control-Allow-Headers': 'Content-Type' 
-      } 
-    })
+    return new Response('ok', { headers: corsHeaders })
   }
+  
 
   try {
     const { question } = await req.json()
@@ -150,21 +153,21 @@ serve(async (req) => {
     // Génération réponse humaine
     const humanAnswer = await generateHumanResponse(question, sqlQuery, data)
 
-    return new Response(JSON.stringify({ 
-      question,
-      answer: humanAnswer,
-      technical_details: {
-        sql_generated: sqlQuery.replace(/\\n/g, ' ').replace(/\s+/g, ' ').replace(/;$/g, '').trim(),
-        model_used: modelUsed,
-        raw_data: data,
-        timestamp: new Date().toISOString()
-      }
-    }), { 
-      headers: { 
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*' 
-      } 
-    })
+      return new Response(JSON.stringify({ 
+        question,
+        answer: humanAnswer,
+        technical_details: {
+          sql_generated: sqlQuery.replace(/\\n/g, ' ').replace(/\s+/g, ' ').replace(/;$/g, '').trim(),
+          model_used: modelUsed,
+          raw_data: data,
+          timestamp: new Date().toISOString()
+        }
+      }), { 
+        headers: { 
+          'Content-Type': 'application/json',
+          ...corsHeaders // ← Ajoute les headers CORS ici aussi
+        } 
+      })
 
   } catch (error) {
     console.error('Error:', error)
@@ -176,8 +179,9 @@ serve(async (req) => {
       status: 500,
       headers: { 
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*' 
+        ...corsHeaders // ← Et ici pour les erreurs aussi
       } 
+
     })
   }
 })
