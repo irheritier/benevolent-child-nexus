@@ -3,8 +3,9 @@
   "title": "Database Schema for Vulnerable Children System",
   "description": "Schéma JSON pour l'analyse des données des orphelinats et enfants vulnérables en RDC /* GPT-4: Prioriser les indicateurs de santé et localisation géographique. */",
   "tables": {
+  
     "children": {
-      "description": "Enregistrements des enfants pris en charge /* GPT-4: Utiliser estimated_age si birth_date est NULL. */",
+      "description": "Enregistrements des enfants pris en charge /* GPT-4: Utiliser estimated_age si birth_date est NULL. Prioriser les enfants avec parent_status 'abandoned', 'partial_orphan' ou 'total_orphan'. */",
       "columns": {
         "id": { 
           "type": "uuid", 
@@ -14,74 +15,469 @@
           "type": "uuid", 
           "description": "Référence à l'orphelinat d'accueil /* GPT-4: JOIN obligatoire avec la table orphanages pour les analyses géographiques. */" 
         },
-        "parent_status": { 
-          "type": "enum", 
-          "values": ["both_deceased", "mother_only", "father_only", "abandoned", "other"],
-          "description": "Statut parental /* GPT-4: 'abandoned' = nécessite un suivi psychosocial urgent. */" 
+        "full_name": {
+          "type": "text",
+          "description": "Nom complet de l'enfant /* GPT-4: Utiliser pour les recherches par nom. */"
+        },
+        "gender": {
+          "type": "enum",
+          "values": ["M", "F", "other"],
+          "description": "Genre de l'enfant /* GPT-4: M = Masculin, F = Féminin. Filtrer par gender pour les statistiques genre. */"
+        },
+        "birth_date": {
+          "type": "date", 
+          "description": "Date de naissance exacte /* GPT-4: Utiliser pour calculer l'âge exact avec DATE_PART('year', AGE(birth_date)). */"
+        },
+        "estimated_age": {
+          "type": "integer",
+          "description": "Âge estimé si date de naissance inconnue /* GPT-4: Utiliser quand birth_date est NULL. Priorité sur birth_date. */"
+        },
+        "entry_date": {
+          "type": "date",
+          "description": "Date d'entrée dans le système /* GPT-4: Utiliser pour filtrer les nouvelles admissions (entry_date > CURRENT_DATE - INTERVAL '30 days'). */"
+        },
+        "photo_url": {
+          "type": "text",
+          "description": "URL de la photo de l'enfant /* GPT-4: Souvent NULL - ne pas utiliser dans les conditions WHERE. */"
+        },
+        "parent_status": {
+          "type": "enum",
+          "values": ["total_orphan", "partial_orphan", "abandoned", "other", "partial_orphan"],
+          "description": "Statut parental /* GPT-4: 'abandoned' = abandonné, 'total_orphan' = double orphelin, 'partial_orphan' = orphelin partiel. Priorité urgence: abandoned > total_orphan > partial_orphan. */"
+        },
+        "internal_code": {
+          "type": "text",
+          "description": "Code interne d'identification /* GPT-4: Format CH-YYYY-NNN. Utiliser pour la recherche précise. */"
+        },
+        "dhis2_tracked_entity_id": {
+          "type": "text",
+          "description": "ID DHIS2 pour synchronisation /* GPT-4: Souvent NULL - système externe. */"
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "description": "Date de création /* GPT-4: Utiliser pour l'audit, pas pour le business logic. */"
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "description": "Date de mise à jour /* GPT-4: Dernière modification. Utiliser pour détecter les changements récents. */"
         }
       }
     },
+
     "orphanages": {
-      "description": "Centres d'accueil pour enfants vulnérables /* GPT-4: Vérifier legal_status='verified' pour les stats officielles. */",
+      "description": "Centres d'accueil pour enfants vulnérables /* GPT-4: Vérifier legal_status='verified' pour les stats officielles. Prioriser les orphelinats avec legal_status='verified'. */",
       "columns": {
+        "id": { 
+          "type": "uuid", 
+          "description": "Identifiant unique de l'orphelinat /* GPT-4: Clé primaire pour les JOIN avec children. */" 
+        },
+        "name": { 
+          "type": "text", 
+          "description": "Nom officiel du centre /* GPT-4: Utiliser pour les recherches par nom. */" 
+        },
         "province": { 
           "type": "text", 
-          "description": "Province (ex: Kinshasa) /* GPT-4: Toujours filtrer par province avant ville pour de meilleures performances. */" 
+          "description": "Province (ex: Kinshasa, Lomami) /* GPT-4: Toujours filtrer par province avant ville pour de meilleures performances. */" 
+        },
+        "city": { 
+          "type": "text", 
+          "description": "Ville (ex: Kabinda) /* GPT-4: Filtrer par city pour les analyses locales. */" 
+        },
+        "province_id": { 
+          "type": "uuid", 
+          "description": "Référence à la province /* GPT-4: JOIN avec table provinces si disponible. */" 
+        },
+        "city_id": { 
+          "type": "uuid", 
+          "description": "Référence à la ville /* GPT-4: JOIN avec table cities si disponible. */" 
+        },
+        "address": { 
+          "type": "text", 
+          "description": "Adresse physique complète /* GPT-4: Pour les rapports de localisation. */" 
+        },
+        "location_gps": { 
+          "type": "point", 
+          "description": "Coordonnées GPS /* GPT-4: Pour les calculs de distance et cartographie. */" 
+        },
+        "contact_person": { 
+          "type": "text", 
+          "description": "Personne de contact principale /* GPT-4: Pour les communications officielles. */" 
+        },
+        "phone": { 
+          "type": "text", 
+          "description": "Numéro de téléphone /* GPT-4: Format international +243... */" 
+        },
+        "email": { 
+          "type": "text", 
+          "description": "Adresse email /* GPT-4: Pour les communications électroniques. */" 
+        },
+        "description": { 
+          "type": "text", 
+          "description": "Description du centre /* GPT-4: Texte descriptif, ne pas utiliser pour les filtres. */" 
+        },
+        "legal_status": { 
+          "type": "enum", 
+          "values": ["pending", "verified", "rejected", "suspended"],
+          "description": "Statut juridique /* GPT-4: 'verified' = validé officiellement. Toujours filtrer WHERE legal_status='verified' pour les stats fiables. */" 
+        },
+        "documents": { 
+          "type": "jsonb", 
+          "description": "Documents légaux au format JSON /* GPT-4: Contient les URLs des documents. Ne pas utiliser dans WHERE. */" 
+        },
+        "photo_url": { 
+          "type": "text", 
+          "description": "URL de la photo du centre /* GPT-4: Souvent NULL. */" 
+        },
+        "dhis2_orgunit_id": { 
+          "type": "text", 
+          "description": "ID DHIS2 pour synchronisation /* GPT-4: Système externe de santé. */" 
+        },
+        "created_by": { 
+          "type": "uuid", 
+          "description": "Créateur de l'enregistrement /* GPT-4: Référence à la table users. */" 
         },
         "child_capacity": { 
           "type": "integer", 
-          "description": "Capacité d'accueil maximale /* GPT-4: Comparer avec children_total pour calculer le taux d'occupation. */" 
-        }
-      }
-    },
-    "child_diseases": {
-      "description": "Maladies diagnostiquées chez les enfants /* GPT-4: JOIN obligatoire avec diseases pour les noms complets. */",
-      "columns": {
-        "severity": { 
-          "type": "enum", 
-          "values": ["mild", "moderate", "severe"],
-          "description": "Gravité du diagnostic /* GPT-4: 'severe' = alerte médicale prioritaire. */" 
-        }
-      }
-    },
-    "diseases": {
-      "description": "Référentiel des maladies connues /* GPT-4: Filtrer par is_active=true pour les analyses courantes. */",
-      "columns": {
-        "name": { 
-          "type": "text", 
-          "description": "Nom de la maladie (ex: Paludisme) /* GPT-4: Utiliser LIKE '%palud%' pour inclure les variantes orthographiques. */" 
-        }
-      }
-    },
-    "health_records": {
-      "description": "Dossiers médicaux des enfants /* GPT-4: vaccination_status est un JSONB - utiliser jsonb_path_query. */",
-      "columns": {
-        "vaccination_status": { 
-          "type": "jsonb", 
-          "description": "Format: {'vaccines': ['BCG'], 'last_updated': '2023-01-01'} /* GPT-4: Exemple de requête pour vérifier le BCG: jsonb_path_exists(vaccination_status, '$.vaccines[*] ? (@ == \"BCG\")') */" 
-        }
-      }
-    },
-    "nutrition_records": {
-      "description": "Suivi nutritionnel des enfants /* GPT-4: nutrition_status='severe_malnutrition' déclenche une alerte nutritionnelle. */",
-      "columns": {
-        "nutrition_status": { 
-          "type": "enum", 
-          "values": ["normal", "moderate_malnutrition", "severe_malnutrition", "overweight"],
-          "description": "Statut nutritionnel /* GPT-4: Prioriser les cas 'severe_malnutrition' dans les rapports. */" 
-        }
-      }
-    },
-    "cities": {
-      "description": "Référentiel géographique des villes /* GPT-4: is_capital=true pour les analyses régionales clés. */",
-      "columns": {
-        "is_capital": { 
-          "type": "boolean", 
-          "description": "Si c'est une capitale provinciale /* GPT-4: Kinshasa est toujours is_capital=true. */" 
+          "description": "Capacité d'accueil maximale /* GPT-4: Comparer avec children_total pour calculer le taux d'occupation: (children_total/child_capacity)*100. */" 
+        },
+        "children_total": { 
+          "type": "integer", 
+          "description": "Nombre actuel d'enfants /* GPT-4: Pour les statistiques de population. */" 
+        },
+        "boys_count": { 
+          "type": "integer", 
+          "description": "Nombre de garçons /* GPT-4: Pour les ratios genre: (boys_count/children_total)*100. */" 
+        },
+        "girls_count": { 
+          "type": "integer", 
+          "description": "Nombre de filles /* GPT-4: Pour les ratios genre: (girls_count/children_total)*100. */" 
+        },
+        "schooling_rate": { 
+          "type": "numeric", 
+          "description": "Taux de scolarisation (%) /* GPT-4: 0-100%. Filtrer WHERE schooling_rate < 50 pour les centres à problèmes. */" 
+        },
+        "annual_disease_rate": { 
+          "type": "numeric", 
+          "description": "Taux annuel de maladies (%) /* GPT-4: 0-100%. Plus élevé = besoin d'intervention médicale. */" 
+        },
+        "meals_per_day": { 
+          "type": "integer", 
+          "description": "Nombre de repas par jour /* GPT-4: 1-3. Indicateur de qualité de vie. */" 
+        },
+        "created_at": { 
+          "type": "timestamptz", 
+          "description": "Date de création /* GPT-4: Pour l'audit. */" 
+        },
+        "updated_at": { 
+          "type": "timestamptz", 
+          "description": "Date de mise à jour /* GPT-4: Dernière modification. */" 
         }
       }
     }
+    
+    ,
+
+    "child_diseases": {
+      "description": "Maladies diagnostiquées chez les enfants /* GPT-4: JOIN obligatoire avec diseases pour les noms complets et avec children pour les informations des enfants. Table de liaison entre children et diseases. */",
+      "columns": {
+        "id": { 
+          "type": "uuid", 
+          "description": "Identifiant unique du diagnostic /* GPT-4: Clé primaire de la table de liaison. */" 
+        },
+        "child_id": { 
+          "type": "uuid", 
+          "description": "Référence à l'enfant /* GPT-4: JOIN OBLIGATOIRE avec table children: JOIN children c ON child_diseases.child_id = c.id */" 
+        },
+        "disease_id": { 
+          "type": "uuid", 
+          "description": "Référence à la maladie /* GPT-4: JOIN OBLIGATOIRE avec table diseases: JOIN diseases d ON child_diseases.disease_id = d.id */" 
+        },
+        "health_record_id": { 
+          "type": "uuid", 
+          "description": "Référence au dossier médical /* GPT-4: JOIN avec health_records pour les détails complets. */" 
+        },
+        "diagnosed_date": { 
+          "type": "date", 
+          "description": "Date du diagnostic /* GPT-4: Utiliser pour filtrer les diagnostics récents: diagnosed_date > CURRENT_DATE - INTERVAL '30 days'. */" 
+        },
+        "severity": { 
+          "type": "enum", 
+          "values": ["mild", "moderate", "severe"],
+          "description": "Gravité du diagnostic /* GPT-4: 'severe' = alerte médicale prioritaire, nécessite intervention urgente. Filtrer WHERE severity = 'severe', moderate pour les cas critiques. */" 
+        },
+        "notes": { 
+          "type": "text", 
+          "description": "Notes supplémentaires sur le diagnostic /* GPT-4: Souvent NULL. Contient des observations médicales. */" 
+        },
+        "created_at": { 
+          "type": "timestamptz", 
+          "description": "Date de création de l'enregistrement /* GPT-4: Pour l'audit et le suivi. */" 
+        }
+      },
+      "relationships": [
+        {
+          "from": "child_diseases.child_id",
+          "to": "children.id",
+          "description": "Lien vers l'enfant /* GPT-4: JOIN REQUIS pour obtenir le nom, âge, orphelinat de l'enfant. */"
+        },
+        {
+          "from": "child_diseases.disease_id", 
+          "to": "diseases.id",
+          "description": "Lien vers la maladie /* GPT-4: JOIN REQUIS pour obtenir le nom et la description de la maladie. */"
+        },
+        {
+          "from": "child_diseases.health_record_id",
+          "to": "health_records.id",
+          "description": "Lien vers le dossier médical /* GPT-4: JOIN optionnel pour les détails médicaux complets. */"
+        }
+      ]
+    }
+  
+    ,
+
+    "diseases": {
+      "description": "Référentiel des maladies connues /* GPT-4: Catalogue médical de référence. Toujours filtrer par is_active=true pour les analyses courantes. Utiliser pour les statistiques de santé. */",
+      "columns": {
+        "id": { 
+          "type": "uuid", 
+          "description": "Identifiant unique de la maladie /* GPT-4: Clé primaire pour les JOIN avec child_diseases. */" 
+        },
+        "name": { 
+          "type": "text", 
+          "description": "Nom de la maladie (ex: Paludisme, Anémie) /* GPT-4: Utiliser LIKE '%palud%' pour inclure les variantes orthographiques. Recherche insensible à la casse: ILIKE '%anemie%'. */" 
+        },
+        "description": { 
+          "type": "text", 
+          "description": "Description médicale de la maladie /* GPT-4: Contient des détails cliniques. Ne pas utiliser pour les filtres WHERE. */" 
+        },
+        "is_active": { 
+          "type": "boolean", 
+          "description": "Si la maladie est toujours surveillée /* GPT-4: TOUJOURS filtrer WHERE is_active = true pour les analyses actuelles. Ignorer les maladies inactives. */" 
+        },
+        "created_at": { 
+          "type": "timestamptz", 
+          "description": "Date d'ajout au référentiel /* GPT-4: Pour l'audit et le suivi historique. */" 
+        }
+      },
+      "relationships": [
+        {
+          "from": "child_diseases.disease_id",
+          "to": "diseases.id",
+          "description": "Lien vers les diagnostics /* GPT-4: JOIN REQUIS pour obtenir le nom des maladies dans les requêtes child_diseases. */"
+        }
+      ],
+      "common_diseases": [
+        "Paludisme",
+        "Anémie", 
+        "Malnutrition",
+        "Infections respiratoires",
+        "Diarrhée",
+        "VIH/SIDA",
+        "Tuberculose",
+        "Vers intestinaux"
+      ]
+    }
+    
+    ,
+
+    "health_records": {
+      "description": "Dossiers médicaux des enfants /* GPT-4: Contient l'historique médical complet. vaccination_status_structured est plus fiable que vaccination_status. */",
+      "columns": {
+        "id": { 
+          "type": "uuid", 
+          "description": "Identifiant unique du dossier médical /* GPT-4: Clé primaire pour les références. */" 
+        },
+        "child_id": { 
+          "type": "uuid", 
+          "description": "Référence à l'enfant /* GPT-4: JOIN OBLIGATOIRE avec table children: JOIN children c ON health_records.child_id = c.id */" 
+        },
+        "date": { 
+          "type": "date", 
+          "description": "Date de la consultation ou du bilan /* GPT-4: Utiliser pour filtrer les bilans récents: date > CURRENT_DATE - INTERVAL '30 days'. */" 
+        },
+        "vaccination_status": { 
+          "type": "text", 
+          "description": "Statut vaccinal en texte libre /* GPT-4: Ancien format - préférer vaccination_status_structured. Contient du texte descriptif. */" 
+        },
+        "chronic_conditions": { 
+          "type": "text", 
+          "description": "Maladies chroniques /* GPT-4: Texte libre listant les conditions chroniques. Utiliser ILIKE pour la recherche. */" 
+        },
+        "medications": { 
+          "type": "text", 
+          "description": "Médicaments prescrits /* GPT-4: Liste des traitements en cours. Recherche par mot-clé. */" 
+        },
+        "remarks": { 
+          "type": "text", 
+          "description": "Remarques et observations /* GPT-4: Notes médicales additionnelles. */" 
+        },
+        "dhis2_event_id": { 
+          "type": "text", 
+          "description": "ID DHIS2 pour synchronisation /* GPT-4: Système externe de santé. */" 
+        },
+        "synced": { 
+          "type": "boolean", 
+          "description": "Si synchronisé avec DHIS2 /* GPT-4: true = déjà synchronisé, false = besoin de sync. */" 
+        },
+        "vaccination_status_structured": { 
+          "type": "jsonb", 
+          "description": "Statut vaccinal structuré /* GPT-4: FORMAT: {'status': 'partially_vaccinated', 'vaccines': ['BCG', 'Polio'], 'last_updated': '2025-07-12T17:45:50.699Z'}. Utiliser jsonb_path_exists(vaccination_status_structured, '$.vaccines[*] ? (@ == \"BCG\")') pour vérifier un vaccin. */" 
+        },
+        "created_at": { 
+          "type": "timestamptz", 
+          "description": "Date de création /* GPT-4: Pour l'audit. */" 
+        },
+        "updated_at": { 
+          "type": "timestamptz", 
+          "description": "Date de mise à jour /* GPT-4: Dernière modification. */" 
+        }
+      },
+      "relationships": [
+        {
+          "from": "health_records.child_id",
+          "to": "children.id",
+          "description": "Lien vers l'enfant /* GPT-4: JOIN REQUIS pour obtenir les informations de l'enfant. */"
+        }
+      ],
+      "vaccination_guide": {
+        "status_values": ["not_vaccinated", "partially_vaccinated", "fully_vaccinated", "unknown"],
+        "common_vaccines": ["BCG", "Polio", "DTC", "HepB", "Rougeole", "ROR", "Fièvre jaune", "Vitamine A"],
+        "jsonb_examples": [
+          "Vérifier BCG: jsonb_path_exists(vaccination_status_structured, '$.vaccines[*] ? (@ == \"BCG\")')",
+          "Enfants non vaccinés: vaccination_status_structured->>'status' = 'not_vaccinated'",
+          "Dernière mise à jour: vaccination_status_structured->>'last_updated' > '2025-01-01'"
+        ]
+      }
+    }
+    
+    ,
+
+    "nutrition_records": {
+      "description": "Suivi nutritionnel des enfants /* GPT-4: nutrition_status='severe_malnutrition' déclenche une alerte nutritionnelle. */",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "description": "Identifiant unique de l'enregistrement nutritionnel"
+        },
+        "child_id": {
+          "type": "uuid", 
+          "description": "Identifiant de l'enfant suivi"
+        },
+        "date": {
+          "type": "date",
+          "description": "Date de l'évaluation nutritionnelle"
+        },
+        "weight_kg": {
+          "type": "decimal",
+          "description": "Poids de l'enfant en kilogrammes"
+        },
+        "height_cm": {
+          "type": "decimal", 
+          "description": "Taille de l'enfant en centimètres"
+        },
+        "bmi": {
+          "type": "decimal",
+          "description": "Indice de masse corporelle calculé"
+        },
+        "nutrition_status": { 
+          "type": "enum", 
+          "values": ["normal", "malnourished", "severely_malnourished", "overweight"],
+          "description": "Statut nutritionnel /* GPT-4: Prioriser les cas 'severe_malnutrition' dans les rapports. */" 
+        },
+        "dhis2_event_id": {
+          "type": "text",
+          "description": "Identifiant d'événement DHIS2 pour la synchronisation",
+          "nullable": true
+        },
+        "synced": {
+          "type": "boolean",
+          "description": "Indicateur de synchronisation avec DHIS2"
+        },
+        "created_at": {
+          "type": "timestamp",
+          "description": "Date de création de l'enregistrement"
+        },
+        "updated_at": {
+          "type": "timestamp", 
+          "description": "Date de dernière mise à jour de l'enregistrement"
+        }
+      }
+    },
+
+    "cities": {
+      "description": "Référentiel géographique des villes /* GPT-4: is_capital=true pour les analyses régionales clés. */",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "description": "Identifiant unique de la ville"
+        },
+        "name": {
+          "type": "text",
+          "description": "Nom de la ville"
+        },
+        "province_id": {
+          "type": "uuid",
+          "description": "Identifiant de la province de la ville"
+        },
+        "type": {
+          "type": "text",
+          "description": "Type de division administrative (ville, territoire, etc.)"
+        },
+        "population": {
+          "type": "integer",
+          "description": "Population de la ville",
+          "nullable": true
+        },
+        "is_capital": { 
+          "type": "boolean", 
+          "description": "Si c'est une capitale provinciale /* GPT-4: Kinshasa est toujours is_capital=true. */" 
+        },
+        "created_at": {
+          "type": "timestamp",
+          "description": "Date de création de l'enregistrement"
+        }
+      }
+    },
+
+    "provinces": {
+      "description": "Référentiel géographique des provinces de la RDC",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "description": "Identifiant unique de la province"
+        },
+        "name": {
+          "type": "text",
+          "description": "Nom de la province"
+        },
+        "code": {
+          "type": "text",
+          "description": "Code abrégé de la province (ex: SUB pour Sud-Ubangi)"
+        },
+        "capital": {
+          "type": "text",
+          "description": "Nom de la ville capitale de la province"
+        },
+        "population": {
+          "type": "integer",
+          "description": "Population de la province",
+          "nullable": true
+        },
+        "area_km2": {
+          "type": "integer",
+          "description": "Superficie de la province en kilomètres carrés",
+          "nullable": true
+        },
+        "created_at": {
+          "type": "timestamp",
+          "description": "Date de création de l'enregistrement"
+        }
+      }
+    }
+
   },
+
+
   "relationships": [
     {
       "from": "children.orphanage_id",
@@ -94,6 +490,8 @@
       "description": "Lien maladie-diagnostic /* GPT-4: Toujours inclure diseases.name dans les résultats. */"
     }
   ],
+
+
   "key_metrics": {
     "orphanages": [
       "children_total /* GPT-4: Comparer avec child_capacity pour détecter les surcharges. */",
@@ -104,6 +502,8 @@
       "chronic_conditions"
     ]
   },
+
+
   "gpt_instructions": {
     "general_rules": [
       "/* GPT-4: Ne jamais suggérer de DELETE/UPDATE/MODIFY. */",
@@ -115,4 +515,6 @@
       "requete_vaccination": "SELECT COUNT(*) FROM health_records WHERE jsonb_path_exists(vaccination_status, '$.vaccines[*] ? (@ == \"BCG\")')"
     }
   }
+
+
 }

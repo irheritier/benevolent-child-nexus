@@ -114,7 +114,7 @@ const AdminChatbot = () => {
   };
 
   return (
-    <div className="h-[600px] flex flex-col">
+    <div className="h-[70vh] flex flex-col">
       <Card className="flex-1 flex flex-col border-0 shadow-xl bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-900/20 dark:to-indigo-900/20">
         <CardHeader className="pb-4 border-b border-slate-200/50 dark:border-slate-700/50">
           <CardTitle className="flex items-center gap-3 text-lg">
@@ -126,8 +126,8 @@ const AdminChatbot = () => {
         </CardHeader>
 
         <CardContent className="flex-1 flex flex-col p-0">
-          <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
-            <div className="space-y-4">
+          <ScrollArea ref={scrollAreaRef} className="flex-1 p-4 ">
+            <div className="space-y-4 overflow-y-scroll h-[45vh]">
               <AnimatePresence>
                 {messages.map((message) => (
                   <motion.div
@@ -228,6 +228,7 @@ const AdminChatbot = () => {
               Exemples: "Combien d'enfants sont malnutris ?", "Quels sont les centres en attente ?", "Statistiques par province"
             </p>
           </div>
+
         </CardContent>
       </Card>
     </div>
