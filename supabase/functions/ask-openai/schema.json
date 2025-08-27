@@ -353,7 +353,7 @@
     ,
 
     "nutrition_records": {
-      "description": "Suivi nutritionnel des enfants /* GPT-4: nutrition_status='severe_malnutrition' déclenche une alerte nutritionnelle. */",
+      "description": "Suivi nutritionnel des enfants /* GPT-4: nutrition_status='severely_malnourished', nutrition_status='malnourished' ou nutrition_status='normal'  déclenche une alerte nutritionnelle. */",
       "columns": {
         "id": {
           "type": "uuid",
@@ -381,8 +381,8 @@
         },
         "nutrition_status": { 
           "type": "enum", 
-          "values": ["normal", "malnourished", "severely_malnourished", "overweight"],
-          "description": "Statut nutritionnel /* GPT-4: Prioriser les cas 'severe_malnutrition' dans les rapports. */" 
+          "values": ["normal", "malnourished", "severely_malnourished"],
+          "description": "Statut nutritionnel /* GPT-4: Prioriser les cas 'severely_malnourished' et 'malnourished' dans les rapports. */" 
         },
         "dhis2_event_id": {
           "type": "text",
