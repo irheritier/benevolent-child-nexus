@@ -228,8 +228,8 @@ async function getDashboardStats(supabase: any, orphanageId: string): Promise<Da
 }
 
 function calculateChildrenStats(children: any[]) {
-  const boys = children.filter(c => c.gender === 'male').length
-  const girls = children.filter(c => c.gender === 'female').length
+  const boys = children.filter(c => c.gender === 'M').length
+  const girls = children.filter(c => c.gender === 'F').length
   
   // Groupes d'âge
   const ageGroups = {
