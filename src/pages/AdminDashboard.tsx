@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+
 import { Textarea } from '@/components/ui/textarea';
 import { Eye, CheckCircle, XCircle, Clock, Mail, Phone, MapPin, FileText, Download, BarChart, Bell, Users, Building2, Heart, MessageSquare } from 'lucide-react';
 import AdminStatsDashboard from '@/components/admin/AdminStatsDashboard';
@@ -81,7 +81,7 @@ const AdminDashboardContent = () => {
   const [showDialog, setShowDialog] = useState(false);
   const [showPartnerDialog, setShowPartnerDialog] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
-  const [partnerPassword, setPartnerPassword] = useState('');
+  
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -317,27 +317,10 @@ const AdminDashboardContent = () => {
   };
 
   const handleApprovePartnerRequest = async () => {
-    if (!selectedPartnerRequest || !partnerPassword.trim()) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez saisir un mot de passe pour le compte partenaire.",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!selectedPartnerRequest) return;
 
     setIsValidating(true);
     try {
-      // Créer le compte utilisateur
-      const { data: newUser, error: createError } = await supabase.rpc('create_user_account', {
-        user_email: selectedPartnerRequest.email,
-        user_password: partnerPassword,
-        user_role: 'partner'
-      });
-
-      if (createError) throw createError;
-
-      // Mettre à jour le statut de la demande
       const { error: updateError } = await supabase
         .from('partner_requests')
         .update({
@@ -351,13 +334,12 @@ const AdminDashboardContent = () => {
 
       toast({
         title: "Demande approuvée",
-        description: `Le compte partenaire a été créé pour ${selectedPartnerRequest.email}. Mot de passe: ${partnerPassword}`,
+        description: `La demande de ${selectedPartnerRequest.organization_name} a été approuvée`,
       });
 
       fetchPartnerRequests();
       setShowPartnerDialog(false);
       setSelectedPartnerRequest(null);
-      setPartnerPassword('');
     } catch (error) {
       console.error('Error approving request:', error);
       toast({
@@ -1068,16 +1050,6 @@ const AdminDashboardContent = () => {
 
               {selectedPartnerRequest.status === 'pending' && (
                 <div className="space-y-4 border-t pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="partner-password">Mot de passe pour le compte partenaire</Label>
-                    <Input
-                      id="partner-password"
-                      type="password"
-                      value={partnerPassword}
-                      onChange={(e) => setPartnerPassword(e.target.value)}
-                      placeholder="Saisissez un mot de passe sécurisé"
-                    />
-                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="rejection-reason">Raison de rejet (optionnel)</Label>
                     <Textarea
