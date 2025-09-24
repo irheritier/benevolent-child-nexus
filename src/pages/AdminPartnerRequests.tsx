@@ -36,7 +36,6 @@ const AdminPartnerRequests = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
-  const [partnerPassword, setPartnerPassword] = useState('');
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -94,27 +93,9 @@ const AdminPartnerRequests = () => {
   };
 
   const handleApproveRequest = async (request: PartnerRequest) => {
-    if (!partnerPassword.trim()) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez saisir un mot de passe pour le compte partenaire.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsProcessing(true);
     try {
-      // Créer le compte utilisateur
-      const { data: newUser, error: createError } = await supabase.rpc('create_user_account', {
-        user_email: request.email,
-        user_password: partnerPassword,
-        user_role: 'partner'
-      });
-
-      if (createError) throw createError;
-
-      // Mettre à jour le statut de la demande
+      // Mettre à jour uniquement le statut de la demande
       const { error: updateError } = await supabase
         .from('partner_requests')
         .update({
@@ -128,12 +109,11 @@ const AdminPartnerRequests = () => {
 
       toast({
         title: "Demande approuvée",
-        description: `Le compte partenaire a été créé pour ${request.email}`,
+        description: `La demande de ${request.organization_name} a été approuvée`,
       });
 
       await loadRequests();
       setSelectedRequest(null);
-      setPartnerPassword('');
     } catch (error) {
       console.error('Error approving request:', error);
       toast({
@@ -323,16 +303,6 @@ const AdminPartnerRequests = () => {
                         </div>
                         {request.status === 'pending' && (
                           <DialogFooter className="flex-col gap-4">
-                            <div className="w-full">
-                              <Label htmlFor="password">Mot de passe pour le compte partenaire</Label>
-                              <Input
-                                id="password"
-                                type="password"
-                                value={partnerPassword}
-                                onChange={(e) => setPartnerPassword(e.target.value)}
-                                placeholder="Saisissez un mot de passe sécurisé"
-                              />
-                            </div>
                             <div className="w-full">
                               <Label htmlFor="rejection">Raison de rejet (optionnel)</Label>
                               <Textarea
