@@ -245,7 +245,7 @@ const PartnerDashboardContent = () => {
       {/* Main Content */}
       <main className="container mx-auto px-6 py-12">
         {/* Section d'en-tête avec animations */}
-        <motion.div 
+        {/* <motion.div 
           className="mb-12 text-center space-y-6"
         >
           <div className="space-y-4">
@@ -266,10 +266,10 @@ const PartnerDashboardContent = () => {
               Accédez aux statistiques complètes, analyses détaillées et notifications en temps réel 
               concernant les orphelinats et centres d'accueil de la République Démocratique du Congo.
             </motion.p>
-          </div>
+          </div> */}
           
           {/* Indicateurs visuels */}
-          <motion.div 
+            {/* <motion.div 
               className="flex justify-center items-center gap-8 mt-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -288,7 +288,7 @@ const PartnerDashboardContent = () => {
                 <span className="text-sm font-medium">Accès sécurisé</span>
               </div>
             </motion.div>
-          </motion.div>
+        </motion.div> */}
 
         {/* Onglets avec design amélioré */}
         <motion.div
