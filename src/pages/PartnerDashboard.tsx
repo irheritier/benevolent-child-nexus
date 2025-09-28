@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Heart, LogOut, Bell, BarChart, Users, TrendingUp, MapPin, Activity, Shield } from 'lucide-react';
+import { Heart, LogOut, Bell, BarChart, Users, TrendingUp, MapPin, Activity, Shield, MessageSquare } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
@@ -14,6 +14,7 @@ import { NotificationProvider } from '@/contexts/NotificationContext';
 import DashboardAnalyticsTabs from '@/components/admin/DashboardAnalyticsTabs';
 import DashboardStatsCards from '@/components/admin/DashboardStatsCards';
 import HealthDashboard from '@/components/admin/HealthDashboard';
+import AdminChatbot from '@/components/admin/AdminChatbot';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 
 interface DashboardStats {
@@ -296,7 +297,7 @@ const PartnerDashboardContent = () => {
           animate="visible"
         >
           <Tabs defaultValue="analytics" className="space-y-8">
-            <TabsList className="grid w-full grid-cols-3 h-16 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 rounded-2xl p-2 shadow-lg">
+            <TabsList className="grid w-full grid-cols-4 h-16 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 rounded-2xl p-2 shadow-lg">
               <TabsTrigger 
                 value="analytics" 
                 className="flex items-center gap-3 h-12 rounded-xl font-semibold text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
@@ -317,6 +318,13 @@ const PartnerDashboardContent = () => {
               >
                 <Bell className="w-5 h-5" />
                 Notifications
+              </TabsTrigger>
+              <TabsTrigger 
+                value="ai-chat" 
+                className="flex items-center gap-3 h-12 rounded-xl font-semibold text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
+              >
+                <MessageSquare className="w-5 h-5" />
+                AI Chat
               </TabsTrigger>
             </TabsList>
             
@@ -398,6 +406,27 @@ const PartnerDashboardContent = () => {
                     </CardHeader>
                     <CardContent className="p-8">
                       <NotificationCenter />
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </TabsContent>
+
+              <TabsContent value="ai-chat" className="animate-fade-in">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-0 shadow-2xl rounded-3xl overflow-hidden">
+                    <CardHeader className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white p-8">
+                      <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                        <MessageSquare className="w-7 h-7" />
+                        Assistant IA
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-8">
+                      <AdminChatbot />
                     </CardContent>
                   </Card>
                 </motion.div>
