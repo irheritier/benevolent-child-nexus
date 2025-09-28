@@ -257,10 +257,29 @@ const AdminDashboardContent = () => {
         return;
       }
 
-      toast({
-        title: "Demande validée avec succès",
-        description: `Le compte a été créé pour ${selectedOrphanage.name}. Email: ${selectedOrphanage.email}, Mot de passe temporaire: ${tempPassword}`,
-      });
+      // Envoyer les identifiants par email et SMS
+      try {
+        await supabase.functions.invoke('send-credentials', {
+          body: {
+            email: selectedOrphanage.email,
+            phone: selectedOrphanage.phone,
+            password: tempPassword,
+            name: selectedOrphanage.name,
+            type: 'orphanage'
+          }
+        });
+        
+        toast({
+          title: "Demande validée avec succès",
+          description: `Le compte a été créé pour ${selectedOrphanage.name}. Les identifiants ont été envoyés par email${selectedOrphanage.phone ? ' et SMS' : ''}.`,
+        });
+      } catch (credentialsError) {
+        console.error('Error sending credentials:', credentialsError);
+        toast({
+          title: "Compte créé mais erreur d'envoi",
+          description: `Le compte a été créé pour ${selectedOrphanage.name}. Email: ${selectedOrphanage.email}, Mot de passe temporaire: ${tempPassword}`,
+        });
+      }
 
       // Rafraîchir la liste
       fetchOrphanages();
@@ -362,10 +381,30 @@ const AdminDashboardContent = () => {
 
       if (updateError) throw updateError;
 
-      toast({
-        title: "Demande approuvée",
-        description: `Le compte partenaire a été créé pour ${selectedPartnerRequest.email}. Mot de passe: ${partnerPassword}`,
-      });
+      // Envoyer les identifiants par email et SMS
+      try {
+        await supabase.functions.invoke('send-credentials', {
+          body: {
+            email: selectedPartnerRequest.email,
+            phone: selectedPartnerRequest.phone,
+            password: partnerPassword,
+            name: selectedPartnerRequest.contact_person,
+            type: 'partner',
+            organization_name: selectedPartnerRequest.organization_name
+          }
+        });
+        
+        toast({
+          title: "Demande approuvée",
+          description: `Le compte partenaire a été créé pour ${selectedPartnerRequest.organization_name}. Les identifiants ont été envoyés par email${selectedPartnerRequest.phone ? ' et SMS' : ''}.`,
+        });
+      } catch (credentialsError) {
+        console.error('Error sending credentials:', credentialsError);
+        toast({
+          title: "Compte créé mais erreur d'envoi",
+          description: `Le compte partenaire a été créé pour ${selectedPartnerRequest.email}. Mot de passe: ${partnerPassword}`,
+        });
+      }
 
       fetchPartnerRequests();
       setShowPartnerDialog(false);
