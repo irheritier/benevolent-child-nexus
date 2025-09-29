@@ -225,21 +225,33 @@ const AdminDashboardContent = () => {
       // Générer un mot de passe temporaire
       const tempPassword = Math.random().toString(36).slice(-12);
 
-      // Créer le compte utilisateur
-      const { data: accountData, error: accountError } = await supabase.rpc('create_user_account', {
-        user_email: selectedOrphanage.email,
-        user_password: tempPassword,
-        user_role: 'orphelinat',
-        orphanage_id_param: selectedOrphanage.id
-      });
+      // Vérifier d'abord si l'utilisateur existe déjà
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', selectedOrphanage.email)
+        .single();
 
-      if (accountError) {
-        toast({
-          title: "Erreur de création de compte",
-          description: accountError.message,
-          variant: "destructive",
+      // Si l'utilisateur n'existe pas, le créer
+      if (!existingUser) {
+        const { error: accountError } = await supabase.rpc('create_user_account', {
+          user_email: selectedOrphanage.email,
+          user_password: tempPassword,
+          user_role: 'orphelinat',
+          orphanage_id_param: selectedOrphanage.id
         });
-        return;
+
+        if (accountError) {
+          // Si l'erreur est une duplication d'email, c'est OK (utilisateur créé entre temps)
+          if (accountError.code !== '23505') {
+            toast({
+              title: "Erreur de création de compte",
+              description: accountError.message,
+              variant: "destructive",
+            });
+            return;
+          }
+        }
       }
 
       // Mettre à jour le statut de l'orphelinat
