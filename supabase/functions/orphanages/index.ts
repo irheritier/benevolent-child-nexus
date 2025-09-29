@@ -20,25 +20,25 @@ interface OrphanageData {
   name: string;
   province: string;
   city: string;
-  province_id?: string;
-  city_id?: string;
-  address?: string;
-  location_gps?: string;
+  province_id?: string | null;
+  city_id?: string | null;
+  address?: string | null;
+  location_gps?: string | null;
   contact_person: string;
-  phone?: string;
-  email?: string;
-  description?: string;
+  phone?: string | null;
+  email?: string | null;
+  description?: string | null;
   legal_status?: 'pending' | 'approved' | 'rejected';
-  photo_url?: string;
-  dhis2_orgunit_id?: string;
-  created_by?: string;
-  child_capacity?: number;
-  children_total?: number;
-  boys_count?: number;
-  girls_count?: number;
-  schooling_rate?: number;
-  annual_disease_rate?: number;
-  meals_per_day?: number;
+  photo_url?: string | null;
+  dhis2_orgunit_id?: string | null;
+  created_by?: string | null;
+  child_capacity?: number | null;
+  children_total?: number | null;
+  boys_count?: number | null;
+  girls_count?: number | null;
+  schooling_rate?: number | null;
+  annual_disease_rate?: number | null;
+  meals_per_day?: number | null;
 }
 
 serve(async (req) => {
@@ -72,11 +72,11 @@ serve(async (req) => {
       } else if (typeof value === 'string') {
         // Convert numeric fields
         if (['child_capacity', 'children_total', 'boys_count', 'girls_count', 'meals_per_day'].includes(key)) {
-          orphanageData[key as keyof OrphanageData] = value ? parseInt(value) : null
+          (orphanageData as any)[key] = value ? parseInt(value) : null
         } else if (['schooling_rate', 'annual_disease_rate'].includes(key)) {
-          orphanageData[key as keyof OrphanageData] = value ? parseFloat(value) : null
+          (orphanageData as any)[key] = value ? parseFloat(value) : null
         } else {
-          orphanageData[key as keyof OrphanageData] = value || null
+          (orphanageData as any)[key] = value || null
         }
       }
     }
@@ -140,14 +140,12 @@ serve(async (req) => {
 
           // Create document metadata (same format as your React code)
           const documentData: DocumentData = {
-            legal_document : {
-                url: urlData.publicUrl,
-                path: filePath,
-                uploaded_at: new Date().toISOString(),
-                file_type: file.type.startsWith('image/') ? 'image' : 'pdf',
-                file_name: file.name,
-                file_size: file.size
-            }
+            url: urlData.publicUrl,
+            path: filePath,
+            uploaded_at: new Date().toISOString(),
+            file_type: file.type.startsWith('image/') ? 'image' : 'pdf',
+            file_name: file.name,
+            file_size: file.size
           }
 
           documentsData.push(documentData)

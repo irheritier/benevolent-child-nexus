@@ -134,12 +134,12 @@ serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error:', error)
     return new Response(
       JSON.stringify({ 
         error: 'Erreur interne du serveur',
-        details: error.message
+        details: error?.message || 'Unknown error'
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
@@ -175,7 +175,7 @@ async function getDashboardStats(supabase: any, orphanageId: string): Promise<Da
     throw new Error(`Failed to fetch children data: ${childrenError.message}`)
   }
 
-  const childrenIds = children?.map(c => c.id) || []
+  const childrenIds = children?.map((c: any) => c.id) || []
 
   // Statistiques nutritionnelles (les 100 derniers enregistrements)
   const { data: nutritionRecords, error: nutritionError } = await supabase
