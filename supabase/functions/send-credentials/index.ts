@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
+import { Resend } from "https://esm.sh/resend@4.0.0";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0'
 
 const corsHeaders = {
@@ -98,9 +98,9 @@ serve(async (req: Request) => {
 
       results.email = emailResponse;
       console.log('Email sent successfully:', emailResponse);
-    } catch (emailError) {
+    } catch (emailError: any) {
       console.error('Email error:', emailError);
-      results.email = { error: emailError.message };
+      results.email = { error: emailError?.message || 'Unknown email error' };
     }
 
     // Send SMS if phone number is provided
@@ -129,9 +129,9 @@ serve(async (req: Request) => {
         const smsData = await smsResponse.json();
         results.sms = smsData;
         console.log('SMS sent successfully:', smsData);
-      } catch (smsError) {
+      } catch (smsError: any) {
         console.error('SMS error:', smsError);
-        results.sms = { error: smsError.message };
+        results.sms = { error: smsError?.message || 'Unknown SMS error' };
       }
     } else {
       results.sms = { skipped: 'No phone number or Twilio credentials' };
@@ -152,12 +152,12 @@ serve(async (req: Request) => {
       }
     );
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in send-credentials function:', error);
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message,
+        error: error?.message || 'Unknown error',
       }),
       {
         status: 500,
