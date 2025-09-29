@@ -335,8 +335,6 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 [functions.ask-openai]
 enabled = true
 verify_jwt = true
-import_map = "./functions/ask-openai/deno.json"
-entrypoint = "./functions/ask-openai/index.ts"
 
 [functions.send-credentials]
 enabled = true
