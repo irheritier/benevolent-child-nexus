@@ -303,7 +303,7 @@ serve(async (req) => {
       { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error:', error)
     return new Response(
       JSON.stringify({ 

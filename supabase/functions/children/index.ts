@@ -14,7 +14,7 @@ function decodeJwt(token: string): any {
     const paddedPayload = payloadBase64.padEnd(payloadBase64.length + (4 - payloadBase64.length % 4) % 4, '=');
     const payloadJson = atob(paddedPayload);
     return JSON.parse(payloadJson);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erreur décodage JWT:', error);
     return null;
   }
@@ -198,7 +198,7 @@ serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error:', error)
     return new Response(
       JSON.stringify({ 

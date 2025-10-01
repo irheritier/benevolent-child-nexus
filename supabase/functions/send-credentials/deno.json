@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "strict": true,
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "npm:react@18.3.1"
+  },
+  "nodeModulesDir": "auto",
+  "imports": {
+    "resend": "npm:resend@4.0.0",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.50.0"
+  }
+}

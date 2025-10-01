@@ -225,21 +225,41 @@ const AdminDashboardContent = () => {
       // Générer un mot de passe temporaire
       const tempPassword = Math.random().toString(36).slice(-12);
 
-      // Créer le compte utilisateur
-      const { data: accountData, error: accountError } = await supabase.rpc('create_user_account', {
-        user_email: selectedOrphanage.email,
-        user_password: tempPassword,
-        user_role: 'orphelinat',
-        orphanage_id_param: selectedOrphanage.id
-      });
+      // Vérifier d'abord si l'utilisateur existe déjà
+      const { data: existingUser, error: checkError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', selectedOrphanage.email)
+        .maybeSingle();
 
-      if (accountError) {
-        toast({
-          title: "Erreur de création de compte",
-          description: accountError.message,
-          variant: "destructive",
+      console.log('Checking existing user:', { existingUser, checkError });
+
+      // Si l'utilisateur n'existe pas, le créer
+      if (!existingUser) {
+        console.log('Creating account for orphanage:', selectedOrphanage.email);
+        const { data: accountData, error: accountError } = await supabase.rpc('create_user_account', {
+          user_email: selectedOrphanage.email,
+          user_password: tempPassword,
+          user_role: 'orphelinat',
+          orphanage_id_param: selectedOrphanage.id
         });
-        return;
+
+        console.log('Account creation result:', { accountData, accountError });
+
+        if (accountError) {
+          // Si l'erreur est une duplication d'email, c'est OK (utilisateur créé entre temps)
+          if (accountError.code !== '23505') {
+            console.error('Account creation failed:', accountError);
+            toast({
+              title: "Erreur de création de compte",
+              description: accountError.message,
+              variant: "destructive",
+            });
+            return;
+          }
+        }
+      } else {
+        console.log('User already exists, skipping account creation');
       }
 
       // Mettre à jour le statut de l'orphelinat
@@ -257,10 +277,29 @@ const AdminDashboardContent = () => {
         return;
       }
 
-      toast({
-        title: "Demande validée avec succès",
-        description: `Le compte a été créé pour ${selectedOrphanage.name}. Email: ${selectedOrphanage.email}, Mot de passe temporaire: ${tempPassword}`,
-      });
+      // Envoyer les identifiants par email et SMS
+      try {
+        await supabase.functions.invoke('send-credentials', {
+          body: {
+            email: selectedOrphanage.email,
+            phone: selectedOrphanage.phone,
+            password: tempPassword,
+            name: selectedOrphanage.name,
+            type: 'orphanage'
+          }
+        });
+        
+        toast({
+          title: "Demande validée avec succès",
+          description: `Le compte a été créé pour ${selectedOrphanage.name}. Les identifiants ont été envoyés par email${selectedOrphanage.phone ? ' et SMS' : ''}.`,
+        });
+      } catch (credentialsError) {
+        console.error('Error sending credentials:', credentialsError);
+        toast({
+          title: "Compte créé mais erreur d'envoi",
+          description: `Le compte a été créé pour ${selectedOrphanage.name}. Email: ${selectedOrphanage.email}, Mot de passe temporaire: ${tempPassword}`,
+        });
+      }
 
       // Rafraîchir la liste
       fetchOrphanages();
@@ -329,19 +368,24 @@ const AdminDashboardContent = () => {
     setIsValidating(true);
     try {
       // Vérifier d'abord si l'utilisateur existe déjà
-      const { data: existingUser } = await supabase
+      const { data: existingUser, error: checkError } = await supabase
         .from('users')
         .select('id')
         .eq('email', selectedPartnerRequest.email)
-        .single();
+        .maybeSingle();
+
+      console.log('Checking existing partner user:', { existingUser, checkError });
 
       // Si l'utilisateur n'existe pas, le créer
       if (!existingUser) {
-        const { error: createError } = await supabase.rpc('create_user_account', {
+        console.log('Creating account for partner:', selectedPartnerRequest.email);
+        const { data: accountData, error: createError } = await supabase.rpc('create_user_account', {
           user_email: selectedPartnerRequest.email,
           user_password: partnerPassword,
           user_role: 'partner'
         });
+
+        console.log('Partner account creation result:', { accountData, createError });
 
         if (createError) {
           // Si l'erreur est une duplication d'email, c'est OK (utilisateur créé entre temps)
@@ -349,12 +393,14 @@ const AdminDashboardContent = () => {
             throw createError;
           }
         }
+      } else {
+        console.log('Partner user already exists, skipping account creation');
       }
 
       const { error: updateError } = await supabase
         .from('partner_requests')
         .update({
-          status: 'approved',
+          status: 'verified',
           reviewed_at: new Date().toISOString(),
           reviewed_by: (await supabase.auth.getSession()).data.session?.user.id
         })
@@ -362,10 +408,30 @@ const AdminDashboardContent = () => {
 
       if (updateError) throw updateError;
 
-      toast({
-        title: "Demande approuvée",
-        description: `Le compte partenaire a été créé pour ${selectedPartnerRequest.email}. Mot de passe: ${partnerPassword}`,
-      });
+      // Envoyer les identifiants par email et SMS
+      try {
+        await supabase.functions.invoke('send-credentials', {
+          body: {
+            email: selectedPartnerRequest.email,
+            phone: selectedPartnerRequest.phone,
+            password: partnerPassword,
+            name: selectedPartnerRequest.contact_person,
+            type: 'partner',
+            organization_name: selectedPartnerRequest.organization_name
+          }
+        });
+        
+        toast({
+          title: "Demande approuvée",
+          description: `Le compte partenaire a été créé pour ${selectedPartnerRequest.organization_name}. Les identifiants ont été envoyés par email${selectedPartnerRequest.phone ? ' et SMS' : ''}.`,
+        });
+      } catch (credentialsError) {
+        console.error('Error sending credentials:', credentialsError);
+        toast({
+          title: "Compte créé mais erreur d'envoi",
+          description: `Le compte partenaire a été créé pour ${selectedPartnerRequest.email}. Mot de passe: ${partnerPassword}`,
+        });
+      }
 
       fetchPartnerRequests();
       setShowPartnerDialog(false);

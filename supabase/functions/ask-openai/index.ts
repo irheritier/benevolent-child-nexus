@@ -12,7 +12,9 @@ const AI_CONFIG = {
   retryDelay: 1000
 }
 
-const openai = new OpenAI(Deno.env.get('OPENAI_API_KEY')!)
+const openai = new OpenAI({
+  apiKey: Deno.env.get('OPENAI_API_KEY')!
+})
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -65,7 +67,7 @@ async function executeSafeQuery(query: string) {
     
     return { data, logs };
 
-  } catch (error) {
+  } catch (error: any) {
     logs.push(`💥 Erreur d'exécution: ${error.message}`);
     throw { message: error.message, logs };
   }
@@ -93,7 +95,7 @@ async function generateSQL(prompt: string) {
           logs.push(`✅ SQL généré avec ${model}: ${sql}`);
           return { sql, modelUsed: model, logs }
         }
-      } catch (error) {
+      } catch (error: any) {
         logs.push(`❌ Erreur avec ${model}: ${error.message}`);
         if (attempt < AI_CONFIG.maxRetries) {
           await new Promise(resolve => setTimeout(resolve, AI_CONFIG.retryDelay))
@@ -133,7 +135,7 @@ async function generateHumanResponse(question: string, sql: string, data: any) {
     })
 
     return response.choices[0]?.message?.content?.trim() || "Voici les informations demandées."
-  } catch (error) {
+  } catch (error: any) {
     return "Je n'ai pas pu formuler la réponse."
   }
 }
@@ -170,15 +172,15 @@ serve(async (req) => {
     const sqlPrompt = `
       Question: "${question}"
       Schéma: ${JSON.stringify({
-        tables: dbSchema.tables,
-        relationships: dbSchema.relationships
+        tables: (dbSchema as any).tables || {},
+        relationships: (dbSchema as any).relationships || {}
       })}
       Règles:
-      1. ${dbSchema.gpt_instructions.security}
+      1. ${(dbSchema as any).gpt_instructions?.security || 'Seules les requêtes SELECT sont autorisées'}
       2. NE PAS METTRE de point-virgule (;) à la fin
       3. Exemples: 
-         - ${dbSchema.gpt_instructions.examples.requete_nutrition}
-         - ${dbSchema.gpt_instructions.examples.requete_scolarisation}
+         - ${(dbSchema as any).gpt_instructions?.examples?.requete_nutrition || 'SELECT * FROM nutrition_records'}
+         - ${(dbSchema as any).gpt_instructions?.examples?.requete_scolarisation || 'SELECT * FROM children'}
 
       Génère UNIQUEMENT la requête SQL compatible PostgreSQL 15.
       Format: SELECT... FROM... [WHERE...]
@@ -221,7 +223,7 @@ serve(async (req) => {
       status: 200
     })
 
-  } catch (error) {
+  } catch (error: any) {
     const executionTime = Date.now() - startTime;
     executionLogs.push(`💥 Erreur attrapée: ${error.message}`);
     executionLogs.push(`⏱️ Temps avant erreur: ${executionTime}ms`);
