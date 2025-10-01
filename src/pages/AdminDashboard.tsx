@@ -400,7 +400,7 @@ const AdminDashboardContent = () => {
       const { error: updateError } = await supabase
         .from('partner_requests')
         .update({
-          status: 'approved',
+          status: 'verified',
           reviewed_at: new Date().toISOString(),
           reviewed_by: (await supabase.auth.getSession()).data.session?.user.id
         })
