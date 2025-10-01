@@ -3,7 +3,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import OpenAI from 'https://esm.sh/openai@4.0.0'
 import dbSchema from './schema.json' assert { type: "json" }
 
-// Configuration améliorée GPT-4o mini
+// Configuration améliorée GPT-4o mini heirweapon@gmail.com fraternell@centre.cd
+
+
 const AI_CONFIG = {
   models: ["gpt-4o-mini", "gpt-3.5-turbo"],
   maxRetries: 2,
@@ -247,6 +249,11 @@ serve(async (req) => {
 })
 
 
+// RESEND : re_gbBpDxdG_F2KzomRCHqtDAx8J5D7hTgEk
+
+// Twilio Account SID : AC066140a60ecd813c9d85f70654bdd7d4
+// TWILIO_AUTH_TOKEN : 3ba941e3585061a79211e84476ddd6d3
+// TWILIO_PHONE_NUMBER : +243 842 354 044	
 
 
 // import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
