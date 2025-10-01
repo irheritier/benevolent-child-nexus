@@ -226,24 +226,30 @@ const AdminDashboardContent = () => {
       const tempPassword = Math.random().toString(36).slice(-12);
 
       // Vérifier d'abord si l'utilisateur existe déjà
-      const { data: existingUser } = await supabase
+      const { data: existingUser, error: checkError } = await supabase
         .from('users')
         .select('id')
         .eq('email', selectedOrphanage.email)
-        .single();
+        .maybeSingle();
+
+      console.log('Checking existing user:', { existingUser, checkError });
 
       // Si l'utilisateur n'existe pas, le créer
       if (!existingUser) {
-        const { error: accountError } = await supabase.rpc('create_user_account', {
+        console.log('Creating account for orphanage:', selectedOrphanage.email);
+        const { data: accountData, error: accountError } = await supabase.rpc('create_user_account', {
           user_email: selectedOrphanage.email,
           user_password: tempPassword,
           user_role: 'orphelinat',
           orphanage_id_param: selectedOrphanage.id
         });
 
+        console.log('Account creation result:', { accountData, accountError });
+
         if (accountError) {
           // Si l'erreur est une duplication d'email, c'est OK (utilisateur créé entre temps)
           if (accountError.code !== '23505') {
+            console.error('Account creation failed:', accountError);
             toast({
               title: "Erreur de création de compte",
               description: accountError.message,
@@ -252,6 +258,8 @@ const AdminDashboardContent = () => {
             return;
           }
         }
+      } else {
+        console.log('User already exists, skipping account creation');
       }
 
       // Mettre à jour le statut de l'orphelinat
@@ -360,19 +368,24 @@ const AdminDashboardContent = () => {
     setIsValidating(true);
     try {
       // Vérifier d'abord si l'utilisateur existe déjà
-      const { data: existingUser } = await supabase
+      const { data: existingUser, error: checkError } = await supabase
         .from('users')
         .select('id')
         .eq('email', selectedPartnerRequest.email)
-        .single();
+        .maybeSingle();
+
+      console.log('Checking existing partner user:', { existingUser, checkError });
 
       // Si l'utilisateur n'existe pas, le créer
       if (!existingUser) {
-        const { error: createError } = await supabase.rpc('create_user_account', {
+        console.log('Creating account for partner:', selectedPartnerRequest.email);
+        const { data: accountData, error: createError } = await supabase.rpc('create_user_account', {
           user_email: selectedPartnerRequest.email,
           user_password: partnerPassword,
           user_role: 'partner'
         });
+
+        console.log('Partner account creation result:', { accountData, createError });
 
         if (createError) {
           // Si l'erreur est une duplication d'email, c'est OK (utilisateur créé entre temps)
@@ -380,6 +393,8 @@ const AdminDashboardContent = () => {
             throw createError;
           }
         }
+      } else {
+        console.log('Partner user already exists, skipping account creation');
       }
 
       const { error: updateError } = await supabase
