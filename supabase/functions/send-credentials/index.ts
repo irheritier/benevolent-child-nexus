@@ -10,10 +10,12 @@ const corsHeaders = {
 interface CredentialsRequest {
   email: string;
   phone?: string;
-  password: string;
+  password?: string;
   name: string;
   type: 'orphanage' | 'partner';
   organization_name?: string;
+  status?: 'approved' | 'rejected';
+  rejection_reason?: string;
 }
 
 serve(async (req: Request) => {
@@ -23,9 +25,9 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { email, phone, password, name, type, organization_name }: CredentialsRequest = await req.json();
+    const { email, phone, password, name, type, organization_name, status = 'approved', rejection_reason }: CredentialsRequest = await req.json();
     
-    console.log(`Sending credentials to ${email} for ${type}`);
+    console.log(`Sending ${status} notification to ${email} for ${type}`);
 
     // Initialize services
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
@@ -40,54 +42,102 @@ serve(async (req: Request) => {
 
     // Send Email
     try {
-      const subject = type === 'orphanage' 
-        ? `Bienvenue - Votre compte orphelinat a été approuvé`
-        : `Bienvenue - Votre compte partenaire a été approuvé`;
-
+      let subject: string;
+      let emailContent: string;
       const organizationText = type === 'orphanage' ? name : (organization_name || name);
 
-      const emailContent = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="margin: 0; font-size: 24px;">Félicitations ! 🎉</h1>
-          </div>
-          
-          <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
-            <p style="font-size: 16px; color: #333; margin-bottom: 20px;">
-              Bonjour <strong>${name}</strong>,
-            </p>
-            
-            <p style="font-size: 16px; color: #333; line-height: 1.6; margin-bottom: 25px;">
-              Votre demande ${type === 'orphanage' ? 'd\'inscription d\'orphelinat' : 'de partenariat'} 
-              pour <strong>${organizationText}</strong> a été approuvée avec succès !
-            </p>
+      if (status === 'rejected') {
+        // Email de rejet
+        subject = type === 'orphanage' 
+          ? `Demande d'inscription rejetée`
+          : `Demande de partenariat rejetée`;
 
-            <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #28a745; margin: 20px 0;">
-              <h3 style="color: #28a745; margin-top: 0;">Vos identifiants de connexion :</h3>
-              <p style="margin: 10px 0;"><strong>Email :</strong> ${email}</p>
-              <p style="margin: 10px 0;"><strong>Mot de passe temporaire :</strong> <code style="background: #f1f3f4; padding: 4px 8px; border-radius: 4px; font-family: monospace;">${password}</code></p>
+        emailContent = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+              <h1 style="margin: 0; font-size: 24px;">Demande rejetée</h1>
             </div>
+            
+            <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+              <p style="font-size: 16px; color: #333; margin-bottom: 20px;">
+                Bonjour <strong>${name}</strong>,
+              </p>
+              
+              <p style="font-size: 16px; color: #333; line-height: 1.6; margin-bottom: 25px;">
+                Nous regrettons de vous informer que votre demande ${type === 'orphanage' ? 'd\'inscription d\'orphelinat' : 'de partenariat'} 
+                pour <strong>${organizationText}</strong> a été rejetée.
+              </p>
 
-            <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 20px 0;">
-              <p style="margin: 0; color: #856404;">
-                <strong>⚠️ Important :</strong> Pour votre sécurité, veuillez changer ce mot de passe lors de votre première connexion.
+              ${rejection_reason ? `
+                <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #dc3545; margin: 20px 0;">
+                  <h3 style="color: #dc3545; margin-top: 0;">Raison du rejet :</h3>
+                  <p style="margin: 10px 0; color: #333;">${rejection_reason}</p>
+                </div>
+              ` : ''}
+
+              <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 0; color: #856404;">
+                  <strong>💡 Que faire maintenant ?</strong><br>
+                  Si vous pensez qu'il s'agit d'une erreur ou si vous souhaitez plus d'informations, n'hésitez pas à nous contacter.
+                </p>
+              </div>
+
+              <p style="font-size: 14px; color: #6c757d; margin-top: 30px; text-align: center;">
+                Pour toute question, contactez-nous.<br>
+                Équipe SiMéOr - Système de Monitoring des Orphelinats
               </p>
             </div>
-
-            <div style="text-align: center; margin-top: 30px;">
-              <a href="${Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovable.app') || 'https://your-app-url.lovable.app'}" 
-                 style="background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
-                Se connecter maintenant
-              </a>
-            </div>
-
-            <p style="font-size: 14px; color: #6c757d; margin-top: 30px; text-align: center;">
-              Si vous avez des questions, n'hésitez pas à nous contacter.<br>
-              Équipe SiMéOr - Système de Monitoring des Orphelinats
-            </p>
           </div>
-        </div>
-      `;
+        `;
+      } else {
+        // Email d'approbation (existant)
+        subject = type === 'orphanage' 
+          ? `Bienvenue - Votre compte orphelinat a été approuvé`
+          : `Bienvenue - Votre compte partenaire a été approuvé`;
+
+        emailContent = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+              <h1 style="margin: 0; font-size: 24px;">Félicitations ! 🎉</h1>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+              <p style="font-size: 16px; color: #333; margin-bottom: 20px;">
+                Bonjour <strong>${name}</strong>,
+              </p>
+              
+              <p style="font-size: 16px; color: #333; line-height: 1.6; margin-bottom: 25px;">
+                Votre demande ${type === 'orphanage' ? 'd\'inscription d\'orphelinat' : 'de partenariat'} 
+                pour <strong>${organizationText}</strong> a été approuvée avec succès !
+              </p>
+
+              <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #28a745; margin: 20px 0;">
+                <h3 style="color: #28a745; margin-top: 0;">Vos identifiants de connexion :</h3>
+                <p style="margin: 10px 0;"><strong>Email :</strong> ${email}</p>
+                <p style="margin: 10px 0;"><strong>Mot de passe temporaire :</strong> <code style="background: #f1f3f4; padding: 4px 8px; border-radius: 4px; font-family: monospace;">${password}</code></p>
+              </div>
+
+              <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 0; color: #856404;">
+                  <strong>⚠️ Important :</strong> Pour votre sécurité, veuillez changer ce mot de passe lors de votre première connexion.
+                </p>
+              </div>
+
+              <div style="text-align: center; margin-top: 30px;">
+                <a href="${Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovable.app') || 'https://your-app-url.lovable.app'}" 
+                   style="background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                  Se connecter maintenant
+                </a>
+              </div>
+
+              <p style="font-size: 14px; color: #6c757d; margin-top: 30px; text-align: center;">
+                Si vous avez des questions, n'hésitez pas à nous contacter.<br>
+                Équipe SiMéOr - Système de Monitoring des Orphelinats
+              </p>
+            </div>
+          </div>
+        `;
+      }
 
       const emailResponse = await resend.emails.send({
         from: "SiMéOr <noreply@resend.dev>",
@@ -106,9 +156,17 @@ serve(async (req: Request) => {
     // Send SMS if phone number is provided
     if (phone && twilioAccountSid && twilioAuthToken && twilioPhoneNumber) {
       try {
-        const smsMessage = type === 'orphanage' 
-          ? `Félicitations ! Votre compte orphelinat "${name}" a été approuvé. Email: ${email} | Mot de passe: ${password} | Changez votre mot de passe lors de la 1ère connexion. - SiMéOr`
-          : `Félicitations ! Votre compte partenaire "${organization_name || name}" a été approuvé. Email: ${email} | Mot de passe: ${password} | Changez votre mot de passe lors de la 1ère connexion. - SiMéOr`;
+        let smsMessage: string;
+        
+        if (status === 'rejected') {
+          smsMessage = type === 'orphanage' 
+            ? `Désolé, votre demande d'inscription "${name}" a été rejetée. ${rejection_reason ? 'Raison: ' + rejection_reason : ''} Contactez-nous pour plus d'infos. - SiMéOr`
+            : `Désolé, votre demande de partenariat "${organization_name || name}" a été rejetée. ${rejection_reason ? 'Raison: ' + rejection_reason : ''} Contactez-nous pour plus d'infos. - SiMéOr`;
+        } else {
+          smsMessage = type === 'orphanage' 
+            ? `Félicitations ! Votre compte orphelinat "${name}" a été approuvé. Email: ${email} | Mot de passe: ${password} | Changez votre mot de passe lors de la 1ère connexion. - SiMéOr`
+            : `Félicitations ! Votre compte partenaire "${organization_name || name}" a été approuvé. Email: ${email} | Mot de passe: ${password} | Changez votre mot de passe lors de la 1ère connexion. - SiMéOr`;
+        }
 
         const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`;
         const credentials = btoa(`${twilioAccountSid}:${twilioAuthToken}`);

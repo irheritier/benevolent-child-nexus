@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -560,6 +560,9 @@ export type Database = {
           photo_url: string | null
           province: string
           province_id: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           schooling_rate: number | null
           updated_at: string | null
         }
@@ -588,6 +591,9 @@ export type Database = {
           photo_url?: string | null
           province: string
           province_id?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           schooling_rate?: number | null
           updated_at?: string | null
         }
@@ -616,6 +622,9 @@ export type Database = {
           photo_url?: string | null
           province?: string
           province_id?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           schooling_rate?: number | null
           updated_at?: string | null
         }
@@ -639,6 +648,13 @@ export type Database = {
             columns: ["province_id"]
             isOneToOne: false
             referencedRelation: "provinces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orphanages_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -864,23 +880,27 @@ export type Database = {
     Functions: {
       create_notification: {
         Args: {
-          target_user_id: string
-          notification_type: string
-          notification_title: string
-          notification_message: string
           notification_entity_id?: string
           notification_entity_type?: string
+          notification_message: string
           notification_priority?: string
+          notification_title: string
+          notification_type: string
+          target_user_id: string
         }
         Returns: string
       }
       create_user_account: {
         Args: {
+          orphanage_id_param?: string
           user_email: string
           user_password: string
           user_role?: Database["public"]["Enums"]["user_role"]
-          orphanage_id_param?: string
         }
+        Returns: Json
+      }
+      execute_sql: {
+        Args: { query: string }
         Returns: Json
       }
       is_admin: {
@@ -891,10 +911,18 @@ export type Database = {
         Args: {
           action_type: string
           resource_accessed?: string
-          user_ip?: unknown
           user_agent_string?: string
+          user_ip?: unknown
         }
         Returns: string
+      }
+      update_partner_request_status: {
+        Args: {
+          new_status: string
+          request_id: string
+          reviewed_by_user: string
+        }
+        Returns: boolean
       }
       user_orphanage_id: {
         Args: Record<PropertyKey, never>

@@ -81,6 +81,7 @@ const AdminDashboardContent = () => {
   const [showDialog, setShowDialog] = useState(false);
   const [showPartnerDialog, setShowPartnerDialog] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [orphanageRejectionReason, setOrphanageRejectionReason] = useState('');
   const [partnerPassword, setPartnerPassword] = useState('');
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -265,7 +266,11 @@ const AdminDashboardContent = () => {
       // Mettre à jour le statut de l'orphelinat
       const { error: updateError } = await supabase
         .from('orphanages')
-        .update({ legal_status: 'verified' })
+        .update({ 
+          legal_status: 'verified',
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: (await supabase.auth.getSession()).data.session?.user.id
+        })
         .eq('id', selectedOrphanage.id);
 
       if (updateError) {
@@ -320,11 +325,25 @@ const AdminDashboardContent = () => {
   const handleRejectOrphanage = async () => {
     if (!selectedOrphanage) return;
 
+    if (!orphanageRejectionReason.trim()) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez saisir une raison de rejet.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsValidating(true);
     try {
       const { error } = await supabase
         .from('orphanages')
-        .update({ legal_status: 'rejected' })
+        .update({ 
+          legal_status: 'rejected',
+          rejection_reason: orphanageRejectionReason,
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: (await supabase.auth.getSession()).data.session?.user.id
+        })
         .eq('id', selectedOrphanage.id);
 
       if (error) {
@@ -336,14 +355,31 @@ const AdminDashboardContent = () => {
         return;
       }
 
+      // Envoyer l'email de rejet
+      try {
+        await supabase.functions.invoke('send-credentials', {
+          body: {
+            email: selectedOrphanage.email,
+            phone: selectedOrphanage.phone,
+            name: selectedOrphanage.name,
+            type: 'orphanage',
+            status: 'rejected',
+            rejection_reason: orphanageRejectionReason
+          }
+        });
+      } catch (emailError) {
+        console.error('Error sending rejection email:', emailError);
+      }
+
       toast({
         title: "Demande rejetée",
-        description: `La demande de ${selectedOrphanage.name} a été rejetée.`,
+        description: `La demande de ${selectedOrphanage.name} a été rejetée et un email a été envoyé.`,
       });
 
       fetchOrphanages();
       setShowDialog(false);
       setSelectedOrphanage(null);
+      setOrphanageRejectionReason('');
     } catch (error) {
       toast({
         title: "Erreur inattendue",
@@ -488,9 +524,26 @@ const AdminDashboardContent = () => {
       // Créer une notification pour le partenaire
       await createPartnerRequestNotification(updateData, 'rejected');
 
+      // Envoyer l'email de rejet
+      try {
+        await supabase.functions.invoke('send-credentials', {
+          body: {
+            email: selectedPartnerRequest.email,
+            phone: selectedPartnerRequest.phone,
+            name: selectedPartnerRequest.contact_person,
+            type: 'partner',
+            organization_name: selectedPartnerRequest.organization_name,
+            status: 'rejected',
+            rejection_reason: rejectionReason
+          }
+        });
+      } catch (emailError) {
+        console.error('Error sending rejection email:', emailError);
+      }
+
       toast({
         title: "Demande rejetée",
-        description: "La demande a été rejetée avec succès.",
+        description: "La demande a été rejetée avec succès et un email a été envoyé.",
       });
 
       fetchPartnerRequests();
@@ -1103,6 +1156,20 @@ const AdminDashboardContent = () => {
                 <h4 className="font-medium">Statut actuel</h4>
                 {getStatusBadge(selectedOrphanage.legal_status)}
               </div>
+
+              {selectedOrphanage.legal_status === 'pending' && (
+                <div className="space-y-4 border-t pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="orphanage-rejection-reason">Raison de rejet</Label>
+                    <Textarea
+                      id="orphanage-rejection-reason"
+                      value={orphanageRejectionReason}
+                      onChange={(e) => setOrphanageRejectionReason(e.target.value)}
+                      placeholder="Expliquez pourquoi cette demande est rejetée..."
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
