@@ -1204,7 +1204,7 @@ const AdminDashboardContent = () => {
               {selectedPartnerRequest.status === 'pending' && (
                 <div className="space-y-4 border-t pt-4">
                   <div className="space-y-2">
-                    <Label htmlFor="rejection-reason">Raison de rejet (optionnel)</Label>
+                    <Label htmlFor="rejection-reason">Raison de rejet</Label>
                     <Textarea
                       id="rejection-reason"
                       value={rejectionReason}
