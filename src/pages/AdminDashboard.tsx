@@ -291,7 +291,7 @@ const AdminDashboardContent = () => {
         
         toast({
           title: "Demande validée avec succès",
-          description: `Le compte a été créé pour ${selectedOrphanage.name}. Les identifiants ont été envoyés par email${selectedOrphanage.phone ? ' et SMS' : ''}.`,
+          description: `Le compte a été créé pour ${selectedOrphanage.name}. Les identifiants ont été envoyés par email.`,
         });
       } catch (credentialsError) {
         console.error('Error sending credentials:', credentialsError);
@@ -356,10 +356,10 @@ const AdminDashboardContent = () => {
   };
 
   const handleApprovePartnerRequest = async () => {
-    if (!selectedPartnerRequest || !partnerPassword.trim()) {
+    if (!selectedPartnerRequest) {
       toast({
         title: "Erreur",
-        description: "Veuillez saisir un mot de passe pour le compte partenaire.",
+        description: "Aucune demande sélectionnée.",
         variant: "destructive",
       });
       return;
@@ -367,6 +367,9 @@ const AdminDashboardContent = () => {
 
     setIsValidating(true);
     try {
+      // Générer un mot de passe temporaire automatiquement
+      const tempPassword = Math.random().toString(36).slice(-12);
+
       // Vérifier d'abord si l'utilisateur existe déjà
       const { data: existingUser, error: checkError } = await supabase
         .from('users')
@@ -381,7 +384,7 @@ const AdminDashboardContent = () => {
         console.log('Creating account for partner:', selectedPartnerRequest.email);
         const { data: accountData, error: createError } = await supabase.rpc('create_user_account', {
           user_email: selectedPartnerRequest.email,
-          user_password: partnerPassword,
+          user_password: tempPassword,
           user_role: 'partner'
         });
 
@@ -397,16 +400,24 @@ const AdminDashboardContent = () => {
         console.log('Partner user already exists, skipping account creation');
       }
 
-      const { error: updateError } = await supabase
+      // Mettre à jour le statut de la demande partenaire
+      const { data: updateData, error: updateError } = await supabase
         .from('partner_requests')
         .update({
-          status: 'verified',
+          status: 'approved',
           reviewed_at: new Date().toISOString(),
           reviewed_by: (await supabase.auth.getSession()).data.session?.user.id
         })
-        .eq('id', selectedPartnerRequest.id);
+        .eq('id', selectedPartnerRequest.id)
+        .select()
+        .single();
 
       if (updateError) throw updateError;
+
+      console.log('Partner request updated:', updateData);
+
+      // Créer une notification pour le partenaire
+      await createPartnerRequestNotification(updateData, 'approved');
 
       // Envoyer les identifiants par email et SMS
       try {
@@ -414,7 +425,7 @@ const AdminDashboardContent = () => {
           body: {
             email: selectedPartnerRequest.email,
             phone: selectedPartnerRequest.phone,
-            password: partnerPassword,
+            password: tempPassword,
             name: selectedPartnerRequest.contact_person,
             type: 'partner',
             organization_name: selectedPartnerRequest.organization_name
@@ -423,20 +434,19 @@ const AdminDashboardContent = () => {
         
         toast({
           title: "Demande approuvée",
-          description: `Le compte partenaire a été créé pour ${selectedPartnerRequest.organization_name}. Les identifiants ont été envoyés par email${selectedPartnerRequest.phone ? ' et SMS' : ''}.`,
+          description: `Le compte partenaire a été créé pour ${selectedPartnerRequest.organization_name}. Les identifiants ont été envoyés par email.`,
         });
       } catch (credentialsError) {
         console.error('Error sending credentials:', credentialsError);
         toast({
           title: "Compte créé mais erreur d'envoi",
-          description: `Le compte partenaire a été créé pour ${selectedPartnerRequest.email}. Mot de passe: ${partnerPassword}`,
+          description: `Le compte partenaire a été créé pour ${selectedPartnerRequest.email}. Mot de passe: ${tempPassword}`,
         });
       }
 
       fetchPartnerRequests();
       setShowPartnerDialog(false);
       setSelectedPartnerRequest(null);
-      setPartnerPassword('');
     } catch (error) {
       console.error('Error approving request:', error);
       toast({
@@ -461,7 +471,7 @@ const AdminDashboardContent = () => {
 
     setIsValidating(true);
     try {
-      const { error } = await supabase
+      const { data: updateData, error } = await supabase
         .from('partner_requests')
         .update({
           status: 'rejected',
@@ -469,9 +479,14 @@ const AdminDashboardContent = () => {
           reviewed_by: (await supabase.auth.getSession()).data.session?.user.id,
           rejection_reason: rejectionReason
         })
-        .eq('id', selectedPartnerRequest.id);
+        .eq('id', selectedPartnerRequest.id)
+        .select()
+        .single(); // Important: récupérer les données mises à jour
 
       if (error) throw error;
+
+      // Créer une notification pour le partenaire
+      await createPartnerRequestNotification(updateData, 'rejected');
 
       toast({
         title: "Demande rejetée",
@@ -491,6 +506,47 @@ const AdminDashboardContent = () => {
       });
     } finally {
       setIsValidating(false);
+    }
+  };
+
+  const createPartnerRequestNotification = async (requestData: any, status: string) => {
+    try {
+      const notificationType = status === 'approved' 
+        ? 'partner_request_approved' 
+        : 'partner_request_rejected';
+      
+      const notificationTitle = status === 'approved'
+        ? 'Demande partenaire approuvée'
+        : 'Demande partenaire rejetée';
+      
+      const notificationMessage = status === 'approved'
+        ? `Votre demande d'accès partenaire pour ${requestData.organization_name} a été approuvée. Vous pouvez maintenant vous connecter.`
+        : `Votre demande d'accès partenaire pour ${requestData.organization_name} a été rejetée.`;
+
+      // D'abord, récupérer l'ID de l'utilisateur par son email
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', requestData.email)
+        .single();
+
+      if (userError) {
+        console.error('Erreur lors de la récupération de l\'utilisateur:', userError);
+        return;
+      }
+
+      // Créer une notification pour l'utilisateur partenaire
+      await supabase.rpc('create_notification', {
+        target_user_id: userData.id, // Utiliser l'ID au lieu de l'email
+        notification_type: notificationType,
+        notification_title: notificationTitle,
+        notification_message: notificationMessage,
+        notification_entity_id: requestData.id,
+        notification_entity_type: 'partner_request',
+        notification_priority: 'high'
+      });
+    } catch (error) {
+      console.error('Erreur lors de la création de la notification:', error);
     }
   };
 
@@ -1147,16 +1203,6 @@ const AdminDashboardContent = () => {
 
               {selectedPartnerRequest.status === 'pending' && (
                 <div className="space-y-4 border-t pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="partner-password">Mot de passe pour le compte partenaire</Label>
-                    <Input
-                      id="partner-password"
-                      type="password"
-                      value={partnerPassword}
-                      onChange={(e) => setPartnerPassword(e.target.value)}
-                      placeholder="Saisissez un mot de passe sécurisé"
-                    />
-                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="rejection-reason">Raison de rejet (optionnel)</Label>
                     <Textarea
