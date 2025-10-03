@@ -13,6 +13,7 @@ import { Send, Users, Shield, Globe, Building2, GraduationCap, Search } from 'lu
 import { Header } from '@/components/landing/Header';
 import { useLanguage } from '@/hooks/useLanguage';
 import { WhatsAppButton } from '@/components/ui/WhatsAppButton';
+import { SuccessPage } from '@/components/register/SuccessPage';
 
 const PartnerRequest = () => {
   const [formData, setFormData] = useState({
@@ -25,6 +26,7 @@ const PartnerRequest = () => {
     purpose: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
   const { language, setLanguage } = useLanguage();
 
@@ -88,16 +90,8 @@ const PartnerRequest = () => {
         duration: 5000
       });
 
-      // Reset form
-      setFormData({
-        organizationName: '',
-        organizationType: '',
-        contactPerson: '',
-        email: '',
-        phone: '',
-        description: '',
-        purpose: ''
-      });
+      // Afficher la page de succès
+      setIsSubmitted(true);
 
     } catch (error: any) {
       console.error('Submission error:', error);
@@ -140,6 +134,18 @@ async function getClientIP() {
         return <Building2 className="w-5 h-5" />;
     }
   };
+
+  const successTexts = {
+    validation: {
+      success: "Demande soumise avec succès !",
+      pending: "Votre demande d'accès partenaire a été soumise et est en cours de validation par nos équipes. Vous recevrez un email de confirmation dans les 48 heures."
+    },
+    backHome: "Retour à l'accueil"
+  };
+
+  if (isSubmitted) {
+    return <SuccessPage language={language} setLanguage={setLanguage} texts={successTexts} />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 dark:to-primary/10">
