@@ -93,7 +93,7 @@ export const BasicInfoForm = ({
                 <Select onValueChange={onProvinceChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base">
-                      <SelectValue placeholder="Sélectionnez une province" />
+                      <SelectValue placeholder={texts.register.selectProvince} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -121,7 +121,7 @@ export const BasicInfoForm = ({
                 <Select onValueChange={field.onChange} value={field.value} disabled={!selectedProvinceId}>
                   <FormControl>
                     <SelectTrigger className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base">
-                      <SelectValue placeholder="Sélectionnez une localité" />
+                      <SelectValue placeholder={texts.register.selectLocality} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -158,7 +158,7 @@ export const BasicInfoForm = ({
 
         {/* Nouvelle section pour les informations sur les enfants */}
         <div className="border-t pt-6">
-          <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4">Informations sur les enfants accueillis</h3>
+          <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4">{texts.register.childrenInfo}</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             <FormField
@@ -167,7 +167,7 @@ export const BasicInfoForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
-                    Nombre total d'enfants
+                    {texts.register.totalChildren}
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -189,7 +189,7 @@ export const BasicInfoForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
-                    Nombre de garçons
+                    {texts.register.boysCount}
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -211,7 +211,7 @@ export const BasicInfoForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
-                    Nombre de filles (calculé)
+                    {texts.register.girlsCount}
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -230,7 +230,7 @@ export const BasicInfoForm = ({
 
         {/* Section pour les taux et repas */}
         <div className="border-t pt-6">
-          <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4">Informations complémentaires</h3>
+          <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4">{texts.register.additionalInfo}</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             <FormField
@@ -239,12 +239,12 @@ export const BasicInfoForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
-                    Taux de scolarisation
+                    {texts.register.schoolingRate}
                   </FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base">
-                        <SelectValue placeholder="Sélectionnez un taux" />
+                        <SelectValue placeholder={texts.register.selectRate} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -266,12 +266,12 @@ export const BasicInfoForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
-                    Taux annuel de maladies
+                    {texts.register.annualDiseaseRate}
                   </FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base">
-                        <SelectValue placeholder="Sélectionnez un taux" />
+                        <SelectValue placeholder={texts.register.selectRate} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -293,12 +293,12 @@ export const BasicInfoForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-slate-700 dark:text-slate-300 font-semibold text-sm sm:text-base">
-                    Repas par jour
+                    {texts.register.mealsPerDay}
                   </FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger className="h-10 sm:h-12 border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base">
-                        <SelectValue placeholder="Sélectionnez le nombre" />
+                        <SelectValue placeholder={texts.register.selectNumber} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
