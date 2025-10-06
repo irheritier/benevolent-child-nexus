@@ -82,12 +82,7 @@ const Index = () => {
 
   // Enhanced stats object with new labels
   const enhancedStatsLabels = {
-    ...t.stats,
-    boys: "Garçons",
-    girls: "Filles",
-    schoolingRate: "Taux de scolarisation",
-    diseaseRate: "Taux de maladies",
-    mealsPerDay: "Repas/jour (moy.)",
+    ...t.stats
   };
 
   const sectionVariants: Variants = {
@@ -178,6 +173,10 @@ const Index = () => {
         <CTASection 
           registerText={t.cta.register}
           exploreMapText={t.cta.exploreMap}
+          partnerAccessText={t.cta.partnerAccess}
+          alreadyPartnerText={t.cta.alreadyPartner}
+          joinMissionText={t.cta.joinMission}
+          joinDescriptionText={t.cta.joinDescription}
         />
       </motion.div>
       

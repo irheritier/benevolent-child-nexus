@@ -8,6 +8,9 @@ interface TrustSectionProps {
     ministry: string;
     security: string;
     gdpr: string;
+    officialCertification: string;
+    maximumProtection: string;
+    internationalCompliance: string;
   };
 }
 
@@ -26,7 +29,7 @@ export const TrustSection = ({ trust }: TrustSectionProps) => {
               <Award className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
             </div>
             <h3 className="font-bold text-foreground mb-2 text-sm sm:text-base">{trust.ministry}</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground">Certification officielle</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">{trust.officialCertification}</p>
           </div>
           
           <div className="text-center p-4 sm:p-6">
@@ -34,7 +37,7 @@ export const TrustSection = ({ trust }: TrustSectionProps) => {
               <Shield className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
             </div>
             <h3 className="font-bold text-foreground mb-2 text-sm sm:text-base">{trust.security}</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground">Protection maximale</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">{trust.maximumProtection}</p>
           </div>
           
           <div className="text-center p-4 sm:p-6">
@@ -42,7 +45,7 @@ export const TrustSection = ({ trust }: TrustSectionProps) => {
               <CheckCircle className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
             </div>
             <h3 className="font-bold text-foreground mb-2 text-sm sm:text-base">{trust.gdpr}</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground">Conformité internationale</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">{trust.internationalCompliance}</p>
           </div>
         </div>
       </div>

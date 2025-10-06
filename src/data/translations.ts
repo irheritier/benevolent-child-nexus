@@ -14,12 +14,20 @@ export const texts = {
       provinces: "Provinces couvertes",
       verified: "Centres vérifiés",
       wellNourished: "Enfants bien nourris",
-      malnourished: "Enfants nécessitant un suivi"
+      malnourished: "Enfants nécessitant un suivi",
+      boys: "Garçons",
+      girls: "Filles",
+      schoolingRate: "Taux de scolarisation",
+      mealsPerDay: "Repas/jour (moy.)"
     },
     cta: {
       register: "Enregistrer votre centre",
       adminLogin: "Connexion administrateur",
-      exploreMap: "Explorer la carte interactive"
+      exploreMap: "Explorer la carte interactive",
+      partnerAccess: "Demander l'accès partenaire",
+      alreadyPartner: "Déjà partenaire ? Se connecter",
+      joinMission: "Rejoignez notre mission",
+      joinDescription: "Que vous soyez un orphelinat ou un partenaire de recherche, contribuez à améliorer la vie des enfants vulnérables en RDC."
     },
     features: {
       title: "Fonctionnalités Clés",
@@ -38,7 +46,10 @@ export const texts = {
       subtitle: "Certifiée et reconnue par les institutions",
       ministry: "Partenaire Ministère de la Santé",
       security: "Sécurité ISO 27001",
-      gdpr: "Conforme RGPD"
+      gdpr: "Conforme RGPD",
+      officialCertification: "Certification officielle",
+      maximumProtection: "Protection maximale",
+      internationalCompliance: "Conformité internationale"
     },
     footer: {
       about: "À propos de FCTS",
@@ -65,12 +76,20 @@ export const texts = {
       provinces: "Provinces Covered",
       verified: "Verified Centers",
       wellNourished: "Well-nourished Children",
-      malnourished: "Children Requiring Follow-up"
+      malnourished: "Children Requiring Follow-up",
+      boys: "Boys",
+      girls: "Girls",
+      schoolingRate: "Schooling Rate",
+      mealsPerDay: "Meals/day (avg.)"
     },
     cta: {
       register: "Register your Center",
       adminLogin: "Administrator Login",
-      exploreMap: "Explore Interactive Map"
+      exploreMap: "Explore Interactive Map",
+      partnerAccess: "Request Partner Access",
+      alreadyPartner: "Already a partner? Log in",
+      joinMission: "Join Our Mission",
+      joinDescription: "Whether you are an orphanage or a research partner, contribute to improving the lives of vulnerable children in DRC."
     },
     features: {
       title: "Key Features",
@@ -89,7 +108,10 @@ export const texts = {
       subtitle: "Certified and recognized by institutions",
       ministry: "Ministry of Health Partner",
       security: "ISO 27001 Security",
-      gdpr: "GDPR Compliant"
+      gdpr: "GDPR Compliant",
+      officialCertification: "Official Certification",
+      maximumProtection: "Maximum Protection",
+      internationalCompliance: "International Compliance"
     },
     footer: {
       about: "About FCTS",
