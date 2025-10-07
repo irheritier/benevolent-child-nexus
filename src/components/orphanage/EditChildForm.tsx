@@ -62,9 +62,9 @@ const EditChildForm = ({ child, onSuccess, onCancel }: EditChildFormProps) => {
               Mettre à jour les informations de {child.full_name}
             </CardDescription>
           </div>
-          <Button variant="ghost" size="sm" onClick={onCancel}>
+          {/* <Button variant="ghost" size="sm" onClick={onCancel}>
             <X className="w-4 h-4" />
-          </Button>
+          </Button> */}
         </div>
       </CardHeader>
 
@@ -73,11 +73,11 @@ const EditChildForm = ({ child, onSuccess, onCancel }: EditChildFormProps) => {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <ChildFormFields control={form.control} />
 
-            <div className="flex justify-end space-x-4">
-              <Button type="button" variant="outline" onClick={onCancel}>
+            <div className="flex space-x-4">
+              <Button className=" w-1/2 " type="button" variant="outline" onClick={onCancel}>
                 Annuler
               </Button>
-              <Button type="submit" disabled={isEditing}>
+              <Button className=" w-1/2 " type="submit" disabled={isEditing}>
                 {isEditing ? (
                   <>
                     <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2" />

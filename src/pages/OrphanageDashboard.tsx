@@ -707,10 +707,10 @@ const OrphanageDashboard = () => {
 
       {/* Dialog pour modifier un enfant */}
       <Dialog open={!!editingChild} onOpenChange={(open) => !open && setEditingChild(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent >
+          {/* <DialogHeader>
             <DialogTitle className="text-lg sm:text-xl">Modifier l'enfant</DialogTitle>
-          </DialogHeader>
+          </DialogHeader> */}
           {editingChild && (
             <EditChildForm
               child={editingChild}
