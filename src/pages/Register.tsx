@@ -113,6 +113,29 @@ const Register = () => {
         selectProvince: "Veuillez sélectionner une province",
         selectLocality: "Veuillez sélectionner une localité",
         documentRequired: "Veuillez télécharger un document avant de continuer"
+      },
+      register: {
+        selectProvince: "Sélectionnez une province",
+        selectLocality: "Sélectionnez une localité",
+        childrenInfo: "Informations sur les enfants accueillis",
+        totalChildren: "Nombre total d'enfants",
+        boysCount: "Nombre de garçons",
+        girlsCount: "Nombre de filles (calculé)",
+        additionalInfo: "Informations complémentaires",
+        schoolingRate: "Taux de scolarisation",
+        selectRate: "Sélectionnez un taux",
+        annualDiseaseRate: "Taux annuel de maladies",
+        mealsPerDay: "Repas par jour",
+        selectNumber: "Sélectionnez le nombre",
+        footerAbout: "FCTS : Find The Children To Save est une plateforme dédiée au suivi et à la protection des enfants vulnérables en République Démocratique du Congo. Notre mission est d'améliorer le bien-être des enfants grâce à une meilleure coordination entre les centres d'accueil.",
+        footerPartners: "Nous travaillons en étroite collaboration avec le Ministère des Affaires Sociales, les ONG locales et internationales pour assurer le meilleur suivi possible des enfants."
+      },
+      footer: {
+        links: "Liens utiles",
+        privacy: "Politique de confidentialité",
+        terms: "Conditions d'utilisation",
+        contact: "Contact",
+        partners: "Partenaires"
       }
     },
     en: {
@@ -176,6 +199,29 @@ const Register = () => {
         selectProvince: "Please select a province",
         selectLocality: "Please select a locality",
         documentRequired: "Please upload a document before continuing"
+      },
+      register: {
+        selectProvince: "Select a province",
+        selectLocality: "Select a locality",
+        childrenInfo: "Information about hosted children",
+        totalChildren: "Total number of children",
+        boysCount: "Number of boys",
+        girlsCount: "Number of girls (calculated)",
+        additionalInfo: "Additional Information",
+        schoolingRate: "Schooling Rate",
+        selectRate: "Select a rate",
+        annualDiseaseRate: "Annual Disease Rate",
+        mealsPerDay: "Meals per Day",
+        selectNumber: "Select the number",
+        footerAbout: "FCTS : Find The Children To Save is a platform dedicated to monitoring and protecting vulnerable children in the Democratic Republic of Congo. Our mission is to improve children's well-being through better coordination between care centers.",
+        footerPartners: "We work closely with the Ministry of Social Affairs, local and international NGOs to ensure the best possible follow-up for children."
+      },
+      footer: {
+        links: "Useful Links",
+        privacy: "Privacy Policy",
+        terms: "Terms of Use",
+        contact: "Contact",
+        partners: "Partners"
       }
     }
   };
@@ -284,13 +330,13 @@ const Register = () => {
   }
 
   const footerTexts = {
-    aboutText: "FCTS : Find The Children To Save est une plateforme dédiée au suivi et à la protection des enfants vulnérables en République Démocratique du Congo. Notre mission est d'améliorer le bien-être des enfants grâce à une meilleure coordination entre les centres d'accueil.",
-    links: "Liens utiles",
-    privacy: "Politique de confidentialité",
-    terms: "Conditions d'utilisation",
-    contact: "Contact",
-    partners: "Partenaires",
-    partnersText: "Nous travaillons en étroite collaboration avec le Ministère des Affaires Sociales, les ONG locales et internationales pour assurer le meilleur suivi possible des enfants."
+    aboutText: t.register.footerAbout,
+    links: t.footer.links,
+    privacy: t.footer.privacy,
+    terms: t.footer.terms,
+    contact: t.footer.contact,
+    partners: t.footer.partners,
+    partnersText: t.register.footerPartners
   };
 
   return (

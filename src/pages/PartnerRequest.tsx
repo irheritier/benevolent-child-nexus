@@ -14,6 +14,7 @@ import { Header } from '@/components/landing/Header';
 import { useLanguage } from '@/hooks/useLanguage';
 import { WhatsAppButton } from '@/components/ui/WhatsAppButton';
 import { SuccessPage } from '@/components/register/SuccessPage';
+import { texts } from '@/data/translations';
 
 const PartnerRequest = () => {
   const [formData, setFormData] = useState({
@@ -135,12 +136,16 @@ async function getClientIP() {
     }
   };
 
+  const t = texts[language];
+  
   const successTexts = {
     validation: {
-      success: "Demande soumise avec succès !",
-      pending: "Votre demande d'accès partenaire a été soumise et est en cours de validation par nos équipes. Vous recevrez un email de confirmation dans les 48 heures."
+      success: language === 'fr' ? "Demande soumise avec succès !" : "Request submitted successfully!",
+      pending: language === 'fr' 
+        ? "Votre demande d'accès partenaire a été soumise et est en cours de validation par nos équipes. Vous recevrez un email de confirmation dans les 48 heures."
+        : "Your partner access request has been submitted and is being validated by our teams. You will receive a confirmation email within 48 hours."
     },
-    backHome: "Retour à l'accueil"
+    backHome: language === 'fr' ? "Retour à l'accueil" : "Back to home"
   };
 
   if (isSubmitted) {
@@ -152,7 +157,7 @@ async function getClientIP() {
       <Header 
         language={language} 
         setLanguage={setLanguage} 
-        adminLoginText="Connexion Partenaire"
+        adminLoginText={language === 'fr' ? "Connexion Partenaire" : "Partner Login"}
       />
 
       <div className="container mx-auto px-6 py-12">
@@ -164,10 +169,10 @@ async function getClientIP() {
             </div>
           </div> */}
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-4">
-            Devenir Partenaire
+            {t.partnerRequest.title}
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Rejoignez notre réseau de partenaires pour accéder aux données et contribuer à la protection des enfants vulnérables
+            {t.partnerRequest.subtitle}
           </p>
         </div>
 
@@ -178,11 +183,11 @@ async function getClientIP() {
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <Shield className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
-              <CardTitle className="text-lg">Accès Sécurisé</CardTitle>
+              <CardTitle className="text-lg">{t.partnerRequest.secureAccess}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground text-center">
-                Accédez aux données avec des protocoles de sécurité renforcés
+                {t.partnerRequest.secureAccessDesc}
               </p>
             </CardContent>
           </Card>
@@ -192,11 +197,11 @@ async function getClientIP() {
               <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <Globe className="w-6 h-6 text-purple-600 dark:text-purple-400" />
               </div>
-              <CardTitle className="text-lg">Impact Global</CardTitle>
+              <CardTitle className="text-lg">{t.partnerRequest.globalImpact}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground text-center">
-                Contribuez à un impact positif sur la protection de l'enfance
+                {t.partnerRequest.globalImpactDesc}
               </p>
             </CardContent>
           </Card>
@@ -206,11 +211,11 @@ async function getClientIP() {
               <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <Search className="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
-              <CardTitle className="text-lg">Recherche Avancée</CardTitle>
+              <CardTitle className="text-lg">{t.partnerRequest.advancedResearch}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground text-center">
-                Outils d'analyse et de recherche pour vos projets
+                {t.partnerRequest.advancedResearchDesc}
               </p>
             </CardContent>
           </Card>
@@ -220,11 +225,10 @@ async function getClientIP() {
         <Card className="max-w-4xl mx-auto shadow-2xl border-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
           <CardHeader className="text-center bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 rounded-t-lg border-b">
             <CardTitle className="text-2xl font-bold text-slate-800 dark:text-slate-200">
-              Demande d'Accès Partenaire
+              {t.partnerRequest.formTitle}
             </CardTitle>
             <CardDescription className="text-base">
-              Remplissez ce formulaire pour demander l'accès aux données des orphelinats.
-              Votre demande sera examinée par notre équipe administrative.
+              {t.partnerRequest.formDescription}
             </CardDescription>
           </CardHeader>
           <CardContent className="p-8">
@@ -233,14 +237,14 @@ async function getClientIP() {
                 <div className="space-y-3">
                   <Label htmlFor="organizationName" className="text-base font-semibold flex items-center gap-2">
                     <Building2 className="w-4 h-4" />
-                    Nom de l'organisation *
+                    {t.partnerRequest.organizationName} *
                   </Label>
                   <Input
                     id="organizationName"
                     value={formData.organizationName}
                     onChange={(e) => handleInputChange('organizationName', e.target.value)}
                     className="h-12 border-2 focus:border-blue-500 transition-colors"
-                    placeholder="Entrez le nom de votre organisation"
+                    placeholder={t.partnerRequest.organizationNamePlaceholder}
                     required
                   />
                 </div>
@@ -248,43 +252,43 @@ async function getClientIP() {
                 <div className="space-y-3">
                   <Label htmlFor="organizationType" className="text-base font-semibold flex items-center gap-2">
                     {getOrganizationIcon(formData.organizationType)}
-                    Type d'organisation *
+                    {t.partnerRequest.organizationType} *
                   </Label>
                   <Select 
                     value={formData.organizationType} 
                     onValueChange={(value) => handleInputChange('organizationType', value)}
                   >
                     <SelectTrigger className="h-12 border-2 focus:border-blue-500 transition-colors">
-                      <SelectValue placeholder="Sélectionnez le type" />
+                      <SelectValue placeholder={t.partnerRequest.selectType} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="ong">ONG</SelectItem>
-                      <SelectItem value="universite">Université</SelectItem>
-                      <SelectItem value="institut_recherche">Institut de recherche</SelectItem>
-                      <SelectItem value="organisme_gouvernemental">Organisme gouvernemental</SelectItem>
-                      <SelectItem value="organisation_internationale">Organisation internationale</SelectItem>
-                      <SelectItem value="autre">Autre</SelectItem>
+                      <SelectItem value="ong">{t.partnerRequest.typeNGO}</SelectItem>
+                      <SelectItem value="universite">{t.partnerRequest.typeUniversity}</SelectItem>
+                      <SelectItem value="institut_recherche">{t.partnerRequest.typeResearch}</SelectItem>
+                      <SelectItem value="organisme_gouvernemental">{t.partnerRequest.typeGovernment}</SelectItem>
+                      <SelectItem value="organisation_internationale">{t.partnerRequest.typeInternational}</SelectItem>
+                      <SelectItem value="autre">{t.partnerRequest.typeOther}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-3">
                   <Label htmlFor="contactPerson" className="text-base font-semibold">
-                    Personne de contact *
+                    {t.partnerRequest.contactPerson} *
                   </Label>
                   <Input
                     id="contactPerson"
                     value={formData.contactPerson}
                     onChange={(e) => handleInputChange('contactPerson', e.target.value)}
                     className="h-12 border-2 focus:border-blue-500 transition-colors"
-                    placeholder="Nom complet du responsable"
+                    placeholder={t.partnerRequest.contactPersonPlaceholder}
                     required
                   />
                 </div>
 
                 <div className="space-y-3">
                   <Label htmlFor="email" className="text-base font-semibold">
-                    Email *
+                    {t.partnerRequest.email} *
                   </Label>
                   <Input
                     id="email"
@@ -292,41 +296,41 @@ async function getClientIP() {
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     className="h-12 border-2 focus:border-blue-500 transition-colors"
-                    placeholder="contact@organisation.com"
+                    placeholder={t.partnerRequest.emailPlaceholder}
                     required
                   />
                 </div>
 
                 <div className="space-y-3">
                   <Label htmlFor="phone" className="text-base font-semibold">
-                    Téléphone
+                    {t.partnerRequest.phone}
                   </Label>
                   <Input
                     id="phone"
                     value={formData.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
                     className="h-12 border-2 focus:border-blue-500 transition-colors"
-                    placeholder="+243 XXX XXX XXX"
+                    placeholder={t.partnerRequest.phonePlaceholder}
                   />
                 </div>
 
                 <div className="space-y-3">
                   <Label htmlFor="purpose" className="text-base font-semibold">
-                    Objectif d'utilisation *
+                    {t.partnerRequest.purpose} *
                   </Label>
                   <Select 
                     value={formData.purpose} 
                     onValueChange={(value) => handleInputChange('purpose', value)}
                   >
                     <SelectTrigger className="h-12 border-2 focus:border-blue-500 transition-colors">
-                      <SelectValue placeholder="Sélectionnez l'objectif" />
+                      <SelectValue placeholder={t.partnerRequest.selectPurpose} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="recherche">Recherche académique</SelectItem>
-                      <SelectItem value="analyse_statistique">Analyse statistique</SelectItem>
-                      <SelectItem value="programme_aide">Programme d'aide</SelectItem>
-                      <SelectItem value="evaluation_politique">Évaluation de politique</SelectItem>
-                      <SelectItem value="autre">Autre</SelectItem>
+                      <SelectItem value="recherche">{t.partnerRequest.purposeResearch}</SelectItem>
+                      <SelectItem value="analyse_statistique">{t.partnerRequest.purposeStats}</SelectItem>
+                      <SelectItem value="programme_aide">{t.partnerRequest.purposeAid}</SelectItem>
+                      <SelectItem value="evaluation_politique">{t.partnerRequest.purposePolicy}</SelectItem>
+                      <SelectItem value="autre">{t.partnerRequest.purposeOther}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -334,7 +338,7 @@ async function getClientIP() {
 
               <div className="space-y-3">
                 <Label htmlFor="description" className="text-base font-semibold">
-                  Description du projet
+                  {t.partnerRequest.projectDescription}
                 </Label>
                 <Textarea
                   id="description"
@@ -342,7 +346,7 @@ async function getClientIP() {
                   onChange={(e) => handleInputChange('description', e.target.value)}
                   rows={6}
                   className="border-2 focus:border-blue-500 transition-colors resize-none"
-                  placeholder="Décrivez votre projet et comment vous comptez utiliser les données. Plus votre description est détaillée, plus votre demande aura de chances d'être approuvée."
+                  placeholder={t.partnerRequest.projectDescriptionPlaceholder}
                 />
               </div>
 
@@ -355,12 +359,12 @@ async function getClientIP() {
                   {isSubmitting ? (
                     <div className="flex items-center gap-3">
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Envoi en cours...
+                      {t.partnerRequest.submitting}
                     </div>
                   ) : (
                     <div className="flex items-center gap-3">
                       <Send className="h-5 w-5" />
-                      Envoyer la demande
+                      {t.partnerRequest.submitButton}
                     </div>
                   )}
                 </Button>
@@ -372,8 +376,7 @@ async function getClientIP() {
         {/* Footer Note */}
         <div className="text-center mt-12">
           <p className="text-sm text-muted-foreground">
-            Votre demande sera traitée dans un délai de 48 à 72 heures. 
-            Vous recevrez une notification par email dès qu'une décision sera prise.
+            {t.partnerRequest.footerNote}
           </p>
         </div>
       </div>
