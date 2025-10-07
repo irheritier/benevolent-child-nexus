@@ -1,10 +1,16 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Heart, LogOut, Shield, Bell, Settings } from 'lucide-react';
+import { Heart, LogOut, Shield, Bell, Settings, Globe } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface User {
   id: string;
@@ -100,6 +106,31 @@ const DashboardHeader = ({ user, orphanage, onLogout, language, onLanguageChange
           </div>
           
           <div className="flex items-center space-x-2 sm:space-x-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 h-8 w-8 sm:h-10 sm:w-10"
+                >
+                  <Globe className="w-4 h-4 sm:w-5 sm:h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-white dark:bg-slate-800 z-50">
+                <DropdownMenuItem 
+                  onClick={() => onLanguageChange('fr')}
+                  className={language === 'fr' ? 'bg-slate-100 dark:bg-slate-700' : ''}
+                >
+                  🇫🇷 Français
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => onLanguageChange('en')}
+                  className={language === 'en' ? 'bg-slate-100 dark:bg-slate-700' : ''}
+                >
+                  🇬🇧 English
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <ThemeToggle />
             <Button 
               variant="ghost" 
