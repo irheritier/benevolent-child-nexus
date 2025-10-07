@@ -45,9 +45,12 @@ interface DashboardHeaderProps {
   user: User | null;
   orphanage: Orphanage;
   onLogout: () => void;
+  language: 'fr' | 'en';
+  onLanguageChange: (lang: 'fr' | 'en') => void;
+  translations: any;
 }
 
-const DashboardHeader = ({ user, orphanage, onLogout }: DashboardHeaderProps) => {
+const DashboardHeader = ({ user, orphanage, onLogout, language, onLanguageChange, translations }: DashboardHeaderProps) => {
   const navigate = useNavigate();
 
   const getStatusBadge = (status: string) => {

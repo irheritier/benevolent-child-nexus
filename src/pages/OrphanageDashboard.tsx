@@ -28,6 +28,8 @@ import DocumentsManagement from '@/components/orphanage/DocumentsManagement';
 import DashboardHeader from '@/components/orphanage/DashboardHeader';
 import StatsCards from '@/components/orphanage/StatsCards';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
+import { useLanguage } from '@/hooks/useLanguage';
+import { texts } from '@/data/translations';
 
 interface User {
   id: string;
@@ -115,6 +117,8 @@ const fadeIn = {
 };
 
 const OrphanageDashboard = () => {
+  const { language, setLanguage } = useLanguage();
+  const t = texts[language].orphanageDashboard;
   const [user, setUser] = useState<User | null>(null);
   const [orphanage, setOrphanage] = useState<Orphanage | null>(null);
   const [children, setChildren] = useState<Child[]>([]);
@@ -327,12 +331,19 @@ const OrphanageDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      <DashboardHeader user={user} orphanage={orphanage} onLogout={handleLogout} />
+      <DashboardHeader 
+        user={user} 
+        orphanage={orphanage} 
+        onLogout={handleLogout}
+        language={language}
+        onLanguageChange={setLanguage}
+        translations={t}
+      />
 
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {/* Statistiques rapides */}
         <div className="mb-6 sm:mb-8">
-          <StatsCards children={children} orphanage={orphanage} />
+          <StatsCards children={children} orphanage={orphanage} translations={t.stats} language={language} />
         </div>
 
         {/* Contenu principal avec onglets */}
