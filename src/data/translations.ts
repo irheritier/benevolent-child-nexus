@@ -220,13 +220,210 @@ export const texts = {
       },
       childrenTab: {
         title: "Gestion des enfants",
-        addChild: "Ajouter un enfant"
+        addChild: "Ajouter un enfant",
+        list: "Liste des enfants",
+        filters: {
+          search: "Rechercher un enfant...",
+          gender: {
+            label: "Genre",
+            all: "Tous",
+            boy: "Garçon",
+            girl: "Fille"
+          },
+          status: {
+            label: "Statut",
+            all: "Tous",
+            total_orphan: "Orphelin total",
+            partial_orphan: "Orphelin partiel",
+            abandoned: "Abandonné"
+          }
+        },
+        table: {
+          fullName: "Nom complet",
+          gender: "Genre",
+          age: "Âge",
+          parentStatus: "Statut parental",
+          internalCode: "Code interne",
+          entryDate: "Date d'entrée",
+          actions: "Actions",
+          years: "ans"
+        },
+        empty: {
+          noChildren: "Aucun enfant enregistré",
+          noChildrenDesc: "Commencez par ajouter des enfants à votre centre d'accueil.",
+          noResults: "Aucun enfant ne correspond aux filtres sélectionnés."
+        },
+        loadMore: "Charger plus"
       },
-      health: {},
-      nutrition: {},
-      documents: {},
-      addChild: {},
-      editChild: {}
+      health: {
+        title: "Gestion de la santé",
+        selectChild: "Sélectionner un enfant",
+        selectPlaceholder: "Choisir un enfant...",
+        boy: "Garçon",
+        girl: "Fille",
+        unknownAge: "Âge inconnu",
+        years: "ans",
+        empty: {
+          noChildren: "Aucun enfant enregistré",
+          noChildrenDesc: "Vous devez d'abord enregistrer des enfants pour pouvoir gérer leur santé.",
+          selectChild: "Sélectionnez un enfant",
+          selectChildDesc: "Choisissez un enfant dans la liste pour voir son historique médical."
+        },
+        form: {
+          title: "Nouveau dossier médical",
+          date: "Date de consultation",
+          selectDate: "Sélectionner une date",
+          vaccinationStatus: "Statut vaccinal",
+          vaccinationStatusPlaceholder: "Sélectionner le statut vaccinal",
+          vaccinationOptions: {
+            vaccinated: "Vacciné",
+            partially_vaccinated: "Partiellement vacciné",
+            not_vaccinated: "Non vacciné",
+            unknown: "Inconnu"
+          },
+          vaccinationDetails: "Détails du statut vaccinal",
+          vaccinationDetailsPlaceholder: "Ex: BCG à jour, DTC-HepB-Hib reçu à 2 mois...",
+          chronicConditions: "Conditions chroniques",
+          chronicConditionsPlaceholder: "Ex: Antécédents d'otites fréquentes...",
+          medications: "Médicaments",
+          medicationsPlaceholder: "Ex: Amoxicilline 250mg 3x/jour...",
+          remarks: "Remarques médicales",
+          remarksPlaceholder: "Ex: Éviter l'eau dans les oreilles...",
+          submit: "Enregistrer",
+          submitting: "Enregistrement...",
+          cancel: "Annuler"
+        }
+      },
+      nutrition: {
+        title: "Gestion nutritionnelle",
+        selectChild: "Sélectionner un enfant",
+        selectPlaceholder: "Choisir un enfant...",
+        boy: "Garçon",
+        girl: "Fille",
+        unknownAge: "Âge inconnu",
+        years: "ans",
+        empty: {
+          noChildren: "Aucun enfant enregistré",
+          noChildrenDesc: "Vous devez d'abord enregistrer des enfants pour pouvoir gérer leur nutrition.",
+          selectChild: "Sélectionnez un enfant",
+          selectChildDesc: "Choisissez un enfant dans la liste pour voir son suivi nutritionnel."
+        },
+        form: {
+          title: "Nouvelles données nutritionnelles",
+          date: "Date de mesure",
+          selectDate: "Sélectionner une date",
+          weight: "Poids (kg)",
+          weightPlaceholder: "Ex: 15.5",
+          height: "Taille (cm)",
+          heightPlaceholder: "Ex: 120.5",
+          bmiCalculated: "IMC calculé",
+          nutritionStatus: "Statut nutritionnel",
+          nutritionStatusPlaceholder: "Sélectionner le statut nutritionnel",
+          nutritionOptions: {
+            severely_malnourished: "Malnutrition sévère",
+            malnourished: "Malnutrition modérée",
+            normal: "Normal"
+          },
+          submit: "Enregistrer",
+          submitting: "Enregistrement...",
+          cancel: "Annuler"
+        }
+      },
+      documents: {
+        importance: {
+          title: "Importance des documents légaux",
+          required: "Documents requis",
+          requiredText: "Agrément ministériel, statuts de l'organisation, autorisation d'exploitation, certificat d'enregistrement.",
+          confidentiality: "Confidentialité",
+          confidentialityText: "Ces documents sont utilisés uniquement à des fins de vérification et de recensement, dans le respect de la confidentialité.",
+          validation: "Validation",
+          validationText: "La mise à jour régulière de vos documents légaux facilite les processus de validation et de suivi administratif."
+        },
+        engagement: {
+          title: "Engagement de confidentialité",
+          description: "Nous nous engageons à protéger la confidentialité de vos documents et des informations concernant les enfants sous votre protection.",
+          protection: "Protection des données",
+          protectionText: "Toutes les informations sont stockées de manière sécurisée et ne sont accessibles qu'aux personnes autorisées.",
+          rights: "Respect des droits",
+          rightsText: "Nous respectons les lois nationales et internationales sur la protection des enfants."
+        },
+        stats: {
+          center: "Centre d'accueil",
+          childrenHosted: "enfant(s) hébergé(s)",
+          legal: "Documents légaux",
+          centralizedManagement: "Gestion centralisée",
+          documents: "Agrément, statuts, autorisations",
+          security: "Sécurité",
+          protected: "Protégée",
+          secureStorage: "Stockage sécurisé et confidentiel"
+        },
+        form: {
+          title: "Ajouter un document",
+          documentType: "Type de document",
+          documentTypePlaceholder: "Sélectionnez le type de document",
+          documentTypes: {
+            agrément: "Agrément ministériel",
+            statuts: "Statuts de l'organisation",
+            autorisation: "Autorisation d'exploitation",
+            certificat: "Certificat d'enregistrement",
+            autre: "Autre document"
+          },
+          documentTitle: "Titre du document",
+          documentTitlePlaceholder: "ex: Agrément 2024",
+          description: "Description",
+          descriptionPlaceholder: "Description optionnelle du document...",
+          expiryDate: "Date d'expiration (optionnelle)",
+          file: "Fichier du document",
+          clickToUpload: "Cliquez pour télécharger",
+          fileFormats: "PDF, JPG, PNG jusqu'à 10MB",
+          submit: "Ajouter",
+          submitting: "Ajout en cours...",
+          cancel: "Annuler"
+        }
+      },
+      addChild: {
+        title: "Ajouter un enfant",
+        description: "Enregistrer un nouvel enfant dans votre centre d'accueil",
+        fields: {
+          fullName: "Nom complet",
+          fullNamePlaceholder: "Prénom et nom de l'enfant",
+          gender: "Genre",
+          genderPlaceholder: "Sélectionner le genre",
+          genderOptions: {
+            boy: "Garçon",
+            girl: "Fille"
+          },
+          estimatedAge: "Âge estimé",
+          estimatedAgePlaceholder: "Âge en années",
+          birthDate: "Date de naissance",
+          birthDatePlaceholder: "Sélectionner une date",
+          entryDate: "Date d'entrée",
+          entryDatePlaceholder: "Sélectionner une date",
+          parentStatus: "Statut parental",
+          parentStatusPlaceholder: "Sélectionner le statut parental",
+          parentStatusOptions: {
+            total_orphan: "Orphelin total (père et mère décédés)",
+            partial_orphan: "Orphelin partiel (un parent décédé)",
+            abandoned: "Abandonné"
+          },
+          internalCode: "Code interne (optionnel)",
+          internalCodePlaceholder: "Code d'identification interne du centre"
+        },
+        buttons: {
+          cancel: "Annuler",
+          submit: "Ajouter l'enfant",
+          submitting: "Ajout en cours..."
+        }
+      },
+      editChild: {
+        title: "Modifier l'enfant",
+        description: "Mettre à jour les informations de l'enfant",
+        buttons: {
+          cancel: "Annuler",
+          submit: "Enregistrer les modifications",
+          submitting: "Mise à jour..."
+        }
+      }
     }
   },
   en: {
@@ -449,13 +646,210 @@ export const texts = {
       },
       childrenTab: {
         title: "Children Management",
-        addChild: "Add Child"
+        addChild: "Add Child",
+        list: "Children List",
+        filters: {
+          search: "Search for a child...",
+          gender: {
+            label: "Gender",
+            all: "All",
+            boy: "Boy",
+            girl: "Girl"
+          },
+          status: {
+            label: "Status",
+            all: "All",
+            total_orphan: "Total orphan",
+            partial_orphan: "Partial orphan",
+            abandoned: "Abandoned"
+          }
+        },
+        table: {
+          fullName: "Full Name",
+          gender: "Gender",
+          age: "Age",
+          parentStatus: "Parental Status",
+          internalCode: "Internal Code",
+          entryDate: "Entry Date",
+          actions: "Actions",
+          years: "years old"
+        },
+        empty: {
+          noChildren: "No children registered",
+          noChildrenDesc: "Start by adding children to your care center.",
+          noResults: "No children match the selected filters."
+        },
+        loadMore: "Load More"
       },
-      health: {},
-      nutrition: {},
-      documents: {},
-      addChild: {},
-      editChild: {}
+      health: {
+        title: "Health Management",
+        selectChild: "Select a child",
+        selectPlaceholder: "Choose a child...",
+        boy: "Boy",
+        girl: "Girl",
+        unknownAge: "Unknown age",
+        years: "years old",
+        empty: {
+          noChildren: "No children registered",
+          noChildrenDesc: "You must first register children to manage their health.",
+          selectChild: "Select a child",
+          selectChildDesc: "Choose a child from the list to view their medical history."
+        },
+        form: {
+          title: "New Medical Record",
+          date: "Consultation Date",
+          selectDate: "Select a date",
+          vaccinationStatus: "Vaccination Status",
+          vaccinationStatusPlaceholder: "Select vaccination status",
+          vaccinationOptions: {
+            vaccinated: "Vaccinated",
+            partially_vaccinated: "Partially vaccinated",
+            not_vaccinated: "Not vaccinated",
+            unknown: "Unknown"
+          },
+          vaccinationDetails: "Vaccination Status Details",
+          vaccinationDetailsPlaceholder: "E.g.: BCG up to date, DTC-HepB-Hib received at 2 months...",
+          chronicConditions: "Chronic Conditions",
+          chronicConditionsPlaceholder: "E.g.: History of frequent ear infections...",
+          medications: "Medications",
+          medicationsPlaceholder: "E.g.: Amoxicillin 250mg 3x/day...",
+          remarks: "Medical Remarks",
+          remarksPlaceholder: "E.g.: Avoid water in ears...",
+          submit: "Save",
+          submitting: "Saving...",
+          cancel: "Cancel"
+        }
+      },
+      nutrition: {
+        title: "Nutrition Management",
+        selectChild: "Select a child",
+        selectPlaceholder: "Choose a child...",
+        boy: "Boy",
+        girl: "Girl",
+        unknownAge: "Unknown age",
+        years: "years old",
+        empty: {
+          noChildren: "No children registered",
+          noChildrenDesc: "You must first register children to manage their nutrition.",
+          selectChild: "Select a child",
+          selectChildDesc: "Choose a child from the list to view their nutritional monitoring."
+        },
+        form: {
+          title: "New Nutrition Data",
+          date: "Measurement Date",
+          selectDate: "Select a date",
+          weight: "Weight (kg)",
+          weightPlaceholder: "E.g.: 15.5",
+          height: "Height (cm)",
+          heightPlaceholder: "E.g.: 120.5",
+          bmiCalculated: "Calculated BMI",
+          nutritionStatus: "Nutrition Status",
+          nutritionStatusPlaceholder: "Select nutrition status",
+          nutritionOptions: {
+            severely_malnourished: "Severely malnourished",
+            malnourished: "Moderately malnourished",
+            normal: "Normal"
+          },
+          submit: "Save",
+          submitting: "Saving...",
+          cancel: "Cancel"
+        }
+      },
+      documents: {
+        importance: {
+          title: "Importance of Legal Documents",
+          required: "Required documents",
+          requiredText: "Ministerial approval, organization statutes, operating authorization, registration certificate.",
+          confidentiality: "Confidentiality",
+          confidentialityText: "These documents are used solely for verification and census purposes, with respect for confidentiality.",
+          validation: "Validation",
+          validationText: "Regular updating of your legal documents facilitates validation and administrative monitoring processes."
+        },
+        engagement: {
+          title: "Confidentiality Commitment",
+          description: "We are committed to protecting the confidentiality of your documents and information about children under your protection.",
+          protection: "Data Protection",
+          protectionText: "All information is stored securely and is accessible only to authorized persons.",
+          rights: "Respect for Rights",
+          rightsText: "We respect national and international laws on child protection."
+        },
+        stats: {
+          center: "Care Center",
+          childrenHosted: "child(ren) hosted",
+          legal: "Legal Documents",
+          centralizedManagement: "Centralized Management",
+          documents: "Approval, statutes, authorizations",
+          security: "Security",
+          protected: "Protected",
+          secureStorage: "Secure and confidential storage"
+        },
+        form: {
+          title: "Add Document",
+          documentType: "Document Type",
+          documentTypePlaceholder: "Select document type",
+          documentTypes: {
+            agrément: "Ministerial Approval",
+            statuts: "Organization Statutes",
+            autorisation: "Operating Authorization",
+            certificat: "Registration Certificate",
+            autre: "Other Document"
+          },
+          documentTitle: "Document Title",
+          documentTitlePlaceholder: "e.g.: 2024 Approval",
+          description: "Description",
+          descriptionPlaceholder: "Optional document description...",
+          expiryDate: "Expiry Date (optional)",
+          file: "Document File",
+          clickToUpload: "Click to upload",
+          fileFormats: "PDF, JPG, PNG up to 10MB",
+          submit: "Add",
+          submitting: "Adding...",
+          cancel: "Cancel"
+        }
+      },
+      addChild: {
+        title: "Add Child",
+        description: "Register a new child in your care center",
+        fields: {
+          fullName: "Full Name",
+          fullNamePlaceholder: "Child's first and last name",
+          gender: "Gender",
+          genderPlaceholder: "Select gender",
+          genderOptions: {
+            boy: "Boy",
+            girl: "Girl"
+          },
+          estimatedAge: "Estimated Age",
+          estimatedAgePlaceholder: "Age in years",
+          birthDate: "Date of Birth",
+          birthDatePlaceholder: "Select a date",
+          entryDate: "Entry Date",
+          entryDatePlaceholder: "Select a date",
+          parentStatus: "Parental Status",
+          parentStatusPlaceholder: "Select parental status",
+          parentStatusOptions: {
+            total_orphan: "Total orphan (both parents deceased)",
+            partial_orphan: "Partial orphan (one parent deceased)",
+            abandoned: "Abandoned"
+          },
+          internalCode: "Internal Code (optional)",
+          internalCodePlaceholder: "Center's internal identification code"
+        },
+        buttons: {
+          cancel: "Cancel",
+          submit: "Add Child",
+          submitting: "Adding..."
+        }
+      },
+      editChild: {
+        title: "Edit Child",
+        description: "Update child information",
+        buttons: {
+          cancel: "Cancel",
+          submit: "Save Changes",
+          submitting: "Updating..."
+        }
+      }
     }
   }
 };

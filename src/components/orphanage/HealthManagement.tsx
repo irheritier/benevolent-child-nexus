@@ -18,9 +18,12 @@ interface Child {
 
 interface HealthManagementProps {
   children: Child[];
+  translations: any;
+  language: 'fr' | 'en';
 }
 
-const HealthManagement = ({ children }: HealthManagementProps) => {
+const HealthManagement = ({ children, translations, language }: HealthManagementProps) => {
+  const t = translations.orphanageDashboard.health;
   const [selectedChildId, setSelectedChildId] = useState<string>('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -43,23 +46,23 @@ const HealthManagement = ({ children }: HealthManagementProps) => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="w-5 h-5" />
-            Gestion de la santé
+            {t.title}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium mb-2 block">
-                Sélectionner un enfant
+                {t.selectChild}
               </label>
               <Select value={selectedChildId} onValueChange={setSelectedChildId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Choisir un enfant..." />
+                  <SelectValue placeholder={t.selectPlaceholder} />
                 </SelectTrigger>
                 <SelectContent>
                   {children.map((child) => (
                     <SelectItem key={child.id} value={child.id}>
-                      {child.full_name} ({child.gender === 'M' ? 'Garçon' : 'Fille'}, {child.estimated_age || 'Âge inconnu'} ans)
+                      {child.full_name} ({child.gender === 'M' ? t.boy : t.girl}, {child.estimated_age || t.unknownAge} {t.years})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -69,9 +72,9 @@ const HealthManagement = ({ children }: HealthManagementProps) => {
             {!selectedChildId && children.length === 0 && (
               <div className="text-center py-8">
                 <Stethoscope className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">Aucun enfant enregistré</h3>
+                <h3 className="text-lg font-medium mb-2">{t.empty.noChildren}</h3>
                 <p className="text-muted-foreground">
-                  Vous devez d'abord enregistrer des enfants pour pouvoir gérer leur santé.
+                  {t.empty.noChildrenDesc}
                 </p>
               </div>
             )}
@@ -79,9 +82,9 @@ const HealthManagement = ({ children }: HealthManagementProps) => {
             {!selectedChildId && children.length > 0 && (
               <div className="text-center py-8">
                 <Stethoscope className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="md:text-lg font-medium mb-2">Sélectionnez un enfant</h3>
+                <h3 className="md:text-lg font-medium mb-2">{t.empty.selectChild}</h3>
                 <p className="text-muted-foreground">
-                  Choisissez un enfant dans la liste pour voir son historique médical.
+                  {t.empty.selectChildDesc}
                 </p>
               </div>
             )}
@@ -101,15 +104,14 @@ const HealthManagement = ({ children }: HealthManagementProps) => {
       {/* Add Health Record Dialog */}
       <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          {/* <DialogHeader>
-            <DialogTitle>Nouveau dossier médical</DialogTitle>
-          </DialogHeader> */}
           {selectedChild && (
             <HealthRecordForm
               childId={selectedChild.id}
               childName={selectedChild.full_name}
               onSuccess={handleFormSuccess}
               onCancel={() => setShowAddForm(false)}
+              translations={translations}
+              language={language}
             />
           )}
         </DialogContent>

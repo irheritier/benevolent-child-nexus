@@ -547,12 +547,14 @@ const OrphanageDashboard = () => {
                       transition={{ delay: 0.3 }}
                       className="overflow-x-auto"
                     >
-                      <ChildrenTable
-                        children={children}
-                        onEdit={handleEditChild}
-                        onDelete={handleDeleteChild}
-                        onViewDetails={handleViewChildDetails}
-                      />
+                <ChildrenTable 
+                  children={children}
+                  onEdit={handleEditChild}
+                  onDelete={handleDeleteChild}
+                  onViewDetails={handleViewChildDetails}
+                  translations={texts[language]}
+                  language={language}
+                />
                     </motion.div>
                   </CardContent>
                 </Card>
@@ -597,7 +599,7 @@ const OrphanageDashboard = () => {
                       variants={fadeIn}
                       transition={{ delay: 0.3 }}
                     >
-                      <HealthManagement children={children} />
+                      <HealthManagement children={children} translations={texts[language]} language={language} />
                     </motion.div>
                   </CardContent>
                 </Card>
@@ -642,7 +644,7 @@ const OrphanageDashboard = () => {
                       variants={fadeIn}
                       transition={{ delay: 0.3 }}
                     >
-                      <NutritionManagement children={children} />
+                      <NutritionManagement children={children} translations={texts[language]} language={language} />
                     </motion.div>
                   </CardContent>
                 </Card>

@@ -39,6 +39,8 @@ interface NutritionRecordFormProps {
   childName: string;
   onSuccess: () => void;
   onCancel: () => void;
+  translations: any;
+  language: 'fr' | 'en';
 }
 
 const NutritionRecordForm = ({ childId, childName, onSuccess, onCancel }: NutritionRecordFormProps) => {

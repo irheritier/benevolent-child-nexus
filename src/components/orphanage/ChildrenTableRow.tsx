@@ -28,9 +28,10 @@ interface ChildrenTableRowProps {
   onEdit: (child: Child) => void;
   onDelete: (childId: string) => void;
   onViewDetails: (child: Child) => void;
+  translations: any;
 }
 
-const ChildrenTableRow = ({ child, onEdit, onDelete, onViewDetails }: ChildrenTableRowProps) => {
+const ChildrenTableRow = ({ child, onEdit, onDelete, onViewDetails, translations }: ChildrenTableRowProps) => {
   return (
     <TableRow key={child.id}>
       <TableCell>
@@ -44,7 +45,7 @@ const ChildrenTableRow = ({ child, onEdit, onDelete, onViewDetails }: ChildrenTa
       </TableCell>
       <TableCell>
         <span className="text-sm">
-          {calculateAge(child.birth_date, child.estimated_age)} ans
+          {calculateAge(child.birth_date, child.estimated_age)} {translations.table.years}
         </span>
       </TableCell>
       <TableCell>

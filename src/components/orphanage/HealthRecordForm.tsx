@@ -45,6 +45,8 @@ interface HealthRecordFormProps {
   childName: string;
   onSuccess: () => void;
   onCancel: () => void;
+  translations: any;
+  language: 'fr' | 'en';
 }
 
 const HealthRecordForm = ({ childId, childName, onSuccess, onCancel }: HealthRecordFormProps) => {

@@ -30,9 +30,12 @@ interface ChildrenTableProps {
   onEdit: (child: Child) => void;
   onDelete: (childId: string) => void;
   onViewDetails: (child: Child) => void;
+  translations: any;
+  language: 'fr' | 'en';
 }
 
-const ChildrenTable = ({ children, onEdit, onDelete, onViewDetails }: ChildrenTableProps) => {
+const ChildrenTable = ({ children, onEdit, onDelete, onViewDetails, translations, language }: ChildrenTableProps) => {
+  const t = translations.orphanageDashboard.childrenTab;
   const {
     searchTerm,
     setSearchTerm,
@@ -75,7 +78,7 @@ const ChildrenTable = ({ children, onEdit, onDelete, onViewDetails }: ChildrenTa
   }, [searchTerm, genderFilter, statusFilter, resetToFirstPage, resetLoadMore]);
 
   if (children.length === 0) {
-    return <ChildrenTableEmptyStates hasChildren={false} hasFilteredResults={false} />;
+    return <ChildrenTableEmptyStates hasChildren={false} hasFilteredResults={false} translations={t} />;
   }
 
   return (
@@ -83,7 +86,7 @@ const ChildrenTable = ({ children, onEdit, onDelete, onViewDetails }: ChildrenTa
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Users className="w-5 h-5" />
-          Liste des enfants ({filteredChildren.length})
+          {t.list} ({filteredChildren.length})
         </CardTitle>
         
         <ChildrenTableFilters
@@ -93,6 +96,7 @@ const ChildrenTable = ({ children, onEdit, onDelete, onViewDetails }: ChildrenTa
           onGenderChange={setGenderFilter}
           statusFilter={statusFilter}
           onStatusChange={setStatusFilter}
+          translations={t}
         />
       </CardHeader>
 
@@ -101,6 +105,7 @@ const ChildrenTable = ({ children, onEdit, onDelete, onViewDetails }: ChildrenTa
           <ChildrenTableEmptyStates 
             hasChildren={children.length > 0} 
             hasFilteredResults={filteredChildren.length > 0} 
+            translations={t}
           />
         ) : (
           <>
@@ -110,13 +115,13 @@ const ChildrenTable = ({ children, onEdit, onDelete, onViewDetails }: ChildrenTa
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Nom complet</TableHead>
-                      <TableHead>Genre</TableHead>
-                      <TableHead>Âge</TableHead>
-                      <TableHead>Statut parental</TableHead>
-                      <TableHead>Code interne</TableHead>
-                      <TableHead>Date d'entrée</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>{t.table.fullName}</TableHead>
+                      <TableHead>{t.table.gender}</TableHead>
+                      <TableHead>{t.table.age}</TableHead>
+                      <TableHead>{t.table.parentStatus}</TableHead>
+                      <TableHead>{t.table.internalCode}</TableHead>
+                      <TableHead>{t.table.entryDate}</TableHead>
+                      <TableHead className="text-right">{t.table.actions}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -127,6 +132,7 @@ const ChildrenTable = ({ children, onEdit, onDelete, onViewDetails }: ChildrenTa
                         onEdit={onEdit}
                         onDelete={onDelete}
                         onViewDetails={onViewDetails}
+                        translations={t}
                       />
                     ))}
                   </TableBody>
@@ -170,7 +176,7 @@ const ChildrenTable = ({ children, onEdit, onDelete, onViewDetails }: ChildrenTa
                     onClick={loadMore}
                     className="w-full sm:w-auto"
                   >
-                    Charger plus ({loadedCount}/{filteredChildren.length})
+                    {t.loadMore} ({loadedCount}/{filteredChildren.length})
                   </Button>
                 </div>
               )}
